@@ -6,15 +6,12 @@
 
 import { configureStore, PreloadedState } from '@reduxjs/toolkit';
 
-import analyticsReducer from '../features/analytics/analytics-slice';
+import { context as analytics } from '@/screens/ChainAnalytics/ChainAnalytics';
 
 export const store = configureStore({
   reducer: {
-    counter: analyticsReducer,
+    ...analytics,
   },
-  // middleware: (getDefaultMiddleware) => {
-  //   return getDefaultMiddleware().concat(api.middleware);
-  // },
 });
 
 export const setupStore = (preloadedState?: PreloadedState<RootState>) => {

@@ -1,4 +1,5 @@
-import { useDispatch, useSelector } from '@/app/hooks';
+import { useMemo, useState } from 'react';
+import { useDispatch, useSelector } from '@/app';
 
 import {
   RouteObject,
@@ -8,14 +9,14 @@ import {
   NavLink,
 } from 'react-router-dom';
 
-import Home from '@/pages/Home';
-
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { useMemo, useState } from 'react';
-import ChainManager from './pages/ChainManager';
-import Multisig from './pages/Multisig';
-import RoleAssigner from './pages/RoleAssigner';
-import ImaManager from './pages/ImaManager';
+
+import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
+import ChainManager from '@/screens/ChainManager/ChainManager';
+import Multisig from '@/screens/Multisig/Multisig';
+import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
+import ImaManager from '@/screens/ImaManager/ImaManager';
+import Support from '@/screens/Support';
 
 const routes: RouteObject[] = [
   {
@@ -24,7 +25,7 @@ const routes: RouteObject[] = [
     children: [
       {
         path: '',
-        element: <Home />,
+        element: <ChainAnalytics />,
       },
       {
         path: 'chain_manager',
@@ -41,6 +42,10 @@ const routes: RouteObject[] = [
       {
         path: 'role_assigner',
         element: <RoleAssigner />,
+      },
+      {
+        path: 'support',
+        element: <Support />,
       },
     ],
   },
@@ -141,7 +146,7 @@ function SideNavigation() {
         <ul>
           <li>
             <NavLink {...linkProps} to="">
-              ◼️ <CHide>Dashboard</CHide>
+              ◼️ <CHide>ChainAnalytics</CHide>
             </NavLink>
           </li>
           <li>
@@ -162,6 +167,11 @@ function SideNavigation() {
           <li>
             <NavLink {...linkProps} to="role_assigner">
               ◼️ <CHide>Role Assigner</CHide>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink {...linkProps} to="role_assigner">
+              ◼️ <CHide>Support</CHide>
             </NavLink>
           </li>
         </ul>

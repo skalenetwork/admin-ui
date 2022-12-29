@@ -15,16 +15,20 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/app/*": ["app/*"],
-      "@/features/*": ["features/*"],
-      "@/pages/*": ["pages/*"],
-      "@/components/*": ["components/*"],
-      "@/types": ["types/index"]
+      "@/skale.js": [
+        "./node_modules/@dirtroad/skale/packages/skale.js/src/index.ts"
+      ],
+      "@/app": ["./src/app/index"],
+      "@/app/*": ["./src/app/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/screens/*": ["./src/screens/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/types": ["./src/types/index"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "./node_modules/@dirtroad/skale"],
   "references": [
     {
       "path": "./tsconfig.node.json"

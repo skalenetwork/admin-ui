@@ -5,3 +5,50 @@ SKALE Chain Admin Dashboard
 </h2>
 <span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">GUIDE</span>
 </div>
+
+# Install
+
+```bash
+yarn
+yarn dev
+```
+
+# :package: Features Usage
+
+In current micro-mono hybrid architecture, screens being HOC compositions of stateless components, forward the context of features they consume.
+
+It might help to think of screens as portals of stateful features. These portals depend on a redux store provider up the tree.
+
+This directly enables:
+
+1. Portability of client-agnostic stateful features, and submodules.
+2. Portability of stateful screens (react) through _"bring your own redux store"_ strategy.
+
+Example use:
+
+**`store.js`**
+
+```ts
+import { context as analytics } from '@/screens/ChainAnalytics/ChainAnalytics';
+
+export const store = configureStore({
+  reducer: {
+    ...analytics,
+  },
+});
+```
+
+**`view.jsx`**
+
+```tsx
+import { store } from './store';
+import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
+
+function View() {
+  return (
+    <Provider store={store}>
+      <ChainAnalytics />
+    </Provider>
+  );
+}
+```
