@@ -1,9 +1,9 @@
-<div align="center" style="background: black; color: white; padding: 20px 0; border-radius: 5px; background: black url('https://global-uploads.webflow.com/625c39b93541414104a1d654/6278d9990c924b03af8b372c_skl-poster-00001.jpg') no-repeat fixed 80%; background-size: cover">
+<div align="center" style="background: black; color: white; padding: 20px 0; border-radius: 5px;">
 <h2 style="color: white;">
 <img valign="middle" src="public/logo.png" alt="skale" width="48" /><br>
-SKALE Chain Admin Dashboard
+SKALE Chain — Admin UI
 </h2>
-<span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">GUIDE</span>
+<span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">DEVELOPER GUIDE</span>
 </div>
 
 # Install
@@ -13,18 +13,33 @@ yarn
 yarn dev
 ```
 
+# Prelude
+
+<img src="./public/mascot.png" style="border-radius: 5px; display: block" align="left" width="124" height="124">
+
+To build a flying car that actually flies:
+
+- Make sure that the car is drivable at all times.
+
+- Ensure that the modularity inspires _maintainable_ reusability.
+
+- Meditate.
+  <br clear="both">
+
 # :package: Features Usage
 
 In current micro-mono hybrid architecture, screens being HOC compositions of stateless components, forward the context of features they consume.
 
-It might help to think of screens as portals of stateful features. These portals depend on a redux store provider up the tree.
+:crystal_ball: It might help to think of screens as portals of stateful features. These portals depend on a redux store provider up the tree.
 
 This directly enables:
 
 1. Portability of client-agnostic stateful features, and submodules.
 2. Portability of stateful screens (react) through _"bring your own redux store"_ strategy.
 
-Example use:
+## Use via screens @ react
+
+Dependency: `react-redux`, `tailwindcss`
 
 **`store.js`**
 
@@ -51,4 +66,33 @@ function View() {
     </Provider>
   );
 }
+```
+
+> Note: This can potentially evolve to zero-config with implicit reducer injection if in favor of usability
+
+## [WIP] Use directly @ react
+
+◼️ Within `react-redux` `<Provider store={store}>` context
+
+```jsx
+import { context, useAnalytics } from '@/features/analytics';
+
+const { scope, reducers } = context;
+
+export const store = configureStore({
+  reducer: {
+    ...reducers,
+  },
+});
+
+function View() {
+  useAnalytics(); // loads into store
+  return <Provider store={store}></Provider>;
+}
+```
+
+◼️ The submodules without any external store
+
+```jsx
+import { useBlockHistory, useWalletHistory } from '@/features/analytics';
 ```

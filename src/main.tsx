@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux/';
 import { store } from '@/app/store'; // order this early
-
 import { BrowserRouter } from 'react-router-dom';
-
 import App from './App';
 
-import './tailwind.css'; // never include in a file from tailwind.config->content
-import './main.css';
+import '@/styles/colors.css';
+import '@/styles/base.css';
+import '@/styles/components.css';
+import '@/styles/utils.css';
+import '@/styles/main.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

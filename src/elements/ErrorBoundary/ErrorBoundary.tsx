@@ -1,10 +1,7 @@
-import { useEffect } from 'react';
+import { withErrorBoundary as _withErrorBoundary } from 'react-error-boundary';
 
 // @ts-ignore
 export default function ErrorScreen({ error, resetErrorBoundary }) {
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
   return (
     <div
       role="alert"
@@ -16,3 +13,9 @@ export default function ErrorScreen({ error, resetErrorBoundary }) {
     </div>
   );
 }
+
+export function withErrorBoundary(Component: ReturnType<typeof _withErrorBoundary> ) {
+  return _withErrorBoundary(Component, {
+    FallbackComponent: ErrorScreen,
+  }) as typeof Component;
+};

@@ -7,4 +7,4 @@ export const context = {
   },
 };
 
-export * from './use-analytics';
+export * from './hooks';

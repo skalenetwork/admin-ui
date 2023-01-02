@@ -1,0 +1,73 @@
+body {
+  font-family: 'Poppins';
+  @apply m-0 p-0;
+}
+
+body > #root {
+  @apply grid
+  h-screen max-h-screen grid-flow-row;
+  grid-template-rows: min-content 1fr min-content;
+}
+
+section .grid {
+  @apply gap-4;
+}
+
+section .grid > *:not(.grid) {
+  @apply relative;
+}
+
+/** for grid skeleton **/
+section .grid > *:not(.grid):empty:before {
+  content: attr(data-id);
+  @apply absolute flex
+  h-full w-full
+  items-center justify-center
+  rounded-lg bg-white font-mono text-black;
+}
+
+main.inspect section .grid > *:not(.grid)[data-s='0'] {
+  @apply opacity-[0.5];
+}
+
+main.inspect section .grid > *:not(.grid)[data-s='1'] {
+  @apply opacity-[0.75];
+}
+
+main.inspect section .grid > *:not(.grid)[data-s='2']:after {
+  content: '✔️';
+  @apply absolute top-[-5px] right-[-5px]
+    flex h-4 w-4
+    items-center justify-center rounded-[50%]
+    bg-white p-[2px]
+    text-xs text-[var(--green10)]
+    opacity-[0.7];
+}
+
+button,
+.btn {
+  @apply rounded-lg bg-blue-600
+  px-6 py-2 text-white;
+}
+
+button.btn-wide,
+.btn.btn-wide {
+  @apply px-16;
+}
+
+.negative {
+  @apply bg-red-400 text-white;
+}
+
+.positive {
+  @apply bg-green-400 text-white;
+}
+
+.card {
+  @apply bg-white;
+}
+
+.card-full {
+  @apply h-full
+  w-full bg-white dark:bg-gray-800;
+}

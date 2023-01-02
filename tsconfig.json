@@ -17,18 +17,18 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/skale.js": [
-        "./node_modules/@dirtroad/skale/packages/skale.js/src/index.ts"
-      ],
+      "@/types": ["./src/types/index"],
+      "@/assets/*": ["./src/assets/*"],
+      "@/styles/*": ["./src/styles/*"],
       "@/app": ["./src/app/index"],
       "@/app/*": ["./src/app/*"],
       "@/features/*": ["./src/features/*"],
+      "@/elements/*": ["./src/elements/*"],
       "@/screens/*": ["./src/screens/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/types": ["./src/types/index"]
+      "@/views/*": ["./src/views/*"],
     }
   },
-  "include": ["src/**/*", "./node_modules/@dirtroad/skale"],
+  "include": ["src"],
   "references": [
     {
       "path": "./tsconfig.node.json"
