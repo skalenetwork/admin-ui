@@ -21,7 +21,7 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-slate-100 bg-white p-4 dark:bg-black">
+      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-4 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -47,7 +47,7 @@ export default function Layout() {
       <footer
         className="
         flex h-min items-center bg-[var(--gray2)]
-        px-8 py-3 text-sm text-slate-400 dark:bg-slate-800 dark:text-slate-200"
+        px-8 py-3 text-sm text-[var(--gray10)]"
       >
         <p>Powered by Dirt Road Dev</p>
         <p></p>

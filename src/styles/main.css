@@ -76,20 +76,3 @@ button.btn-wide,
 .positive {
   @apply bg-green-400 text-white;
 }
-
-/**
-makeshift card
-**/
-
-.card {
-  @apply rounded bg-[var(--white)] p-5 text-[var(--gray12)];
-}
-
-.card-full {
-  @apply absolute h-full max-h-full w-full max-w-full overflow-y-scroll
-  rounded bg-[var(--white)] p-5 text-[var(--gray12)];
-}
-
-.card-full h4:first-of-type {
-  @apply py-2;
-}

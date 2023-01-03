@@ -5,11 +5,21 @@ import { store } from '@/app/store'; // order this early
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
+import { setup, strict, voidSheet } from 'twind';
+
 import '@/styles/colors.css';
 import '@/styles/base.css';
 import '@/styles/components.css';
 import '@/styles/utils.css';
 import '@/styles/main.css';
+
+setup({
+  preflight: false, // do not include base style reset (default: use tailwind preflight)
+  mode: strict, // throw errors for invalid rules (default: warn)
+  hash: false, // hash all generated class names (default: false)
+  theme: {}, // define custom theme values (default: tailwind theme)
+  darkMode: 'class', // use a different dark mode strategy (default: 'media')
+});
 
 import { chains as skaleChains } from '@/features/network/chains';
 import { WagmiConfig, createClient, configureChains, mainnet } from 'wagmi';

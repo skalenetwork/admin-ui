@@ -6,7 +6,7 @@
   }
 
   h2 {
-    @apply py-4 text-2xl font-medium;
+    @apply py-4 text-2xl font-semibold;
   }
 
   h3 {

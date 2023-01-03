@@ -34,7 +34,7 @@ export default function SideNavigation() {
     <Collapsible.Root
       open={navOpen}
       onOpenChange={setNavOpen}
-      className="grid h-full bg-white py-4 dark:bg-black"
+      className="grid h-full bg-[var(--white)] py-4 text-[var(--black)]"
       style={{
         width: navOpen ? '320px' : 'min-content',
         gridTemplateRows: 'min-content 1fr min-content',
@@ -43,13 +43,13 @@ export default function SideNavigation() {
     >
       <div className="flex items-center justify-between p-4">
         <CHide
-          className="slate-300 text-xs uppercase text-slate-400"
+          className="text-xs uppercase text-[var(--gray8)]"
           style={{ letterSpacing: '2px' }}
         >
           Main Menu
         </CHide>
         <div
-          className="font-mono text-sm"
+          className="cursor-pointer font-mono text-sm text-[var(--black)]"
           onClick={() => setDarkMode(!darkMode)}
         >
           {darkMode ? 'make_light' : 'make_dark'}
@@ -89,7 +89,7 @@ export default function SideNavigation() {
           </li>
         </ul>
       </nav>
-      <Collapsible.Trigger className="py-4 text-black">
+      <Collapsible.Trigger className="py-4 text-[var(--black)]">
         <div>{navOpen ? '<< Collapse menu' : '>>'}</div>
       </Collapsible.Trigger>
     </Collapsible.Root>

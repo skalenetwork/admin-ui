@@ -15,7 +15,7 @@ yarn dev
 
 # Prelude
 
-<img src="./public/mascot.png" style="border-radius: 5px; display: block" align="left" width="124" height="124">
+<img src="./public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
 
 To build a flying car that actually flies:
 
@@ -24,7 +24,8 @@ To build a flying car that actually flies:
 - Ensure that the modularity inspires _maintainable_ reusability.
 
 - Meditate.
-  <br clear="both">
+
+<br clear="both">
 
 # :package: Features Usage
 
@@ -97,6 +98,15 @@ function View() {
 import { useBlockHistory, useWalletHistory } from '@/features/analytics';
 ```
 
+# Exposed Packages
+
+Following are being built along-side `admin-ui` app specifically for re-usability across ecosystem.
+
+- `src/features`
+- `src/screens`
+- `src/elements`: JSX UI Elements (ideally framework-agnostic)
+- `src/types`
+
 # Links
 
 ## Consumables
@@ -106,6 +116,10 @@ import { useBlockHistory, useWalletHistory } from '@/features/analytics';
 - [IMA-js](https://github.com/skalenetwork/ima-js)
 
 - [RPC Support Spec](https://github.com/skalenetwork/skaled/blob/docs-v3.14.x/docs/modules/ROOT/pages/json-rpc-interface.adoc)
+
+- [Staging Network List](http://staging-v3.skalenodes.com/#/)
+
+- [Mainnet Network List](http://mainnet.skalenodes.com/#/)
 
 ## Notable Projects
 
