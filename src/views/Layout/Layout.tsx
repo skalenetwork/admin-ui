@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import useKey from 'react-use/lib/useKey';
 import SideNavigation from '@/views/SideNavigation/SideNavigation';
+
+import { ConnectKitButton } from 'connectkit';
+
+import { useNetwork } from 'wagmi';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -13,6 +17,8 @@ export default function Layout() {
     },
   );
 
+  const { chain } = useNetwork();
+
   return (
     <>
       <header className="flex h-min w-full items-center justify-between border-b-2 border-slate-100 bg-white p-4 dark:bg-black">
@@ -21,7 +27,7 @@ export default function Layout() {
           <h3 className="">SKALE Chain UI</h3>
         </Link>
         <div className="flex items-center gap-4">
-          <button className="py-1">Connect</button>
+          <ConnectKitButton />
           <a href="" className="font-mono">
             github_icon
           </a>
@@ -33,7 +39,7 @@ export default function Layout() {
 
       <main className={`flex ${inspectMode ? 'inspect' : ''}`}>
         <SideNavigation />
-        <section className="h-full w-full bg-gray-100 px-6 py-4 dark:bg-gray-900">
+        <section className="h-full w-full bg-[var(--gray3)] px-6 py-4">
           <Outlet />
         </section>
       </main>
@@ -45,7 +51,10 @@ export default function Layout() {
       >
         <p>Powered by Dirt Road Dev</p>
         <p></p>
-        <p className="ml-auto">
+        <p className="ml-auto flex items-center justify-between gap-4">
+          <span>Chain: {chain?.name}</span>
+          <span>ID: {chain?.id}</span>
+          <span>Type: Staging</span>
           <button
             className="py-1"
             onClick={(e) => setInspectMode(!inspectMode)}

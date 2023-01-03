@@ -1,9 +1,19 @@
+:root {
+  --white: #fff;
+  --black: #000;
+}
+
+.dark-theme {
+  --white: #000;
+  --black: #fff;
+}
+
 body {
   font-family: 'Poppins';
   @apply m-0 p-0;
 }
 
-body > #root {
+body #app {
   @apply grid
   h-screen max-h-screen grid-flow-row;
   grid-template-rows: min-content 1fr min-content;
@@ -23,30 +33,34 @@ section .grid > *:not(.grid):empty:before {
   @apply absolute flex
   h-full w-full
   items-center justify-center
-  rounded-lg bg-white font-mono text-black;
+  rounded-lg bg-[var(--white)] font-mono text-[var(--black)];
 }
 
 main.inspect section .grid > *:not(.grid)[data-s='0'] {
   @apply opacity-[0.5];
 }
 
-main.inspect section .grid > *:not(.grid)[data-s='1'] {
-  @apply opacity-[0.75];
+main.inspect section .grid > *:not(.grid)[data-s='1']:after {
+  content: '';
+  @apply absolute top-[-5px]
+    right-[-5px] flex h-3
+    w-3 items-center justify-center
+    rounded-[50%] bg-[var(--blue10)]
+    p-[2px] text-xs;
 }
 
 main.inspect section .grid > *:not(.grid)[data-s='2']:after {
-  content: '✔️';
-  @apply absolute top-[-5px] right-[-5px]
-    flex h-4 w-4
-    items-center justify-center rounded-[50%]
-    bg-white p-[2px]
-    text-xs text-[var(--green10)]
-    opacity-[0.7];
+  content: '';
+  @apply absolute top-[-5px]
+    right-[-5px] flex h-3
+    w-3 items-center justify-center
+    rounded-[50%] bg-[var(--green10)]
+    p-[2px] text-xs;
 }
 
 button,
 .btn {
-  @apply rounded-lg bg-blue-600
+  @apply rounded-lg bg-[var(--blue11)]
   px-6 py-2 text-white;
 }
 
@@ -63,11 +77,19 @@ button.btn-wide,
   @apply bg-green-400 text-white;
 }
 
+/**
+makeshift card
+**/
+
 .card {
-  @apply bg-white;
+  @apply rounded bg-[var(--white)] p-5 text-[var(--gray12)];
 }
 
 .card-full {
-  @apply h-full
-  w-full bg-white dark:bg-gray-800;
+  @apply absolute h-full max-h-full w-full max-w-full overflow-y-scroll
+  rounded bg-[var(--white)] p-5 text-[var(--gray12)];
+}
+
+.card-full h4:first-of-type {
+  @apply py-2;
 }

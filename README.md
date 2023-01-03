@@ -96,3 +96,23 @@ function View() {
 ```jsx
 import { useBlockHistory, useWalletHistory } from '@/features/analytics';
 ```
+
+# Links
+
+## Consumables
+
+- [skale.js](https://github.com/Dirt-Road-Development/skale.js)
+
+- [IMA-js](https://github.com/skalenetwork/ima-js)
+
+- [RPC Support Spec](https://github.com/skalenetwork/skaled/blob/docs-v3.14.x/docs/modules/ROOT/pages/json-rpc-interface.adoc)
+
+## Notable Projects
+
+- [Multisig Wallet CLI](https://github.com/skalenetwork/multisigwallet-cli)
+
+- [Metaport](https://github.com/skalenetwork/metaport)
+
+- [Network UI](https://github.com/skalenetwork/network-ui)
+
+- [Filestorage UI](https://github.com/skalenetwork/filestorage-ui)

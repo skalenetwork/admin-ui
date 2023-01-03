@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { NavLink } from 'react-router-dom';
 
@@ -12,6 +12,13 @@ const CHide = Collapsible.Content;
 
 export default function SideNavigation() {
   const [navOpen, setNavOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState(true);
+
+  useEffect(() => {
+    document.documentElement.classList[darkMode ? 'add' : 'remove'](
+      'dark-theme',
+    );
+  }, [darkMode]);
 
   const linkProps = useMemo(() => {
     return {
@@ -41,13 +48,18 @@ export default function SideNavigation() {
         >
           Main Menu
         </CHide>
-        <div className="font-mono text-sm">dark_mode</div>
+        <div
+          className="font-mono text-sm"
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          {darkMode ? 'make_light' : 'make_dark'}
+        </div>
       </div>
       <nav className="p-4 font-medium text-slate-400">
         <ul>
           <li>
             <NavLink {...linkProps} to="">
-              ◼️ <CHide>ChainAnalytics</CHide>
+              ◼️ <CHide>Dashboard</CHide>
             </NavLink>
           </li>
           <li>

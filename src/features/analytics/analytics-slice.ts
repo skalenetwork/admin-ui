@@ -1,5 +1,5 @@
 /**
- * A redux slice with value-added react-redux hooks for a scoped selector and dispatcher
+ * iteration1: concrete KPIs
  */
 
 import { MetricGroup } from '@/types';
@@ -12,15 +12,17 @@ import {
 } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useSelector, useDispatch } from 'react-redux';
 
+// make the slice
+
 export type State = {
   metrics: MetricGroup[];
 };
 
+export const name = 'skale_analytics' as const;
+
 export const initialState: State = {
   metrics: [],
 };
-
-export const name = 'skale_analytics';
 
 const analyticsSlice = createSlice({
   name,
@@ -35,6 +37,8 @@ const analyticsSlice = createSlice({
     },
   },
 });
+
+// slice consumables
 
 export type StateWindow = { [name]: State };
 
