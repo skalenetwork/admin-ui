@@ -41,21 +41,17 @@ main.inspect section .grid > *:not(.grid)[data-s='0'] {
 }
 
 main.inspect section .grid > *:not(.grid)[data-s='1']:after {
-  content: '';
-  @apply absolute top-[-5px]
-    right-[-5px] flex h-3
-    w-3 items-center justify-center
-    rounded-[50%] bg-[var(--blue10)]
-    p-[2px] text-xs;
+  content: 'IP';
+  @apply absolute top-[-5px] right-[-5px]
+    flex items-center justify-center rounded-md
+    bg-[var(--yellow10)] px-[4px] text-xs font-medium;
 }
 
 main.inspect section .grid > *:not(.grid)[data-s='2']:after {
-  content: '';
-  @apply absolute top-[-5px]
-    right-[-5px] flex h-3
-    w-3 items-center justify-center
-    rounded-[50%] bg-[var(--green10)]
-    p-[2px] text-xs;
+  content: 'D';
+  @apply absolute top-[-5px] right-[-5px]
+    flex items-center justify-center rounded-md
+    bg-[var(--green10)] px-[4px] text-xs font-medium text-[var(--white)];
 }
 
 button,

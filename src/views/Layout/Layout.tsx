@@ -27,7 +27,9 @@ export default function Layout() {
           <h3 className="">SKALE Chain UI</h3>
         </Link>
         <div className="flex items-center gap-4">
-          <ConnectKitButton />
+          <div className="font-mono">
+            <ConnectKitButton />
+          </div>
           <a href="" className="font-mono">
             github_icon
           </a>
@@ -52,9 +54,20 @@ export default function Layout() {
         <p>Powered by Dirt Road Dev</p>
         <p></p>
         <p className="ml-auto flex items-center justify-between gap-4">
-          <span>Chain: {chain?.name}</span>
-          <span>ID: {chain?.id}</span>
-          <span>Type: Staging</span>
+          {chain ? (
+            <>
+              {' '}
+              <span>Chain: {chain?.name}</span>
+              <span>ID: {chain?.id}</span>
+              <span>Type: Staging</span>
+            </>
+          ) : (
+            <p className="flex items-center gap-2">
+              {' '}
+              <span className="h-2 w-2 rounded-full bg-[var(--gray8)]"></span>{' '}
+              Not Connected
+            </p>
+          )}
           <button
             className="py-1"
             onClick={(e) => setInspectMode(!inspectMode)}

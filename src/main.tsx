@@ -5,6 +5,8 @@ import { store } from '@/app/store'; // order this early
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import { setup, strict, voidSheet } from 'twind';
 
 import '@/styles/colors.css';
@@ -56,18 +58,22 @@ const wagmiClient = createClient(
   }),
 );
 
+const queryClient = new QueryClient();
+
 // beware: context hell beyond level-6 nesting
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>
-      <WagmiConfig client={wagmiClient}>
-        <BrowserRouter>
-          <ConnectKitProvider>
-            <App />
-          </ConnectKitProvider>
-        </BrowserRouter>
-      </WagmiConfig>
+      <QueryClientProvider client={queryClient}>
+        <WagmiConfig client={wagmiClient}>
+          <BrowserRouter>
+            <ConnectKitProvider>
+              <App />
+            </ConnectKitProvider>
+          </BrowserRouter>
+        </WagmiConfig>
+      </QueryClientProvider>
     </Provider>
   </React.StrictMode>,
 );

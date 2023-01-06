@@ -2,22 +2,31 @@ import { useMemo } from 'react';
 import {
   useAnalytics,
   context as analyticsContext,
+  useBlockHistory,
 } from '@/features/analytics';
 import { useSelector } from '@/app';
 
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Card from '@/components/Card/Card';
+import { Loading } from '@/components/Loading/Loading';
 
 // @ts-ignore
 import { AxisOptions, Chart } from 'react-charts';
 
 const fmtnum = Intl.NumberFormat('en-US');
 
-function FormattedMetric({ amount, label }: { amount: number; label: string }) {
+function FormattedMetric({
+  amount = 0,
+  label,
+}: {
+  amount: number;
+  label: string;
+}) {
   let _amount = Number(amount.toFixed(0));
+  let value = _amount ? fmtnum.format(_amount) : '...';
   return (
     <div>
-      <p className="p-0 text-3xl font-semibold">{fmtnum.format(_amount)}</p>
+      <p className="p-0 text-3xl font-semibold">{value}</p>
       <p className="text-sm text-[var(--gray9)]">{label}</p>
     </div>
   );
@@ -25,6 +34,13 @@ function FormattedMetric({ amount, label }: { amount: number; label: string }) {
 
 export function ChainAnalytics() {
   useAnalytics();
+  const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
+  const { isFetching, data } = useBlockHistory({
+    time: dayStart,
+    includeToday: true,
+  });
+
+  console.log(isFetching, data);
 
   const metrics = useSelector((state) => state.skale_analytics.metrics);
 
@@ -34,13 +50,19 @@ export function ChainAnalytics() {
   return metrics.length ? (
     <div className="grid h-full grid-rows-[1fr_3fr]">
       <div className="grid grid-cols-2">
-        <div data-id="blocks" data-s="1">
+        <div data-id="blocks" data-s="2">
           <Card full heading="Blocks">
             <div className="flex h-full items-center justify-between">
-              <FormattedMetric amount={blk} label="Total block count" />
-              <FormattedMetric amount={blk / 12} label="Blocks last 30 days" />
               <FormattedMetric
-                amount={blk / 12 / 4}
+                amount={data.blocksTotal}
+                label="Total block count"
+              />
+              <FormattedMetric
+                amount={data.blocksLatestMonth}
+                label="Blocks last 30 days"
+              />
+              <FormattedMetric
+                amount={data.blocksLatestWeek}
                 label="Blocks last 7 days"
               />
             </div>
