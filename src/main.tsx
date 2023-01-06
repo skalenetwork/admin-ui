@@ -1,3 +1,5 @@
+import './polyfills';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux/';
@@ -26,10 +28,8 @@ setup({
 import { chains as skaleChains } from '@/features/network/chains';
 import { WagmiConfig, createClient, configureChains, mainnet } from 'wagmi';
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
-import { publicProvider } from '@wagmi/core/providers/public';
 
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { InjectedConnector } from '@wagmi/core/connectors/injected';
 
 const chains = [mainnet, ...Object.values(skaleChains.staging)];
 
@@ -44,8 +44,6 @@ const { provider } = configureChains(chains, [
     },
   }),
 ]);
-
-const connects = [new InjectedConnector({ chains })];
 
 const alchemyId = 'wee';
 

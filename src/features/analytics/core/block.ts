@@ -1,160 +1,239 @@
-// @ts-nocheck
+// credits to nachomazzara/eth-block-timestamp
+// for this beautiful TS rewrite of monosux/ethereum-block-by-date
+// refitted to ethers
 
-import * as moment from 'moment';
 import { getDefaultProvider } from 'ethers';
 
 type Provider = ReturnType<typeof getDefaultProvider>;
-type Block = Awaited<ReturnType<Provider['getBlock']>>;
-type BlockLean = Pick<Block, 'timestamp' | 'number'>;
 
-// credits to monosux/ethereum-block-by-date
-// extended to return types
+export type SavedBlock = {
+  number: number;
+  timestamp: number;
+};
 
-export class BlockMoment {
-  readonly provider: Provider;
-  checkedBlocks: { [key: number]: BlockLean };
-  savedBlocks: { [key: number]: BlockLean };
+export type BlockResponse = {
+  block: number;
+  timestamp: number;
+};
+
+export class TimedBlocks {
+  provider: Provider;
+  checkedBlocks: { [key: string]: number[] };
+  savedBlocks: { [key: string]: SavedBlock };
+  blockTime?: number;
+  firstTimestamp?: number;
+  maxRequests: number;
   requests: number;
-  latestBlock: BlockLean | undefined;
-  firstBlock: BlockLean | undefined;
-  blockTime: number;
 
   constructor(provider: Provider) {
     this.provider = provider;
     this.checkedBlocks = {};
     this.savedBlocks = {};
+    this.maxRequests = 0;
     this.requests = 0;
   }
 
-  async getBoundaries() {
-    this.latestBlock = await this.getBlockWrapper('latest');
-    this.firstBlock = await this.getBlockWrapper(1);
+  async fillBlockTime() {
+    const first = await this.getBlockWrapper(1);
+    const latest = await this.getBlockWrapper('latest');
+
     this.blockTime =
-      (parseInt(this.latestBlock.timestamp, 10) -
-        parseInt(this.firstBlock.timestamp, 10)) /
-      (parseInt(this.latestBlock.number, 10) - 1);
+      (latest.timestamp - first.timestamp) / Number(latest.number) - 1;
+
+    this.firstTimestamp = first.timestamp;
   }
 
-  async getDate(date, after = true, refresh = false) {
-    if (!moment.isMoment(date)) date = moment(date).utc();
-    if (
-      typeof this.firstBlock == 'undefined' ||
-      typeof this.latestBlock == 'undefined' ||
-      typeof this.blockTime == 'undefined' ||
-      refresh
-    )
-      await this.getBoundaries();
-    if (date.isBefore(moment.unix(this.firstBlock.timestamp)))
-      return this.returnWrapper(date.format(), 1);
-    if (date.isSameOrAfter(moment.unix(this.latestBlock.timestamp)))
-      return this.returnWrapper(date.format(), this.latestBlock.number);
-    this.checkedBlocks[date.unix()] = [];
-    let predictedBlock = await this.getBlockWrapper(
-      Math.ceil(
-        date.diff(moment.unix(this.firstBlock.timestamp), 'seconds') /
-          this.blockTime,
-      ),
-    );
-    return this.returnWrapper(
-      date.format(),
-      await this.findBetter(date, predictedBlock, after),
-    );
-  }
+  async getDate(
+    date: string,
+    after: boolean = true,
+    maxRequest: number = 50,
+  ): Promise<BlockResponse | null> {
+    console.log(date, after);
+    this.maxRequests = maxRequest;
+    this.requests = 0;
 
-  async getEvery(
-    duration,
-    start,
-    end,
-    every = 1,
-    after = true,
-    refresh = false,
-  ) {
-    (start = moment(start)), (end = moment(end));
-    let current = start,
-      dates = [];
-    while (current.isSameOrBefore(end)) {
-      dates.push(current.format());
-      current.add(every, duration);
+    try {
+      const now = Date.now();
+      const dateAsNumber = Number(date);
+      const dateAsDate = Date.parse(date);
+
+      let normalizedDate;
+
+      if (!isNaN(dateAsNumber)) {
+        // timestamp
+        normalizedDate = dateAsNumber;
+      } else if (!isNaN(dateAsDate)) {
+        // date
+        normalizedDate = dateAsDate / 1000;
+      }
+
+      if (
+        typeof this.firstTimestamp === 'undefined' ||
+        typeof this.blockTime === 'undefined'
+      ) {
+        await this.fillBlockTime();
+      }
+
+      if (
+        date === 'first' ||
+        (normalizedDate && normalizedDate < this.firstTimestamp!)
+      ) {
+        return {
+          block: 1,
+          timestamp: this.firstTimestamp!,
+        };
+      }
+
+      if (
+        date === 'latest' ||
+        (normalizedDate &&
+          (normalizedDate >= now ||
+            normalizedDate > this.savedBlocks['latest'].timestamp))
+      ) {
+        return {
+          block: await this.provider.getBlockNumber(),
+          timestamp: this.savedBlocks['latest'].timestamp,
+        };
+      }
+
+      if (!normalizedDate) {
+        return null;
+      }
+
+      this.checkedBlocks[normalizedDate] = [];
+
+      let predictedBlock = await this.getBlockWrapper(
+        Math.ceil(normalizedDate - this.firstTimestamp! / this.blockTime!),
+      );
+
+      const block = await this.findBetter(
+        normalizedDate,
+        predictedBlock,
+        after,
+      );
+
+      return {
+        timestamp: normalizedDate,
+        block,
+      };
+    } catch (e) {
+      throw e;
     }
-    if (
-      typeof this.firstBlock == 'undefined' ||
-      typeof this.latestBlock == 'undefined' ||
-      typeof this.blockTime == 'undefined' ||
-      refresh
-    )
-      await this.getBoundaries();
-    return await Promise.all(dates.map((date) => this.getDate(date, after)));
   }
 
-  async findBetter(date, predictedBlock, after, blockTime = this.blockTime) {
-    if (await this.isBetterBlock(date, predictedBlock, after))
+  async findBetter(
+    date: number,
+    predictedBlock: SavedBlock,
+    after: boolean,
+    blockTime: number = this.blockTime!,
+  ): Promise<number> {
+    if (await this.isBetterBlock(date, predictedBlock, after)) {
       return predictedBlock.number;
-    let difference = date.diff(
-      moment.unix(predictedBlock.timestamp),
-      'seconds',
-    );
-    let skip = Math.ceil(difference / (blockTime == 0 ? 1 : blockTime));
-    if (skip == 0) skip = difference < 0 ? -1 : 1;
-    let nextPredictedBlock = await this.getBlockWrapper(
+    }
+
+    if (this.requests >= this.maxRequests) {
+      throw new Error('Max requests limit reached');
+    }
+
+    const difference = date - predictedBlock.timestamp;
+    let skip = Math.ceil(difference / blockTime);
+
+    if (skip === 0) {
+      skip = difference < 0 ? -1 : 1;
+    }
+
+    const nextPredictedBlock = await this.getBlockWrapper(
       this.getNextBlock(date, predictedBlock.number, skip),
     );
+
     blockTime = Math.abs(
-      (parseInt(predictedBlock.timestamp, 10) -
-        parseInt(nextPredictedBlock.timestamp, 10)) /
-        (parseInt(predictedBlock.number, 10) -
-          parseInt(nextPredictedBlock.number, 10)),
+      (predictedBlock.timestamp - nextPredictedBlock.timestamp) /
+        (predictedBlock.number - nextPredictedBlock.number),
     );
+
     return this.findBetter(date, nextPredictedBlock, after, blockTime);
   }
 
-  async isBetterBlock(date, predictedBlock, after) {
-    let blockTime = moment.unix(predictedBlock.timestamp);
+  async isBetterBlock(
+    date: number,
+    predictedBlock: SavedBlock,
+    after: boolean,
+  ) {
+    const blockTime = predictedBlock.timestamp;
+
     if (after) {
-      if (blockTime.isBefore(date)) return false;
+      if (blockTime < date) {
+        return false;
+      }
+
       let previousBlock = await this.getBlockWrapper(predictedBlock.number - 1);
-      if (
-        blockTime.isSameOrAfter(date) &&
-        moment.unix(previousBlock.timestamp).isBefore(date)
-      )
+
+      if (blockTime >= date && previousBlock.timestamp < date) {
         return true;
+      }
     } else {
-      if (blockTime.isSameOrAfter(date)) return false;
+      if (blockTime >= date) {
+        return false;
+      }
+
       let nextBlock = await this.getBlockWrapper(predictedBlock.number + 1);
-      if (
-        blockTime.isBefore(date) &&
-        moment.unix(nextBlock.timestamp).isSameOrAfter(date)
-      )
+      if (blockTime < date && nextBlock.timestamp >= date) {
         return true;
+      }
     }
+
     return false;
   }
 
-  getNextBlock(date, currentBlock, skip) {
+  getNextBlock(date: number, currentBlock: number, skip: number): number {
     let nextBlock = currentBlock + skip;
-    if (nextBlock > this.latestBlock.number)
-      nextBlock = this.latestBlock.number;
-    if (this.checkedBlocks[date.unix()].includes(nextBlock))
-      return this.getNextBlock(date, currentBlock, skip < 0 ? --skip : ++skip);
-    this.checkedBlocks[date.unix()].push(nextBlock);
-    return nextBlock < 1 ? 1 : nextBlock;
+
+    if (this.checkedBlocks[date].includes(nextBlock)) {
+      do {
+        nextBlock = nextBlock + skip;
+      } while (this.checkedBlocks[date].includes(nextBlock));
+
+      return this.getNextBlock(date, nextBlock - skip, skip);
+    }
+
+    this.checkedBlocks[date].push(nextBlock);
+
+    return nextBlock;
   }
 
-  returnWrapper(date, block) {
-    return {
-      date: date,
-      block: block,
-      timestamp: this.savedBlocks[block].timestamp,
-    };
-  }
+  async getBlockWrapper(block: number | string): Promise<SavedBlock> {
+    if (this.savedBlocks[block.toString()]) {
+      return this.savedBlocks[block];
+    }
 
-  async getBlockWrapper(block) {
-    if (this.savedBlocks[block]) return this.savedBlocks[block];
-    const { number, timestamp } = await this.provider.getBlock(block);
-    this.savedBlocks[number] = {
-      timestamp,
-      number,
+    if (
+      typeof block === 'number' &&
+      this.savedBlocks['1'] &&
+      this.savedBlocks['1'].number >= block
+    ) {
+      return this.savedBlocks['1'];
+    }
+
+    if (
+      typeof block === 'number' &&
+      this.savedBlocks['latest'] &&
+      this.savedBlocks['latest'].number <= block
+    ) {
+      return this.savedBlocks['latest'];
+    }
+
+    let { timestamp } = await this.provider.getBlock(block);
+
+    this.savedBlocks[block.toString()] = {
+      number:
+        block === 'latest'
+          ? await this.provider.getBlockNumber()
+          : Number(block),
+      timestamp: Number(timestamp),
     };
+
     this.requests++;
-    return this.savedBlocks[number];
+
+    return this.savedBlocks[block.toString()];
   }
 }

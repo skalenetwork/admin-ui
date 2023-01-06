@@ -37,7 +37,7 @@ export function ChainAnalytics() {
   const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
   const { isFetching, data } = useBlockHistory({
     time: dayStart,
-    includeToday: true,
+    includeLatest: true,
   });
 
   console.log(isFetching, data);
