@@ -1,14 +1,23 @@
 import { PropsWithChildren } from 'react';
 import { tw } from 'twind';
+import { InfoIcon } from '../Icons/Icons';
 import ScrollZone from '../ScrollZone/ScrollZone';
+import Tooltip from '../Tooltip/Tooltip';
 
 type Props = PropsWithChildren<{
   className?: string;
   full: boolean;
-  heading: string | JSX.Element;
+  heading: string | React.ReactNode;
+  tooltip?: string | React.ReactNode;
 }>;
 
-export default function Card({ children, className, full, heading }: Props) {
+export default function Card({
+  children,
+  className,
+  full,
+  heading,
+  tooltip,
+}: Props) {
   return (
     <div
       className={tw`
@@ -19,7 +28,19 @@ export default function Card({ children, className, full, heading }: Props) {
       `}
       role="combobox"
     >
-      <h4 className={tw`h-[max-content] pb-2`}>{heading}</h4>
+      <div className="flex justify-between">
+        <h4 className={tw`h-[max-content] pb-2`}>{heading}</h4>
+        {tooltip && (
+          <Tooltip
+            trigger={
+              <div className="cursor-pointer">
+                <InfoIcon color={'var(--gray6)'} />
+              </div>
+            }
+            content={tooltip}
+          />
+        )}
+      </div>
       <div className={tw`flex-grow`}>
         <ScrollZone grow>{children}</ScrollZone>
       </div>

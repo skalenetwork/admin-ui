@@ -6,8 +6,8 @@ import SideNavigation from '@/views/SideNavigation/SideNavigation';
 import { ConnectKitButton } from 'connectkit';
 
 import { useNetwork } from 'wagmi';
-import ScrollZone from '@/components/ScrollZone/ScrollZone';
 import { tw } from 'twind';
+import { GithubIcon, RoleIcon } from '@/components/Icons/Icons';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -23,7 +23,7 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-0 border-b-2 border-[var(--gray3)] bg-[var(--white)] p-3 text-[var(--black)]">
+      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-3 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -33,7 +33,7 @@ export default function Layout() {
             <ConnectKitButton />
           </div>
           <a href="" className="font-mono">
-            github_icon
+            <GithubIcon color="var(--black)" />
           </a>
           <a href="" className="font-mono">
             LinkIcon
@@ -70,6 +70,9 @@ export default function Layout() {
               Not Connected
             </p>
           )}
+          <div className="cursor-pointer">
+            <RoleIcon color={'var(--gray10)'} />
+          </div>
           <button
             className="py-1"
             onClick={(e) => setInspectMode(!inspectMode)}

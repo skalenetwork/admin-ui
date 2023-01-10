@@ -12,7 +12,7 @@ const CHide = Collapsible.Content;
 
 export default function SideNavigation() {
   const [navOpen, setNavOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList[darkMode ? 'add' : 'remove'](
