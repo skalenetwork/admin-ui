@@ -195,6 +195,7 @@ const chainListsDirectory =
 export const WidgetManageChainlist = () => {
   const { chain } = useNetwork();
   const { data, isSuccess, isError, isFetching } = useQuery({
+    queryKey: [chain?.id],
     queryFn: () =>
       fetch(`${chainListsDirectory}/eip155-${chain?.id}.json`).then((res) =>
         res.json(),
@@ -225,7 +226,7 @@ export const WidgetManageChainlist = () => {
         </p>
         <center>
           <a
-            className="btn btn-wide w-5/6"
+            className="btn w-5/6"
             target="blank"
             href="https://github.com/ethereum-lists/chains/pulls"
           >

@@ -8,10 +8,10 @@ import { useSelector } from '@/app';
 
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Card from '@/components/Card/Card';
-import { Loading } from '@/components/Loading/Loading';
 
 // @ts-ignore
 import { AxisOptions, Chart } from 'react-charts';
+import { useExplorer } from '@/features/network/hooks';
 
 const fmtnum = Intl.NumberFormat('en-US');
 const fmtcurr = Intl.NumberFormat('en-US', {
@@ -42,7 +42,15 @@ function FormattedMetric({
 
 export function ChainAnalytics() {
   useAnalytics();
+  const { data: accounts } = useExplorer({
+    module: 'account',
+    action: 'listaccounts',
+  });
+
+  console.log(accounts);
+
   const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
+
   const { isFetching, data } = useBlockHistory({
     time: dayStart,
     includeLatest: true,
@@ -202,7 +210,7 @@ function Bar() {
         data,
         primaryAxis,
         secondaryAxes,
-        defaultColors: ['#2186DE'],
+        defaultColors: ['var(--primary)'],
       }}
     />
   );

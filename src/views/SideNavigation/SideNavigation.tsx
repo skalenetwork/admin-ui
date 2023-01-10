@@ -3,7 +3,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { NavLink } from 'react-router-dom';
 
 const activeStyle = {
-  background: '#3763E4',
+  background: 'var(--bg-color-menuitem-active)',
   color: '#fff',
   borderRadius: '10px',
 };

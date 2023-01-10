@@ -1,11 +1,19 @@
 :root {
   --white: #fff;
   --black: #000;
+  --primary: hsla(208, 74%, 50%, 1);
+  --color-footer: hsla(219, 33%, 35%, 1);
+  --bg-color-footer: hsla(213, 46%, 84%, 0.4);
+  --bg-color-menuitem-active: hsla(225, 76%, 55%, 1);
 }
 
 .dark-theme {
   --white: #000;
   --black: #fff;
+  --color-footer: var(--black);
+  --bg-color-footer: var(--gray1);
+  --primary: hsla(36, 76%, 60%, 1);
+  --bg-color-menuitem-active: var(--primary);
 }
 
 body {
@@ -60,7 +68,7 @@ main.inspect section .grid > *:not(.grid)[data-s='2']:after {
 
 button,
 .btn {
-  @apply rounded-lg bg-[var(--blue11)]
+  @apply block rounded-lg bg-[var(--primary)]
   px-6 py-2 text-white;
 }
 
@@ -74,4 +82,8 @@ button,
 
 .positive {
   @apply bg-green-400 text-white;
+}
+
+svg {
+  display: inline-block;
 }

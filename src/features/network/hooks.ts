@@ -1,9 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNetwork, useProvider } from 'wagmi';
 
-export function useExplorer() {
+type ExplorerProps = {
+  module:
+    | 'account'
+    | 'stats'
+    | 'transaction'
+    | 'logs'
+    | 'block'
+    | 'token'
+    | 'contract';
+  action: 'listaccounts';
+  args?: {
+    [key: string]: string;
+  };
+};
+
+export function useExplorer({ module, action, args }: ExplorerProps) {
   const { chain } = useNetwork();
-  const url = chain?.blockExplorers?.default.url;
+  const baseUrl = chain?.blockExplorers?.default.url;
+  const queryString = new URLSearchParams(args).toString();
+  const url =
+    baseUrl +
+    `api?module=${module}&action=${action}${
+      queryString ? '&' + queryString : ''
+    }`;
+  return useQuery({
+    queryKey: [chain?.id, module, action, args],
+    queryFn: () => fetch(url).then((res) => res.json()),
+  });
 }
 
 export type NetworkType = 'mainnet' | 'staging';

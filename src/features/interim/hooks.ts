@@ -30,8 +30,6 @@ export function useConfigController() {
     isLoading: signerIsLoading,
   } = useSigner();
 
-  console.log(signer);
-
   const connected = useMemo(() => (chain?.id || 0) > 1, [chain]);
 
   const controller = useMemo(
@@ -63,8 +61,6 @@ export function useConfigController() {
         ]
       : [],
   });
-
-  console.log(status);
 
   const flags = (status === 'success' || undefined) &&
     data && {

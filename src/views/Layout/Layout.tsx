@@ -7,7 +7,13 @@ import { ConnectKitButton } from 'connectkit';
 
 import { useNetwork } from 'wagmi';
 import { tw } from 'twind';
-import { GithubIcon, RoleIcon } from '@/components/Icons/Icons';
+import {
+  FcdIcon,
+  GithubIcon,
+  MtmIcon,
+  RoleIcon,
+} from '@/components/Icons/Icons';
+import { useConfigController } from '@/features/interim/hooks';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -20,10 +26,11 @@ export default function Layout() {
   );
 
   const { chain } = useNetwork();
+  const { flags, connected } = useConfigController();
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-3 text-[var(--black)]">
+      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-2 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -50,11 +57,28 @@ export default function Layout() {
 
       <footer
         className="
-        flex h-min items-center bg-[var(--gray2)]
-        px-8 py-3 text-sm text-[var(--gray10)]"
+        flex h-min items-center bg-[var(--bg-color-footer)]
+        px-8 py-2 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
-        <p></p>
+        <p className="flex items-center justify-center gap-2 pl-24">
+          {connected ? (
+            <>
+              <span
+                className={tw`opacity-[${flags?.fcdEnabled ? '1' : '0.5'}]`}
+              >
+                <FcdIcon color="var(--gray10)" /> Free Contract Deployment
+              </span>
+              <span
+                className={tw`opacity-[${flags?.mtmEnabled ? '1' : '0.5'}]`}
+              >
+                <MtmIcon color={'var(--gray10)'} /> Multi-transaction Mode
+              </span>
+            </>
+          ) : (
+            <></>
+          )}
+        </p>
         <p className="ml-auto flex items-center justify-between gap-4">
           {chain ? (
             <>
