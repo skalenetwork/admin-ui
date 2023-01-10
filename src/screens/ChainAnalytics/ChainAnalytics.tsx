@@ -12,6 +12,7 @@ import Card from '@/components/Card/Card';
 // @ts-ignore
 import { AxisOptions, Chart } from 'react-charts';
 import { useExplorer } from '@/features/network/hooks';
+import { useTheme } from '../../hooks';
 
 const fmtnum = Intl.NumberFormat('en-US');
 const fmtcurr = Intl.NumberFormat('en-US', {
@@ -168,6 +169,7 @@ export function ChainAnalytics() {
 // import ResizableBox from '../ResizableBox';
 
 function Bar() {
+  const { darkMode } = useTheme();
   const data = [
     {
       label: 'Series 1',
@@ -211,6 +213,7 @@ function Bar() {
         primaryAxis,
         secondaryAxes,
         defaultColors: ['var(--primary)'],
+        dark: darkMode,
       }}
     />
   );

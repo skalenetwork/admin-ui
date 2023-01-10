@@ -30,7 +30,7 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-2 text-[var(--black)]">
+      <header className="flex h-min w-full items-center justify-between border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-4 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -98,10 +98,10 @@ export default function Layout() {
             <RoleIcon color={'var(--gray10)'} />
           </div>
           <button
-            className="py-1"
+            className="btn-outline"
             onClick={(e) => setInspectMode(!inspectMode)}
           >
-            Dev Mode: {inspectMode ? 1 : 0}
+            {inspectMode ? 'Hide' : 'Show'} Flags
           </button>
         </p>
       </footer>

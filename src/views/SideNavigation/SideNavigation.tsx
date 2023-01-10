@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { NavLink } from 'react-router-dom';
+import { useTheme } from '../../../src/hooks';
 
 const activeStyle = {
   background: 'var(--bg-color-menuitem-active)',
@@ -12,13 +13,13 @@ const CHide = Collapsible.Content;
 
 export default function SideNavigation() {
   const [navOpen, setNavOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, setDarkMode } = useTheme();
 
-  useEffect(() => {
-    document.documentElement.classList[darkMode ? 'add' : 'remove'](
-      'dark-theme',
-    );
-  }, [darkMode]);
+  // useEffect(() => {
+  //   document.documentElement.classList[darkMode ? 'add' : 'remove'](
+  //     'dark-theme',
+  //   );
+  // }, [darkMode]);
 
   const linkProps = useMemo(() => {
     return {

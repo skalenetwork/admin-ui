@@ -72,6 +72,10 @@ button,
   px-6 py-2 text-white;
 }
 
+.btn-outline {
+  @apply border border-[var(--black)] bg-transparent text-[var(--black)];
+}
+
 .btn-wide {
   @apply px-16;
 }
