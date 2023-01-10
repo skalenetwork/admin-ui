@@ -1,5 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { tw } from 'twind';
+import ScrollZone from '../ScrollZone/ScrollZone';
 
 type Props = PropsWithChildren<{
   className?: string;
@@ -19,7 +20,9 @@ export default function Card({ children, className, full, heading }: Props) {
       role="combobox"
     >
       <h4 className={tw`h-[max-content] pb-2`}>{heading}</h4>
-      <div className={tw`flex-grow`}>{children}</div>
+      <div className={tw`flex-grow`}>
+        <ScrollZone grow>{children}</ScrollZone>
+      </div>
     </div>
   );
 }

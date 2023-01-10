@@ -6,6 +6,8 @@ import SideNavigation from '@/views/SideNavigation/SideNavigation';
 import { ConnectKitButton } from 'connectkit';
 
 import { useNetwork } from 'wagmi';
+import ScrollZone from '@/components/ScrollZone/ScrollZone';
+import { tw } from 'twind';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -21,7 +23,7 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-[var(--gray3)] bg-[var(--white)] p-4 text-[var(--black)]">
+      <header className="flex h-min w-full items-center justify-between border-0 border-b-2 border-[var(--gray3)] bg-[var(--white)] p-3 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -34,12 +36,12 @@ export default function Layout() {
             github_icon
           </a>
           <a href="" className="font-mono">
-            link_icon
+            LinkIcon
           </a>
         </div>
       </header>
 
-      <main className={`flex ${inspectMode ? 'inspect' : ''}`}>
+      <main className={`${tw`flex`} ${inspectMode ? 'inspect' : ''}`}>
         <SideNavigation />
         <section className="h-full w-full bg-[var(--gray3)] px-6 py-4">
           <Outlet />

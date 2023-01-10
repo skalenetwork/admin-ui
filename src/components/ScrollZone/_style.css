@@ -1,0 +1,4 @@
+[data-radix-scroll-area-viewport] > div {
+  height: 100%;
+  width: 100%;
+}

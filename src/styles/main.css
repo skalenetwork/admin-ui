@@ -15,8 +15,12 @@ body {
 
 body #app {
   @apply grid
-  h-screen max-h-screen grid-flow-row;
+  h-screen max-h-screen min-h-0 min-w-0 grid-flow-row;
   grid-template-rows: min-content 1fr min-content;
+}
+
+body #app > * {
+  @apply overflow-hidden;
 }
 
 section .grid {
@@ -60,8 +64,7 @@ button,
   px-6 py-2 text-white;
 }
 
-button.btn-wide,
-.btn.btn-wide {
+.btn-wide {
   @apply px-16;
 }
 

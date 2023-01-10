@@ -14,20 +14,28 @@ import { Loading } from '@/components/Loading/Loading';
 import { AxisOptions, Chart } from 'react-charts';
 
 const fmtnum = Intl.NumberFormat('en-US');
+const fmtcurr = Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+});
 
 function FormattedMetric({
   amount = 0,
   label,
+  format = 'number',
 }: {
   amount: number;
-  label: string;
+  format?: 'currency' | 'number';
+  label?: string;
 }) {
   let _amount = Number(amount.toFixed(0));
-  let value = _amount ? fmtnum.format(_amount) : '...';
+  let value = _amount
+    ? (format === 'currency' ? fmtcurr : fmtnum).format(_amount)
+    : '...';
   return (
     <div>
-      <p className="p-0 text-3xl font-semibold">{value}</p>
-      <p className="text-sm text-[var(--gray9)]">{label}</p>
+      <p className="p-0 text-2xl font-semibold">{value}</p>
+      {label && <p className="text-sm text-[var(--gray9)]">{label}</p>}
     </div>
   );
 }
@@ -48,11 +56,11 @@ export function ChainAnalytics() {
   const tx = Math.random() * 50000;
 
   return metrics.length ? (
-    <div className="grid h-full grid-rows-[1fr_3fr]">
+    <div className="grid h-full w-full grid-rows-[1fr_3fr]">
       <div className="grid grid-cols-2">
         <div data-id="blocks" data-s="2">
           <Card full heading="Blocks">
-            <div className="flex h-full items-center justify-between">
+            <div className="flex h-full min-w-max items-center justify-between gap-4">
               <FormattedMetric
                 amount={data.blocksTotal}
                 label="Total block count"
@@ -68,11 +76,37 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="total_gas_save" data-s="0"></div>
+
+        <div data-id="total_gas_save" data-s="1">
+          <Card full heading="Total Gas Fees Saved">
+            <div className="flex h-full flex-col ">
+              <div className="flex flex-col gap-2">
+                <FormattedMetric format="currency" amount={tx / 12} />
+                <FormattedMetric format="currency" amount={tx / 12 / 4} />
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
       <div className="grid grid-cols-3">
         <div className="grid grid-rows-[3fr_2fr]">
-          <div data-id="active_users" data-s="0"></div>
+          <div data-id="active_users" data-s="1">
+            <Card full heading="Active Users">
+              <div className="flex h-full flex-col ">
+                <div className="flex flex-col">
+                  <FormattedMetric amount={tx} label="Total user count" />
+                  <FormattedMetric
+                    amount={tx / 12}
+                    label="Users last 30 days"
+                  />
+                  <FormattedMetric
+                    amount={tx / 12 / 4}
+                    label="Users last 7 days"
+                  />
+                </div>
+              </div>
+            </Card>
+          </div>
           <div data-id="ima_pool" data-s="0"></div>
         </div>
         <div data-id="transactions+chart" data-s="1">
@@ -95,7 +129,27 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="gas_save+chart" data-s="0"></div>
+        <div data-id="gas_save+chart" data-s="1">
+          <Card full heading="Gas Fees saved">
+            <div className="flex h-full flex-col ">
+              <div className="flex flex-col gap-2">
+                <FormattedMetric
+                  format="currency"
+                  amount={tx / 12}
+                  label="Transactions last 30 days"
+                />
+                <FormattedMetric
+                  format="currency"
+                  amount={tx / 12 / 4}
+                  label="Transactions last 7 days"
+                />
+              </div>
+              <div className="relative h-[max] flex-grow">
+                <Bar />
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   ) : (

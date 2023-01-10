@@ -26,15 +26,15 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@radix-ui/colors": "^0.1.8",
     "@reduxjs/toolkit": "^1.9.1",
     "@skaleproject/skale.js": "^0.1.2",
-    "ethers": "^5.7.2",
-    "wagmi": "^0.10.1",
     "@tanstack/query-core": "^4.20.4",
     "@tanstack/react-query": "^4.20.9",
     "connectkit": "^1.1.1",
+    "ethers": "^5.7.2",
     "radix-ui": "^1.0.1",
     "react": "^18.2.0",
     "react-charts": "^3.0.0-beta.51",
@@ -44,6 +44,7 @@
     "react-router-dom": "^6.4.3",
     "react-use": "^17.4.0",
     "twind": "^0.16.19",
+    "wagmi": "^0.10.1",
     "zod": "^3.20.2"
   },
   "devDependencies": {
@@ -54,6 +55,7 @@
     "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
     "@vitejs/plugin-react": "^3.0.0",
+    "abitype": "^0.2.5",
     "autoprefixer": "^10.4.13",
     "cross-env": "^7.0.3",
     "cssnano": "^5.1.14",
