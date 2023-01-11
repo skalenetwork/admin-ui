@@ -10,6 +10,7 @@ import { tw } from 'twind';
 import {
   FcdIcon,
   GithubIcon,
+  LinkIcon,
   MtmIcon,
   RoleIcon,
 } from '@/components/Icons/Icons';
@@ -30,7 +31,7 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-4 text-[var(--black)]">
+      <header className="flex h-min w-full items-center justify-between border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-6 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
@@ -39,12 +40,16 @@ export default function Layout() {
           <div className="font-mono">
             <ConnectKitButton />
           </div>
-          <a href="" className="font-mono">
-            <GithubIcon color="var(--black)" />
+          <a
+            target={'_blank'}
+            href="https://github.com/skalenetwork/admin-ui"
+            className="font-mono"
+          >
+            <GithubIcon />
           </a>
-          <a href="" className="font-mono">
-            LinkIcon
-          </a>
+          {/* <a href="" className="font-mono">
+            <LinkIcon className="h-32" />
+          </a> */}
         </div>
       </header>
 
@@ -67,12 +72,12 @@ export default function Layout() {
               <span
                 className={tw`opacity-[${flags?.fcdEnabled ? '1' : '0.5'}]`}
               >
-                <FcdIcon color="var(--gray10)" /> Free Contract Deployment
+                <FcdIcon /> Free Contract Deployment
               </span>
               <span
                 className={tw`opacity-[${flags?.mtmEnabled ? '1' : '0.5'}]`}
               >
-                <MtmIcon color={'var(--gray10)'} /> Multi-transaction Mode
+                <MtmIcon /> Multi-transaction Mode
               </span>
             </>
           ) : (
@@ -95,7 +100,7 @@ export default function Layout() {
             </p>
           )}
           <div className="cursor-pointer">
-            <RoleIcon color={'var(--gray10)'} />
+            <RoleIcon />
           </div>
           <button
             className="btn-outline"

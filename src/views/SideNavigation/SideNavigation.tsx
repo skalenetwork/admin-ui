@@ -2,6 +2,15 @@ import React, { useMemo, useState, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { NavLink } from 'react-router-dom';
 import { useTheme } from '../../../src/hooks';
+import {
+  BridgeIcon,
+  CrownIcon,
+  DashboardIcon,
+  IIcon,
+  InfoIcon,
+  ManagerIcon,
+  PeopleIcon,
+} from '@/components/Icons/Icons';
 
 const activeStyle = {
   background: 'var(--bg-color-menuitem-active)',
@@ -60,37 +69,37 @@ export default function SideNavigation() {
         <ul>
           <li>
             <NavLink {...linkProps} to="">
-              ◼️ <CHide>Dashboard</CHide>
+              <DashboardIcon /> <CHide>Dashboard</CHide>
             </NavLink>
           </li>
           <li>
             <NavLink {...linkProps} to="chain_manager">
-              ◼️ <CHide>Chain Manager</CHide>
+              <ManagerIcon /> <CHide>Chain Manager</CHide>
             </NavLink>
           </li>
           <li>
             <NavLink {...linkProps} to="ima_manager">
-              ◼️ <CHide>IMA Manager</CHide>
+              <BridgeIcon /> <CHide>IMA Manager</CHide>
             </NavLink>
           </li>
           <li>
             <NavLink {...linkProps} to="multisig">
-              ◼️ <CHide>Multisig</CHide>
+              <PeopleIcon /> <CHide>Multisig</CHide>
             </NavLink>
           </li>
           <li>
             <NavLink {...linkProps} to="role_assigner">
-              ◼️ <CHide>Role Assigner</CHide>
+              <CrownIcon /> <CHide>Role Assigner</CHide>
             </NavLink>
           </li>
           <li>
             <NavLink {...linkProps} to="support">
-              ◼️ <CHide>Support</CHide>
+              <IIcon /> <CHide>Support</CHide>
             </NavLink>
           </li>
         </ul>
       </nav>
-      <Collapsible.Trigger className="py-4 text-[var(--black)]">
+      <Collapsible.Trigger className="py-4 text-slate-400">
         <div>{navOpen ? '<< Collapse menu' : '>>'}</div>
       </Collapsible.Trigger>
     </Collapsible.Root>
