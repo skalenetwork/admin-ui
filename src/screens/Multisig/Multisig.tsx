@@ -1,5 +1,6 @@
 import Avatar from '@/components/Avatar/Avatar';
 import Card from '@/components/Card/Card';
+import Select from '@/components/Select/Select';
 import { useMultisig } from '@/features/multisig/hooks';
 import { useQueries } from '@tanstack/react-query';
 import { ethers } from 'ethers';
@@ -20,13 +21,13 @@ export function MultisigOwner({ address }: { address: string }) {
   );
 }
 
-export function EventSummary({}) {
+export function EventSummary({ id }: { id: any }) {
   return (
     <Card
       lean
       heading={
         <h5>
-          135 - Contract interaction {'<>'}
+          {id} - Contract interaction {'<>'}
           <br></br>
           <span className="text-sm text-[var(--gray10)]">
             About 8 hours ago
@@ -42,7 +43,12 @@ export function EventSummary({}) {
 export function WalletSelect() {
   return (
     <div className="h-full w-3/5 rounded-lg bg-[var(--white)]">
-      <p></p>
+      <Select
+        onValueChange={(val) => window.alert(val)}
+        items={[
+          { value: 'weeee', renderer: () => <MultisigOwner address="weee" /> },
+        ]}
+      />
     </div>
   );
 }
@@ -202,7 +208,11 @@ export default function Multisig() {
           }
           bodyClass="flex flex-col gap-2"
         >
-          <Card lean heading={`Queue`} className="h-1/2 bg-[var(--gray4)]">
+          <Card
+            lean
+            heading={`Queue ( ${pendingTrxIds?.data.length} )`}
+            className="h-1/2 bg-[var(--gray4)]"
+          >
             <div className="flex flex-col gap-2">
               {!connected
                 ? 'Not Available'
@@ -211,7 +221,9 @@ export default function Multisig() {
                 : pendingTrxIds.isError
                 ? 'Failed to retrieve queue'
                 : pendingTrxIds.data
-                ? pendingTrxIds.data.map((address, i) => <EventSummary />)
+                ? pendingTrxIds.data.map((id, i) => (
+                    <EventSummary key={id} id={id} />
+                  ))
                 : 'Loading'}
             </div>
           </Card>
@@ -228,7 +240,9 @@ export default function Multisig() {
                 : executedTrxIds.isError
                 ? 'Failed to retrieve history'
                 : executedTrxIds.data
-                ? executedTrxIds.data.map((address, i) => <EventSummary />)
+                ? executedTrxIds.data.map((id, i) => (
+                    <EventSummary key={id} id={id} />
+                  ))
                 : 'Loading'}
             </div>
           </Card>

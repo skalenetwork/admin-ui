@@ -38,4 +38,31 @@ export const staging = {
       },
     },
   },
+  'staging-legal-crazy-castor': {
+    id: parseInt('0x1c6199cc'),
+    name: 'staging-legal-crazy-castor',
+    network: 'skale',
+    nativeCurrency,
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-legal-crazy-castor',
+        ],
+        webSocket: [
+          'wss://staging-v3.skalenodes.com/v1/ws/staging-legal-crazy-castor',
+        ],
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-legal-crazy-castor',
+        ],
+      },
+    },
+    blockExplorers: {
+      default: {
+        name: EXPLORER_NAME,
+        url: 'https://staging-legal-crazy-castor.explorer.staging-v3.skalenodes.com/',
+      },
+    },
+  },
 } satisfies { [key: string]: Chain };

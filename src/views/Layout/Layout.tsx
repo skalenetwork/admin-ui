@@ -55,7 +55,7 @@ export default function Layout() {
 
       <main className={`${tw`flex`} ${inspectMode ? 'inspect' : ''}`}>
         <SideNavigation />
-        <section className="h-full w-full bg-[var(--gray3)] p-3">
+        <section className="h-full w-full bg-[var(--gray2)] p-3">
           <Outlet />
         </section>
       </main>
