@@ -26,12 +26,14 @@ export function FlowAddNewOwner({
     reValidateMode: 'onChange',
     defaultValues: {
       ownerName: '',
+      confirmationCount: 1,
     },
   });
 
   const {
     register,
     formState: { errors, isValid },
+    getValues,
   } = methods;
 
   const onSubmit = (data) => {
@@ -102,6 +104,59 @@ export function FlowAddNewOwner({
               )}
             />
           </fieldset>
+        </div>
+        <div
+          className={tw`${step !== 2 ? 'invisible h-0 overflow-hidden' : ''}`}
+        >
+          <p className="font-medium">Set the required owner comfirmations</p>
+          <fieldset>
+            <label htmlFor="">Required confirmations *</label>
+            <select
+              {...register('confirmationCount', {
+                required: 'Please give a name to the owner',
+              })}
+              required
+              placeholder="Owner Name"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+            Out of 3 owner(s)
+            <ErrorMessage
+              errors={errors}
+              name="ownerName"
+              render={({ message }) => (
+                <p className="text-normal mb-3 text-[var(--red6)]">{message}</p>
+              )}
+            />
+          </fieldset>
+        </div>
+        <div
+          className={tw`${step !== 3 ? 'invisible h-0 overflow-hidden' : ''}`}
+        >
+          <div className="grid grid-cols-3 text-sm">
+            <div>
+              <p className="text-[var(--primary)]">Details:</p>
+            </div>
+            <div>
+              <p>
+                Owner Name
+                <br />
+                {getValues().ownerName}
+              </p>
+            </div>
+            <div>
+              <p>
+                Confirmation Count
+                <br />
+                {getValues().confirmationCount}
+              </p>
+            </div>
+          </div>
+          <div className="p-4">
+            <h4>Adding new owner</h4>
+          </div>
         </div>
       </Dialog>
     </FormProvider>
