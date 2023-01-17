@@ -65,7 +65,7 @@ export default function SideNavigation() {
           {darkMode ? 'make_light' : 'make_dark'}
         </div>
       </div>
-      <nav className="p-4 font-medium text-slate-400">
+      <nav className="p-4 font-medium text-[var(--color-menu)]">
         <ul>
           <li>
             <NavLink {...linkProps} to="">

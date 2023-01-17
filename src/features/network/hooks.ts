@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNetwork, useProvider } from 'wagmi';
+import { Address, useNetwork, useProvider } from 'wagmi';
 
 type ExplorerProps = {
   module:
@@ -30,6 +30,8 @@ export function useExplorer({ module, action, args }: ExplorerProps) {
     queryFn: () => fetch(url).then((res) => res.json()),
   });
 }
+
+export function useRoles({ signer }: { signer: Address }) {}
 
 export type NetworkType = 'mainnet' | 'staging';
 

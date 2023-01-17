@@ -82,7 +82,7 @@ export const WidgetConfigFcd = ({
       full
       heading={
         <>
-          Free Contract Deployment{' '}
+          <h4 className="inline">Free Contract Deployment</h4>{' '}
           <FlagStatus
             connected={connected}
             isEnabled={isEnabled}
@@ -142,7 +142,7 @@ export const WidgetConfigMtm = ({
       full
       heading={
         <>
-          Multi-transaction mode{' '}
+          <h4 className="inline">Multi-transaction mode</h4>{' '}
           <FlagStatus
             connected={connected}
             isEnabled={isEnabled}
@@ -214,10 +214,10 @@ export const WidgetManageChainlist = () => {
       full
       heading={
         <>
-          Chainlist.wtf <FormattedStatus status={status} />
+          <h4 className="inline">Chainlist.wtf</h4>{' '}
+          <FormattedStatus status={status} />
         </>
       }
-      tooltip="Open PR @ https://github.com/ethereum-lists/chains/pulls"
     >
       <div className="flex h-full flex-col justify-around">
         <p className="text-[var(--slate9)]">
@@ -253,7 +253,7 @@ export const WidgetManageMetadata = () => {
       full
       heading={
         <>
-          Submit Chain Metadata{' '}
+          <h4 className="inline">Submit Chain Metadata</h4>{' '}
           <FormattedStatus status={[status, 'Not Submitted']} />
         </>
       }

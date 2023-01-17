@@ -3,6 +3,15 @@ import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import { Fragment, useCallback } from 'react';
 import { tw } from 'twind';
 
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  trigger: React.ReactNode;
+  title: string | React.ReactNode;
+  description: string | React.ReactNode;
+  onAction?: () => Promise<{ status: string; message?: string }>;
+}
+
 export default function AlertDialog({
   open,
   onOpenChange,
@@ -10,14 +19,7 @@ export default function AlertDialog({
   title,
   description,
   onAction,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  trigger: React.ReactNode;
-  title: string | React.ReactNode;
-  description: string | React.ReactNode;
-  onAction?: () => Promise<{ status: string; message?: string }>;
-}) {
+}: Props) {
   const handleAction = useCallback(() => {
     ((onAction && onAction()) || Promise.resolve({ status: 'success' })).then(
       ({ status }) => {

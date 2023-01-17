@@ -4,6 +4,7 @@
   --primary: hsla(208, 74%, 50%, 1);
   --color-footer: hsla(219, 33%, 35%, 1);
   --bg-color-footer: hsla(213, 46%, 84%, 0.4);
+  --color-menu: #90a3bf;
   --bg-color-menuitem-active: hsla(225, 76%, 55%, 1);
 }
 
@@ -13,11 +14,12 @@
   --color-footer: var(--black);
   --bg-color-footer: var(--gray1);
   --primary: hsla(36, 76%, 60%, 1);
+  --color-menu: white;
   --bg-color-menuitem-active: var(--primary);
 }
 
 body {
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
   @apply m-0 p-0;
 }
 
@@ -32,7 +34,7 @@ body #app > * {
 }
 
 section .grid {
-  @apply gap-4;
+  @apply gap-3;
 }
 
 section .grid > *:not(.grid) {
@@ -64,6 +66,13 @@ main.inspect section .grid > *:not(.grid)[data-s='2']:after {
   @apply absolute top-[-5px] right-[-5px]
     flex items-center justify-center rounded-md
     bg-[var(--green10)] px-[4px] text-xs font-medium text-[var(--white)];
+}
+
+main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
+  content: 'B';
+  @apply absolute top-[-5px] right-[-5px]
+    flex items-center justify-center rounded-md
+    bg-[var(--gray8)] px-[4px] text-xs font-medium;
 }
 
 button,

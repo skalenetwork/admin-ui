@@ -15,7 +15,7 @@ export default function ScrollZone({
   const maybeGrowClass = grow ? 'h-full w-full' : '';
   return (
     <ScrollArea.Root className={`${maybeGrowClass} ${tw`${className}`}`}>
-      <ScrollArea.Viewport className={`${maybeGrowClass}`}>
+      <ScrollArea.Viewport className={`${maybeGrowClass} relative`}>
         {children}
       </ScrollArea.Viewport>
       <ScrollArea.Scrollbar

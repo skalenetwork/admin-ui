@@ -1,7 +1,9 @@
 type KeyedAlertToggle = (toKey?: string) => (open: boolean) => void;
 
-export type WidgetWithAlertProps = {
-  id: string;
+export type AlertProps = {
+  id?: string;
   alertKey: string;
   toggleAlert: KeyedAlertToggle;
 };
+
+export type WidgetWithAlertProps = {} & Required<AlertProps>;

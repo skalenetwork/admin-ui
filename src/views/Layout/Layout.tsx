@@ -55,7 +55,7 @@ export default function Layout() {
 
       <main className={`${tw`flex`} ${inspectMode ? 'inspect' : ''}`}>
         <SideNavigation />
-        <section className="h-full w-full bg-[var(--gray3)] px-6 py-4">
+        <section className="h-full w-full bg-[var(--gray3)] p-3">
           <Outlet />
         </section>
       </main>
@@ -63,7 +63,7 @@ export default function Layout() {
       <footer
         className="
         flex h-min items-center bg-[var(--bg-color-footer)]
-        px-8 py-2 text-sm text-[var(--color-footer)]"
+        px-8 py-1 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
         <p className="flex items-center justify-center gap-2 pl-24">

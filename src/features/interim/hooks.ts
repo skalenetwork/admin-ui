@@ -1,3 +1,7 @@
+import {
+  BaseContract,
+  IContractParams,
+} from '@skaleproject/utils/lib/contracts/base_contract';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
 import { ConfigControllerABI } from '@/features/network/abi-configcontroller';
 
@@ -10,16 +14,60 @@ import {
   useContractRead,
   useContractReads,
   usePrepareContractWrite,
+  useAccount,
+  Address,
 } from 'wagmi';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useInterval, useTimeout } from 'react-use';
+import { Wallet } from 'ethers';
 
 const configControllerContract = {
   address: `${SCHAIN_CONFIG_CONTROLLER_ADDRESS}` as `0x${string}`,
   abi: ConfigControllerABI,
 } as const;
+
+/**
+ * with chain state: return predeployed contract SDK wrapper instance
+ * @param creator
+ * @returns
+ */
+export function usePredeployedWrapper<T extends BaseContract>(
+  creator: (params: IContractParams) => T,
+) {
+  const { chain } = useNetwork();
+
+  const {
+    data: signer,
+    isError: signerIsError,
+    isLoading: signerIsLoading,
+  } = useSigner();
+
+  const { address } = useAccount();
+
+  const connected = useMemo(
+    () => (chain ? chain.network === 'skale' : false),
+    [chain],
+  );
+
+  const api = useMemo(
+    () =>
+      connected && chain && signer
+        ? creator({
+            rpcUrl: chain.rpcUrls.default.http[0],
+            signer,
+          })
+        : undefined,
+    [connected, chain],
+  );
+
+  useEffect(() => {
+    address && api?.setSigner({ signer });
+  }, [address, api]);
+
+  return { connected, chainId: chain?.id, signer, api };
+}
 
 export function useConfigController() {
   const { chain } = useNetwork();
@@ -44,7 +92,7 @@ export function useConfigController() {
   );
 
   useEffect(() => {
-    signer && controller?.setSigner({ signer });
+    signer && controller?.setSigner({ signer: signer });
   }, [signer, controller]);
 
   const { data, status } = useContractReads({
@@ -82,6 +130,7 @@ export function useMtm() {
     ...configControllerContract,
     functionName: flags?.mtmEnabled ? 'disableMTM' : 'enableMTM',
   });
+
   const {
     data,
     error,

@@ -48,4 +48,4 @@ build: {
 
 ## Wallets
 
-- Only complete pack worth it is `ethers` + `wagmi` + `rainbowkit`
+- Only complete pack worth it is `ethers` + `wagmi` + ~~`rainbowkit`~~ `ConnectKit`

@@ -22,4 +22,22 @@
     @apply rounded-lg bg-[var(--blue11)]
   px-6 py-2 text-white;
   }
+
+  fieldset {
+    @apply my-2;
+  }
+
+  fieldset > * {
+    @apply block;
+  }
+
+  fieldset > label {
+    @apply py-1 text-sm text-[var(--gray9)];
+  }
+
+  fieldset input,
+  fieldset select,
+  fieldset textarea {
+    @apply rounded border border-[var(--gray8)] bg-[var(--white)] p-4 text-[var(--gray11)];
+  }
 }

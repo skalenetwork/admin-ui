@@ -86,7 +86,7 @@ export function ChainAnalytics() {
           </Card>
         </div>
 
-        <div data-id="total_gas_save" data-s="1">
+        <div data-id="total_gas_save" data-s="-1">
           <Card full heading="Total Gas Fees Saved">
             <div className="flex h-full flex-col ">
               <div className="flex flex-col gap-2">
@@ -99,10 +99,10 @@ export function ChainAnalytics() {
       </div>
       <div className="grid grid-cols-3">
         <div className="grid grid-rows-[3fr_2fr]">
-          <div data-id="active_users" data-s="1">
+          <div data-id="active_users" data-s="-1">
             <Card full heading="Active Users">
-              <div className="flex h-full flex-col ">
-                <div className="flex flex-col">
+              <div className="flex h-full flex-col">
+                <div className="flex flex-col gap-2">
                   <FormattedMetric amount={tx} label="Total user count" />
                   <FormattedMetric
                     amount={tx / 12}
@@ -118,7 +118,7 @@ export function ChainAnalytics() {
           </div>
           <div data-id="ima_pool" data-s="0"></div>
         </div>
-        <div data-id="transactions+chart" data-s="1">
+        <div data-id="transactions+chart" data-s="-1">
           <Card full heading="Transactions">
             <div className="flex h-full flex-col ">
               <div className="flex flex-col gap-2">
@@ -138,7 +138,7 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="gas_save+chart" data-s="1">
+        <div data-id="gas_save+chart" data-s="-1">
           <Card full heading="Gas Fees saved">
             <div className="flex h-full flex-col ">
               <div className="flex flex-col gap-2">

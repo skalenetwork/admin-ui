@@ -4,9 +4,15 @@ import { InfoIcon } from '../Icons/Icons';
 import ScrollZone from '../ScrollZone/ScrollZone';
 import Tooltip from '../Tooltip/Tooltip';
 
+/**
+ * Set fixed height on body instead of whole card
+ */
+
 type Props = PropsWithChildren<{
   className?: string;
-  full: boolean;
+  bodyClass?: string;
+  full?: boolean;
+  lean?: boolean;
   heading: string | React.ReactNode;
   tooltip?: string | React.ReactNode;
 }>;
@@ -14,35 +20,52 @@ type Props = PropsWithChildren<{
 export default function Card({
   children,
   className,
+  bodyClass,
   full,
+  lean,
   heading,
   tooltip,
 }: Props) {
+  const paddingClass = `${lean ? 'p-2' : 'p-4'}`;
   return (
     <div
       className={tw`
-      flex flex-col
-      rounded-lg bg-[var(--white)] p-4 text-[var(--gray12)]
-      ${full ? 'h-full w-full' : ''}
+      flex flex-col overflow-hidden
+      rounded-lg bg-[var(--white)] text-[var(--gray12)]
       ${className}
+      ${full ? 'h-full w-full' : ''}
       `}
       role="combobox"
     >
-      <div className="flex justify-between">
-        <h4 className={tw`h-[max-content] pb-2`}>{heading}</h4>
+      <div
+        className={tw`flex justify-between ${paddingClass} rounded-t-lg pb-0`}
+      >
+        <div className={tw`h-[max-content] w-full pb-2`}>
+          {typeof heading === 'string' ? (
+            lean ? (
+              <h5 className="font-medium">{heading}</h5>
+            ) : (
+              <h4 className="font-medium">{heading}</h4>
+            )
+          ) : (
+            heading
+          )}
+        </div>
         {tooltip && (
           <Tooltip
             trigger={
               <div className="cursor-pointer">
-                <InfoIcon color={'var(--gray6)'} />
+                <InfoIcon color={'var(--gray8)'} />
               </div>
             }
             content={tooltip}
           />
         )}
       </div>
-      <div className={tw`flex-grow`}>
-        <ScrollZone grow>{children}</ScrollZone>
+      <div
+        className={tw`flex-grow overflow-auto ${paddingClass} pt-0 ${bodyClass}`}
+      >
+        {children}
       </div>
     </div>
   );
