@@ -19,7 +19,7 @@ import '@/styles/main.css';
 
 setup({
   preflight: false, // do not include base style reset (default: use tailwind preflight)
-  mode: strict, // throw errors for invalid rules (default: warn)
+  mode: 'warn', // throw errors for invalid rules (default: warn)
   hash: false, // hash all generated class names (default: false)
   theme: {}, // define custom theme values (default: tailwind theme)
   darkMode: 'class', // use a different dark mode strategy (default: 'media')

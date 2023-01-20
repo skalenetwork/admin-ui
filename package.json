@@ -48,6 +48,7 @@
     "react-router-dom": "^6.4.3",
     "react-singleton-hook": "^4.0.1",
     "react-use": "^17.4.0",
+    "tailwindcss-radix": "^2.7.0",
     "twind": "^0.16.19",
     "wagmi": "^0.10.1",
     "zod": "^3.20.2"

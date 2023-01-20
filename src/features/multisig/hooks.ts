@@ -179,7 +179,7 @@ export function useMultisig({
         })),
   });
 
-  console.log('executed', executedTrxIds);
+  console.log('pendingTrxs', pendingTrxs);
 
   return {
     api,

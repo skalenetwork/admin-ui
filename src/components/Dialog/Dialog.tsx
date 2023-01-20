@@ -1,29 +1,35 @@
 import { Transition } from '@headlessui/react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Cross1Icon, Cross2Icon } from '@radix-ui/react-icons';
 import React, {
+  ComponentProps,
   Fragment,
-  HTMLAttributes,
-  useCallback,
-  useLayoutEffect,
+  PropsWithChildren,
+  PropsWithoutRef,
   useState,
 } from 'react';
+import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { tw } from 'twind';
 
-interface Props {
+type Footer = {
+  actionElement: (props: { className?: string }) => JSX.Element;
+  cancelElement?: (props: { className?: string }) => JSX.Element;
+};
+
+type Step = {
+  onSubmit?: React.FormEventHandler<HTMLFormElement>;
+  content: React.ReactNode;
+} & Footer;
+
+type Props = PropsWithChildren<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger: React.ReactNode;
-  title: string | React.ReactNode;
-  description: string | React.ReactNode;
-  children: React.ReactNode;
-  onSubmit?: React.FormEventHandler<HTMLFormElement>;
-  actionElement: any;
-  cancelElement?: any;
-  onAction?: () => Promise<{
-    status: string;
-    message?: string;
-  }>;
-}
+  title: string | JSX.Element;
+  description: string | JSX.Element;
+  trigger: JSX.Element;
+  steps: Step[];
+  activeStep: number;
+}>;
 
 const Dialog = ({
   open,
@@ -31,11 +37,24 @@ const Dialog = ({
   trigger,
   title,
   description,
-  children,
-  actionElement,
-  cancelElement,
-  onSubmit,
+  activeStep,
+  steps,
 }: Props) => {
+  const [step, setStep] = useState(1);
+  const cancelElClass = tw(
+    'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
+    'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
+    'border border-transparent',
+    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
+    'cursor-pointer',
+  );
+  const actionElClass = tw(
+    'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
+    'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
+    'border border-transparent',
+    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
+    'cursor-pointer',
+  );
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
@@ -75,62 +94,56 @@ const Dialog = ({
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
               )}
             >
-              <form onSubmit={onSubmit}>
-                <div className="flex flex-row items-center gap-4 border-b border-[var(--gray6)] p-4">
-                  <DialogPrimitive.Title asChild>
-                    <h4>{title}</h4>
-                  </DialogPrimitive.Title>
-                  <DialogPrimitive.Description className="text-sm font-normal text-[var(--gray10)]">
-                    {description}
-                  </DialogPrimitive.Description>
-                  <DialogPrimitive.Close
-                    className={tw(
-                      'ml-auto inline-flex items-center justify-center rounded-full',
-                      'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-                    )}
-                  >
-                    <div className="text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-400">
-                      ✠
-                    </div>
-                  </DialogPrimitive.Close>
-                </div>
-
-                <div className="p-8">{children}</div>
-
-                <div className="flex justify-center gap-8 border-t border-[var(--gray6)] py-4">
-                  {cancelElement ? (
-                    cancelElement({
-                      className: tw(
-                        'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-                        'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
-                        'border border-transparent',
-                        'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-                        'cursor-pointer',
-                      ),
-                    })
-                  ) : (
-                    <DialogPrimitive.Close
-                      className={tw(
-                        'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-                        'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 hover:dark:bg-gray-600',
-                        'border border-gray-300 dark:border-transparent',
-                        'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-                      )}
-                    >
-                      Cancel
-                    </DialogPrimitive.Close>
+              <div className="flex flex-row items-center gap-4 border-b border-[var(--gray6)] p-4">
+                <DialogPrimitive.Title asChild>
+                  <h4>{title}</h4>
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="text-sm font-normal text-[var(--gray10)]">
+                  {description}
+                </DialogPrimitive.Description>
+                <DialogPrimitive.Close
+                  className={tw(
+                    'ml-auto inline-flex items-center justify-center rounded-full',
+                    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
                   )}
-                  {actionElement({
-                    className: tw(
-                      'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-                      'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
-                      'border border-transparent',
-                      'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-                      'cursor-pointer',
-                    ),
-                  })}
-                </div>
-              </form>
+                >
+                  <div className="text-[var(--gray10)]">
+                    <Cross1Icon />
+                  </div>
+                </DialogPrimitive.Close>
+              </div>
+              {steps.map(
+                (
+                  { actionElement, cancelElement, onSubmit, content },
+                  index,
+                ) => (
+                  <div
+                    className={
+                      index !== activeStep - 1
+                        ? 'invisible h-0 overflow-hidden'
+                        : ''
+                    }
+                  >
+                    <form onSubmit={onSubmit}>
+                      <div className="p-8">{content}</div>
+                      <div className="flex justify-center gap-8 border-t border-[var(--gray6)] py-4">
+                        {cancelElement ? (
+                          cancelElement({
+                            className: cancelElClass,
+                          })
+                        ) : (
+                          <DialogPrimitive.Close className={cancelElClass}>
+                            Cancel
+                          </DialogPrimitive.Close>
+                        )}
+                        {actionElement({
+                          className: actionElClass,
+                        })}
+                      </div>
+                    </form>
+                  </div>
+                ),
+              )}
             </DialogPrimitive.Content>
           </Transition.Child>
         </Transition.Root>

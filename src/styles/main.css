@@ -42,7 +42,7 @@ section .grid > *:not(.grid) {
 }
 
 /** for grid skeleton **/
-section .grid > *:not(.grid):empty:before {
+section .grid > *:not(.grid)[data-s]:empty:before {
   content: attr(data-id);
   @apply absolute flex
   h-full w-full

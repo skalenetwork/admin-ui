@@ -7,50 +7,64 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { tw } from 'twind';
 
 type Props = {
+  triggerClass?: string;
+  listClass?: string;
+  listItemClass?: string;
   items: { value: string; renderer: any }[];
+  defaultValue: string;
   onValueChange: (value: string) => void;
 };
 
-const Select = ({ items, onValueChange }: Props) => {
+const Select = ({
+  triggerClass = '',
+  listClass = '',
+  listItemClass = '',
+  items,
+  onValueChange,
+  defaultValue,
+}: Props) => {
   return (
     <SelectPrimitive.Root
-      defaultValue="blueberry"
+      defaultValue={defaultValue}
       onValueChange={onValueChange}
     >
-      <SelectPrimitive.Trigger asChild aria-label="Food">
-        <button>
+      <SelectPrimitive.Trigger
+        asChild
+        aria-label="Wallet"
+        className={tw`${triggerClass}`}
+      >
+        <div>
           <SelectPrimitive.Value />
-          <SelectPrimitive.Icon className="ml-2">
+          <SelectPrimitive.Icon className="ml-2 text-[inherit]">
             <ChevronDownIcon />
           </SelectPrimitive.Icon>
-        </button>
+        </div>
       </SelectPrimitive.Trigger>
-      <SelectPrimitive.Content>
-        <SelectPrimitive.ScrollUpButton className="flex items-center justify-center text-gray-700 dark:text-gray-300">
+      <SelectPrimitive.Content className="z-50">
+        <SelectPrimitive.ScrollUpButton className="flex items-center justify-center">
           <ChevronUpIcon />
         </SelectPrimitive.ScrollUpButton>
-        <SelectPrimitive.Viewport className="rounded-lg bg-white p-2 shadow-lg dark:bg-gray-800">
+        <SelectPrimitive.Viewport className={`${listClass}`}>
           <SelectPrimitive.Group>
             {items.map((item, i) => (
               <SelectPrimitive.Item
                 key={`${item}-${i}`}
                 value={item.value}
                 className={tw(
-                  'relative flex items-center rounded-md px-8 py-2 text-sm font-medium text-gray-700 focus:bg-gray-100 dark:text-gray-300 dark:focus:bg-gray-900',
+                  'relative',
                   'radix-disabled:opacity-50',
                   'select-none focus:outline-none',
+                  listItemClass,
                 )}
               >
-                {item.renderer()}
-                {/* <SelectPrimitive.ItemText>{f}</SelectPrimitive.ItemText>
-                <SelectPrimitive.ItemIndicator className="absolute left-2 inline-flex items-center">
-                  <CheckIcon />
-                </SelectPrimitive.ItemIndicator> */}
+                <SelectPrimitive.ItemText>
+                  {item.renderer()}
+                </SelectPrimitive.ItemText>
               </SelectPrimitive.Item>
             ))}
           </SelectPrimitive.Group>
         </SelectPrimitive.Viewport>
-        <SelectPrimitive.ScrollDownButton className="flex items-center justify-center text-gray-700 dark:text-gray-300">
+        <SelectPrimitive.ScrollDownButton className="flex items-center justify-center">
           <ChevronDownIcon />
         </SelectPrimitive.ScrollDownButton>
       </SelectPrimitive.Content>

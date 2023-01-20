@@ -7,16 +7,35 @@ import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
 import { FlowAddNewOwner } from './FlowAddNewOwner';
 
+import { CopyIcon, TrashIcon } from '@radix-ui/react-icons';
+
+export function NiceAddress({
+  className = '',
+  address,
+  copyable = false,
+}: {
+  className?: string;
+  address: string;
+  copyable?: boolean;
+}) {
+  return (
+    <p className={`flex items-center justify-between gap-2 ${className}`}>
+      <Avatar name={address}></Avatar>
+      {'  '}
+      <span>{address}</span>
+      {copyable && <CopyIcon className="h-6 w-6 text-[var(--gray10)]" />}
+    </p>
+  );
+}
+
 export function MultisigOwner({ address }: { address: string }) {
   return (
     <div className="flex w-full items-center justify-between gap-8 py-2">
       <p className="font-medium">Name</p>
-      <p className="flex items-center justify-between gap-2">
-        <Avatar name={address}></Avatar>
-        {'  '}
-        <span>{address}</span>
-      </p>
-      <span className="mono ml-auto">🗑️</span>
+      <NiceAddress address={address} copyable />
+      <span className="ml-auto">
+        <TrashIcon className="h-6 w-6 text-[var(--red10)]" />
+      </span>
     </div>
   );
 }
@@ -42,12 +61,51 @@ export function EventSummary({ id }: { id: any }) {
 
 export function WalletSelect() {
   return (
-    <div className="h-full w-3/5 rounded-lg bg-[var(--white)]">
+    <div className="h-full w-min">
       <Select
+        triggerClass="z-50 flex h-full px-1 items-center border bg-[var(--white)] rounded-3xl"
+        listClass="z-50 w-full bg-[var(--white)] rounded-3xl border"
+        listItemClass="border-b p-1 hover:bg[var(--gray2)]"
         onValueChange={(val) => window.alert(val)}
         items={[
-          { value: 'weeee', renderer: () => <MultisigOwner address="weee" /> },
+          {
+            value: '0xac0e07a58BcA9678d654903d0b1b43dD08fc21c2',
+            renderer: () => (
+              <NiceAddress
+                className="py-1"
+                address="0xac0e07a58BcA9678d654903d0b1b43dD08fc21c2"
+              />
+            ),
+          },
+          {
+            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1',
+            renderer: () => (
+              <NiceAddress
+                className="py-1"
+                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+              />
+            ),
+          },
+          {
+            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c3',
+            renderer: () => (
+              <NiceAddress
+                className="py-1"
+                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c3"
+              />
+            ),
+          },
+          {
+            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c4',
+            renderer: () => (
+              <NiceAddress
+                className="py-1"
+                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c4"
+              />
+            ),
+          },
         ]}
+        defaultValue={'0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1'}
       />
     </div>
   );
@@ -171,6 +229,7 @@ export default function Multisig() {
                 <FlowAddNewOwner
                   alertKey={alertKey}
                   toggleAlert={toggleAlert}
+                  owners={owners?.data || []}
                 />
               </div>
             }
@@ -206,12 +265,13 @@ export default function Multisig() {
               </p>
             </div>
           }
-          bodyClass="flex flex-col gap-2"
+          bodyClass="flex flex-col gap-4"
         >
           <Card
             lean
             heading={`Queue ( ${pendingTrxIds?.data.length} )`}
             className="h-1/2 bg-[var(--gray4)]"
+            bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
               {!connected
@@ -231,6 +291,7 @@ export default function Multisig() {
             lean
             heading={`History ( ${executedTrxIds?.data.length} )`}
             className="h-1/2 bg-[var(--gray4)]"
+            bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
               {!connected
