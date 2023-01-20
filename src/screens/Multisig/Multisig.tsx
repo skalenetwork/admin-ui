@@ -8,37 +8,11 @@ import { useCallback, useState } from 'react';
 import { FlowAddNewOwner } from './FlowAddNewOwner';
 
 import { CopyIcon, TrashIcon } from '@radix-ui/react-icons';
-
-export function NiceAddress({
-  className = '',
-  address,
-  copyable = false,
-}: {
-  className?: string;
-  address: string;
-  copyable?: boolean;
-}) {
-  return (
-    <p className={`flex items-center justify-between gap-2 ${className}`}>
-      <Avatar name={address}></Avatar>
-      {'  '}
-      <span>{address}</span>
-      {copyable && <CopyIcon className="h-6 w-6 text-[var(--gray10)]" />}
-    </p>
-  );
-}
-
-export function MultisigOwner({ address }: { address: string }) {
-  return (
-    <div className="flex w-full items-center justify-between gap-8 py-2">
-      <p className="font-medium">Name</p>
-      <NiceAddress address={address} copyable />
-      <span className="ml-auto">
-        <TrashIcon className="h-6 w-6 text-[var(--red10)]" />
-      </span>
-    </div>
-  );
-}
+import { WalletIcon } from '@heroicons/react/20/solid';
+import { addresses } from '@/features/network';
+import { Address } from 'wagmi';
+import { NiceAddress } from './NiceAddress';
+import { MultisigOwner } from './MultisigOwner';
 
 export function EventSummary({ id }: { id: any }) {
   return (
@@ -59,66 +33,48 @@ export function EventSummary({ id }: { id: any }) {
   );
 }
 
-export function WalletSelect() {
+export function WalletSelect({
+  wallets,
+  active,
+  onActiveChange,
+}: {
+  wallets: Address[];
+  active: Address;
+  onActiveChange: (value: string) => void;
+}) {
   return (
     <div className="h-full w-min">
       <Select
         triggerClass="z-50 flex h-full px-1 items-center border bg-[var(--white)] rounded-3xl"
         listClass="z-50 w-full bg-[var(--white)] rounded-3xl border"
         listItemClass="border-b p-1 hover:bg[var(--gray2)]"
-        onValueChange={(val) => window.alert(val)}
-        items={[
-          {
-            value: '0xac0e07a58BcA9678d654903d0b1b43dD08fc21c2',
-            renderer: () => (
-              <NiceAddress
-                className="py-1"
-                address="0xac0e07a58BcA9678d654903d0b1b43dD08fc21c2"
-              />
-            ),
-          },
-          {
-            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1',
-            renderer: () => (
-              <NiceAddress
-                className="py-1"
-                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-              />
-            ),
-          },
-          {
-            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c3',
-            renderer: () => (
-              <NiceAddress
-                className="py-1"
-                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c3"
-              />
-            ),
-          },
-          {
-            value: '0xad0e07a58BcA9678d654903d0b1b43dD08fc21c4',
-            renderer: () => (
-              <NiceAddress
-                className="py-1"
-                address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c4"
-              />
-            ),
-          },
-        ]}
-        defaultValue={'0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1'}
+        onValueChange={onActiveChange}
+        items={wallets.map((address) => ({
+          value: address,
+          renderer: () => <NiceAddress className="py-1" address={address} />,
+        }))}
+        value={active}
       />
     </div>
   );
 }
 
 export default function Multisig() {
+  // @todo: get from higher context:: multisigs+owners and filter those where signer is owner
+  const signerWallets = [
+    addresses.SCHAIN_MULTISIG_WALLET_ADDRESS as `0x${string}`,
+  ];
+  const activeWalletAddress = signerWallets[0];
+
   const {
     api: multisigApi,
     connected,
     chainId,
     contract,
     data,
-  } = useMultisig();
+  } = useMultisig({
+    address: activeWalletAddress,
+  });
 
   const {
     balance,
@@ -148,7 +104,21 @@ export default function Multisig() {
       style={{ gridTemplateRows: '50px 1fr', gridTemplateColumns: '7fr 3fr' }}
     >
       <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
-        <WalletSelect />
+        <div className="flex h-full w-full items-center gap-2">
+          <WalletSelect
+            wallets={signerWallets}
+            active={activeWalletAddress}
+            onActiveChange={(val) => console.log}
+          />
+          <div className="flex h-full items-center rounded-3xl border bg-white px-4">
+            <p className="cursor-pointer text-[var(--primary)]">
+              +{' '}
+              <span className="underline underline-offset-4 hover:underline-offset-2">
+                Add new multisig
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
 
       <div data-id="scene" className="row-span-2 grid grid-cols-3 grid-rows-4">
@@ -242,7 +212,11 @@ export default function Multisig() {
               ? 'Failed to retrieve owners'
               : owners.data
               ? owners.data.map((address, i) => (
-                  <MultisigOwner address={address} key={address} />
+                  <MultisigOwner
+                    address={address}
+                    key={address}
+                    showControls={true}
+                  />
                 ))
               : 'Loading'}
           </Card>

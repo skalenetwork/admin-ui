@@ -19,8 +19,13 @@
 
   button,
   .btn {
-    @apply rounded-lg bg-[var(--blue11)]
+    @apply rounded-lg bg-[var(--primary)]
   px-6 py-2 text-white;
+  }
+
+  button[disabled],
+  .btn[disabled] {
+    @apply cursor-default grayscale transition-all;
   }
 
   fieldset {

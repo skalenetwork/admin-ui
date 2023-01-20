@@ -1,10 +1,12 @@
 import Dialog from '@/components/Dialog/Dialog';
+import Field from '@/elements/Field/Field';
 import { ErrorMessage } from '@hookform/error-message';
 import { isAddress } from 'ethers/lib/utils.js';
 import { useState, useLayoutEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { tw } from 'twind';
 import { AlertProps } from '../ChainManager/types';
+import { MultisigOwner } from './MultisigOwner';
 
 export function FlowAddNewOwner({
   id = 'add_new_owner',
@@ -78,56 +80,44 @@ export function FlowAddNewOwner({
             (err) => console.error(err),
           ),
           actionElement: ({ className }) => (
-            <input type="submit" className={`${className}`} value="Next" />
+            <input
+              type="submit"
+              className={`${className}`}
+              value="Next"
+              disabled={!form[0].formState.isValid}
+            />
           ),
           content: (
-            <div>
-              <p className="font-medium">
-                Add new owner to the active Multisig
-              </p>
-              <fieldset>
-                <label htmlFor="">Owner name *</label>
-                <input
-                  type="text"
-                  {...form[0].register('ownerName', {
-                    required: 'Please give a name to the owner',
-                  })}
-                  required
-                  placeholder="Owner Name"
-                />
-                <ErrorMessage
-                  errors={form[0].formState.errors}
+            <FormProvider {...form[0]}>
+              <div>
+                <p className="font-medium">
+                  Add new owner to the active Multisig
+                </p>
+                <Field
+                  control={() => <input type="text" />}
                   name="ownerName"
-                  render={({ message }) => (
-                    <p className="text-normal mb-3 text-[var(--red6)]">
-                      {message}
-                    </p>
-                  )}
+                  label="Owner name"
+                  placeholder="Owner Name"
+                  required="Please give a name to the owner"
                 />
-              </fieldset>
-              <fieldset>
-                <label htmlFor="">Owner address *</label>
-                <input
-                  type="text"
-                  {...form[0].register('ownerAddress', {
-                    required: 'Please provide a valid 0x address',
-                    validate: (val) =>
-                      isAddress(val) || 'Please provide a valid 0x address',
-                  })}
-                  required
-                  placeholder="Owner Address"
-                />
-                <ErrorMessage
-                  errors={form[0].formState.errors}
+                <Field
+                  control={() => <input type="text" />}
                   name="ownerAddress"
-                  render={({ message }) => (
-                    <p className="text-normal mb-3 text-[var(--red6)]">
-                      {message}
-                    </p>
-                  )}
+                  label="Owner address"
+                  placeholder="Owner Address"
+                  required="Please provide the address of new owner"
+                  pattern={{
+                    value: /^0x[a-fA-F0-9]{40}$/,
+                    message: 'Address is invalid',
+                  }}
+                  validate={(val) =>
+                    !owners.some(
+                      (address) => address.toLowerCase() === val.toLowerCase(),
+                    ) || 'Address is already an owner'
+                  }
                 />
-              </fieldset>
-            </div>
+              </div>
+            </FormProvider>
           ),
         },
         {
@@ -140,7 +130,12 @@ export function FlowAddNewOwner({
             (err) => console.error(err),
           ),
           actionElement: ({ className }) => (
-            <input type="submit" className={`${className}`} value="Review" />
+            <input
+              type="submit"
+              className={`${className}`}
+              value="Review"
+              disabled={!form[1].formState.isValid}
+            />
           ),
           cancelElement: ({ className }) => (
             <div
@@ -151,35 +146,26 @@ export function FlowAddNewOwner({
             </div>
           ),
           content: (
-            <div>
-              <p className="font-medium">
-                Set the required owner comfirmations
-              </p>
-              <fieldset>
-                <label htmlFor="">Required confirmations *</label>
-                <select
-                  {...form[1].register('confirmationCount', {
-                    required: 'Confirmation count is required',
-                  })}
-                  required
-                  placeholder="Confirmation count *"
-                >
-                  {owners.map((o, index) => (
-                    <option value={index + 1}>{index + 1}</option>
-                  ))}
-                </select>
-                Out of {owners.length} owner(s)
-                <ErrorMessage
-                  errors={form[1].formState.errors}
-                  name="confirmationCount"
-                  render={({ message }) => (
-                    <p className="text-normal mb-3 text-[var(--red6)]">
-                      {message}
-                    </p>
+            <FormProvider {...form[1]}>
+              <div>
+                <p className="font-medium">
+                  Set the required owner comfirmations
+                </p>
+                <Field
+                  control={() => (
+                    <select>
+                      {owners.map((o, index) => (
+                        <option value={index + 1}>{index + 1}</option>
+                      ))}
+                    </select>
                   )}
+                  name="confirmationCount"
+                  label="Required confirmations"
+                  required="Confirmation count is required"
                 />
-              </fieldset>
-            </div>
+                Out of {owners.length} owner(s)
+              </div>
+            </FormProvider>
           ),
         },
         {
@@ -197,27 +183,24 @@ export function FlowAddNewOwner({
           onSubmit: handleFinalSubmit,
           content: (
             <div>
-              <div className="grid grid-cols-3 text-sm">
-                <div>
-                  <p className="text-[var(--primary)]">Details:</p>
+              <div className="grid w-full grid-flow-col grid-cols-[min-content_max-content_1fr] grid-rows-2 gap-x-16 text-sm">
+                <p className="font-medium text-[var(--primary)]">Details:</p>
+                <div></div>
+                <div className="font-medium text-[var(--gray10)]">
+                  Owner Name
+                </div>
+                <div>{form[0].getValues().ownerName}</div>
+                <div className="font-medium text-[var(--gray10)]">
+                  Requires comfirmation transaction number of
                 </div>
                 <div>
-                  <p>
-                    Owner Name
-                    <br />
-                    {form[0].getValues().ownerName}
-                  </p>
-                </div>
-                <div>
-                  <p>
-                    Confirmation Count
-                    <br />
-                    {form[1].getValues().confirmationCount}
-                  </p>
+                  {form[1].getValues().confirmationCount} out of {owners.length}{' '}
+                  Owner(s)
                 </div>
               </div>
               <div className="p-4">
                 <h4>Adding new owner</h4>
+                <MultisigOwner address={form[0].getValues().ownerAddress} />
               </div>
             </div>
           ),

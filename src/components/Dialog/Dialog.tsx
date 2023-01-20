@@ -43,18 +43,11 @@ const Dialog = ({
   const [step, setStep] = useState(1);
   const cancelElClass = tw(
     'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-    'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
-    'border border-transparent',
+    'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 hover:dark:bg-gray-600',
+    'border border-gray-300 dark:border-transparent',
     'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-    'cursor-pointer',
   );
-  const actionElClass = tw(
-    'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-    'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:text-gray-100 dark:hover:bg-purple-600',
-    'border border-transparent',
-    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-    'cursor-pointer',
-  );
+  const actionElClass = tw('btn btn-wide cursor-pointer');
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
@@ -88,7 +81,7 @@ const Dialog = ({
               className={tw(
                 'fixed z-50',
                 'flex flex-col justify-start first-letter:gap-4',
-                'w-[95vw] max-w-xl rounded-lg md:w-full',
+                'w-min-[95vw] w-max rounded-lg',
                 'top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]',
                 'bg-[var(--white)] text-[var(--black)]',
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',

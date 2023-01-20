@@ -11,7 +11,7 @@ type Props = {
   listClass?: string;
   listItemClass?: string;
   items: { value: string; renderer: any }[];
-  defaultValue: string;
+  value: string;
   onValueChange: (value: string) => void;
 };
 
@@ -21,13 +21,10 @@ const Select = ({
   listItemClass = '',
   items,
   onValueChange,
-  defaultValue,
+  value,
 }: Props) => {
   return (
-    <SelectPrimitive.Root
-      defaultValue={defaultValue}
-      onValueChange={onValueChange}
-    >
+    <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
       <SelectPrimitive.Trigger
         asChild
         aria-label="Wallet"
