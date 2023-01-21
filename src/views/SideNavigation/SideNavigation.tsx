@@ -11,6 +11,7 @@ import {
   ManagerIcon,
   PeopleIcon,
 } from '@/components/Icons/Icons';
+import DarkModeToggle from '@/elements/DarkModeToggle/DarkModeToggle';
 
 const activeStyle = {
   background: 'var(--bg-color-menuitem-active)',
@@ -58,12 +59,10 @@ export default function SideNavigation() {
         >
           Main Menu
         </CHide>
-        <div
-          className="cursor-pointer font-mono text-sm text-[var(--black)]"
-          onClick={() => setDarkMode(!darkMode)}
-        >
-          {darkMode ? 'make_light' : 'make_dark'}
-        </div>
+        <DarkModeToggle
+          value={darkMode}
+          onChange={(value) => setDarkMode(value)}
+        />
       </div>
       <nav className="p-4 font-medium text-[var(--color-menu)]">
         <ul>

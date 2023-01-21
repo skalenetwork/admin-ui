@@ -1,10 +1,7 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
-import { ErrorMessage } from '@hookform/error-message';
-import { isAddress } from 'ethers/lib/utils.js';
 import { useState, useLayoutEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { tw } from 'twind';
 import { AlertProps } from '../ChainManager/types';
 import { MultisigOwner } from './MultisigOwner';
 

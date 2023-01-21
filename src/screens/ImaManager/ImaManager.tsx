@@ -46,7 +46,7 @@ export default function ImaManager() {
                 className={tw(
                   'flex h-6 w-6 items-center justify-center',
                   'rounded-[50%]',
-                  'group-radix-state-active:shadow-[0_0_0_4px_var(--blackA4)]',
+                  'group-radix-state-active:shadow-[0_0_0_4px_var(--gray3)]',
                   index < activeIndex && 'bg-[var(--primary)]',
                 )}
               >

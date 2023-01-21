@@ -45,9 +45,9 @@ export function WalletSelect({
   return (
     <div className="h-full w-min">
       <Select
-        triggerClass="z-50 flex h-full px-1 items-center border bg-[var(--white)] rounded-3xl"
-        listClass="z-50 w-full bg-[var(--white)] rounded-3xl border"
-        listItemClass="border-b p-1 hover:bg[var(--gray2)]"
+        triggerClass="z-50 flex h-full px-2 items-center shadow-sm bg-[var(--white)] text-[var(--black)] rounded-3xl"
+        listClass="z-50 w-full bg-[var(--white)] rounded-3xl text-[var(--black)]"
+        listItemClass="shadow-sm p-1 hover:bg[var(--gray2)] text-[var(--black)]"
         onValueChange={onActiveChange}
         items={wallets.map((address) => ({
           value: address,
@@ -110,7 +110,7 @@ export default function Multisig() {
             active={activeWalletAddress}
             onActiveChange={(val) => console.log}
           />
-          <div className="flex h-full items-center rounded-3xl border bg-white px-4">
+          <div className="flex h-full items-center rounded-3xl border-[var(--gray6)] bg-[var(--white)] px-4 shadow-sm">
             <p className="cursor-pointer text-[var(--primary)]">
               +{' '}
               <span className="underline underline-offset-4 hover:underline-offset-2">

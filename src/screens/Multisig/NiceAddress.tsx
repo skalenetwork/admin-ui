@@ -20,7 +20,7 @@ export function NiceAddress({
       }, 1000);
   }, [copied.value]);
   return (
-    <div className={`flex items-center justify-between gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       <Avatar address={address as `0x${string}`} size={32}></Avatar>
       {'  '}
       <span>{address}</span>
@@ -29,9 +29,8 @@ export function NiceAddress({
           {copied.value && (
             <div
               className="
-              z-100 tex-[] absolute left-[100%] bottom-[100%]
-              rounded-xl border bg-[var(--white)] py-0.5 px-1 text-xs text-[var(--gray10)]
-
+              z-100 absolute left-[125%] bottom-[50%]
+              rounded-md border bg-[var(--white)] py-0.5 px-2 text-xs text-[var(--gray11)] shadow-sm
               "
             >
               Copied
