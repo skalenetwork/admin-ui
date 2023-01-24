@@ -1,6 +1,6 @@
-// import { MoonIcon, SunIcon } from '@radix-ui/react-icons';
-
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
+
+import { useMemo } from 'react';
 
 const DarkModeToggle = ({
   value,
@@ -9,9 +9,9 @@ const DarkModeToggle = ({
 }: {
   value: boolean;
   onChange: (value: boolean) => void;
-  size: 5 | 6;
+  size?: 5 | 6 | 8;
 }) => {
-  const sizeClass = `h-${size} w-${size}`;
+  const sizeClass = useMemo(() => `h-${size} w-${size}`, [size]);
   return (
     <div
       className="relative flex cursor-pointer flex-row items-center

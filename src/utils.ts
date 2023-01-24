@@ -1,6 +1,14 @@
 import { utils } from 'ethers';
 
-function sanitizeAddress(
+export function toSentenceCase(camelCase: string) {
+  if (camelCase) {
+    const result = camelCase.replace(/([A-Z])/g, ' $1');
+    return result[0].toUpperCase() + result.substring(1).toLowerCase();
+  }
+  return '';
+}
+
+export function sanitizeAddress(
   addressLike: string = '',
   {
     prefix = true,

@@ -36,7 +36,7 @@ In current micro-mono hybrid architecture, screens being HOC compositions of sta
 This directly enables:
 
 1. Portability of client-agnostic stateful features, and submodules.
-2. Portability of stateful screens (react) through _"bring your own redux store"_ strategy.
+2. Portability of stateful screens (react) through _"optionally bring your own redux store"_ strategy
 
 ## Use via screens @ react
 

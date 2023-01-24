@@ -1,25 +1,33 @@
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { FieldValues, useFormContext } from 'react-hook-form';
 import { withErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 
-type Props = {
-  name: string;
+type Props<T extends FieldValues> = {
+  className?: string;
+  name: keyof T;
   label: string;
   placeholder?: string;
   control: () => JSX.Element;
 } & Parameters<ReturnType<typeof useFormContext>['register']>['1'];
 
-function Field({ name, label, control, placeholder, ...rest }: Props) {
+function Field<T extends FieldValues>({
+  className,
+  name,
+  label,
+  control,
+  placeholder,
+  ...rest
+}: Props<T>) {
   const {
     register,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<T>();
 
   const error = errors[name];
 
   return (
     <>
-      <fieldset className="m-0 w-max">
+      <fieldset className={`m-0 w-full ${className}`}>
         <label>
           {label} {rest.required && ' *'}
         </label>

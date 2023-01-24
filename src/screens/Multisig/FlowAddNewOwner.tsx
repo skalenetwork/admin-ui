@@ -1,16 +1,24 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
-import { useState, useLayoutEffect } from 'react';
+import { useMultisig } from '@/features/multisig/hooks';
+import { useState, useLayoutEffect, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { AlertProps } from '../ChainManager/types';
 import { MultisigOwner } from './MultisigOwner';
+
+export type DataOut = {
+  ownerName: string;
+  ownerAddress: string;
+  confirmationCount: number;
+};
 
 export function FlowAddNewOwner({
   id = 'add_new_owner',
   alertKey,
   toggleAlert,
   owners,
-}: AlertProps & { owners: string[] }) {
+  onSubmit,
+}: AlertProps & { owners: string[]; onSubmit: (data: DataOut) => void }) {
   const [step, setStep] = useState(1);
 
   // reset
@@ -43,13 +51,19 @@ export function FlowAddNewOwner({
     }),
   ] as const;
 
-  const handleFinalSubmit = () => {
-    const data = {
-      ...form[0].getValues(),
-      ...form[1].getValues(),
-    };
-    toggleAlert(id)(false);
-  };
+  const handleFinalSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      const data = {
+        ...form[0].getValues(),
+        ...form[1].getValues(),
+      };
+      onSubmit(data);
+      console.log('handleFinalSubmit', data);
+      toggleAlert(id)(false);
+    },
+    [form],
+  );
 
   return (
     <Dialog
@@ -110,7 +124,7 @@ export function FlowAddNewOwner({
                   validate={(val) =>
                     !owners.some(
                       (address) => address.toLowerCase() === val.toLowerCase(),
-                    ) || 'Address is already an owner'
+                    ) || 'Address belongs to an existing owner'
                   }
                 />
               </div>

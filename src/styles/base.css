@@ -29,20 +29,20 @@
   }
 
   fieldset {
-    @apply my-2;
+    @apply my-1;
   }
 
   fieldset > * {
-    @apply block;
+    @apply block w-full;
   }
 
   fieldset > label {
-    @apply py-1 text-sm text-[var(--gray9)];
+    @apply py-0.5 text-sm text-[var(--gray9)];
   }
 
   fieldset input,
   fieldset select,
   fieldset textarea {
-    @apply rounded border border-[var(--gray8)] bg-[var(--white)] p-4 text-[var(--gray11)];
+    @apply rounded border border-[var(--gray8)] bg-[var(--white)] py-3 px-4 text-[var(--gray11)];
   }
 }

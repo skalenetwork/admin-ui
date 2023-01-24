@@ -5,14 +5,20 @@ import { useMultisig } from '@/features/multisig/hooks';
 import { useQueries } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
-import { FlowAddNewOwner } from './FlowAddNewOwner';
+import { FlowAddNewOwner, DataOut as NewOwner } from './FlowAddNewOwner';
+import {
+  FlowAddNewTransaction,
+  DataOut as NewTransaction,
+} from './FlowAddNewTransaction';
 
 import { CopyIcon, TrashIcon } from '@radix-ui/react-icons';
 import { WalletIcon } from '@heroicons/react/20/solid';
 import { addresses } from '@/features/network';
-import { Address } from 'wagmi';
+import { Address, useMutation } from 'wagmi';
 import { NiceAddress } from './NiceAddress';
 import { MultisigOwner } from './MultisigOwner';
+import { tw } from 'twind';
+import { FlowAddNewWallet } from './FlowAddNewWallet';
 
 export function EventSummary({ id }: { id: any }) {
   return (
@@ -59,6 +65,8 @@ export function WalletSelect({
   );
 }
 
+function withToast() {}
+
 export default function Multisig() {
   // @todo: get from higher context:: multisigs+owners and filter those where signer is owner
   const signerWallets = [
@@ -87,6 +95,33 @@ export default function Multisig() {
     executedTrxIds,
   } = data;
 
+  useMultisig();
+
+  const addOwner = useMutation({
+    mutationKey: ['multisig', 'addOwner', chainId],
+    mutationFn:
+      multisigApi &&
+      ((payload: NewOwner) => {
+        return multisigApi.addOwner({
+          address: payload.ownerAddress,
+        });
+      }),
+  });
+
+  const submitTransaction = useMutation({
+    mutationKey: ['multisig', 'submitTransaction', chainId],
+    mutationFn:
+      multisigApi &&
+      ((payload: NewTransaction) => {
+        // prepare tx here from multisig.lib
+        return multisigApi.submitTransaction({
+          destination: multisigApi.contract.address,
+          value: ethers.BigNumber.from(0),
+          data: payload.hexData,
+        });
+      }),
+  });
+
   const [alertKey, setAlertKey] = useState('');
 
   const toggleAlert = useCallback(
@@ -111,12 +146,13 @@ export default function Multisig() {
             onActiveChange={(val) => console.log}
           />
           <div className="flex h-full items-center rounded-3xl border-[var(--gray6)] bg-[var(--white)] px-4 shadow-sm">
-            <p className="cursor-pointer text-[var(--primary)]">
-              +{' '}
-              <span className="underline underline-offset-4 hover:underline-offset-2">
-                Add new multisig
-              </span>
-            </p>
+            <FlowAddNewWallet
+              alertKey={alertKey}
+              toggleAlert={toggleAlert}
+              onSubmit={(data) => {
+                // false && addOwner.mutateAsync(data);
+              }}
+            />
           </div>
         </div>
       </div>
@@ -196,11 +232,16 @@ export default function Multisig() {
             heading={
               <div className="flex w-full justify-between">
                 <h4>Owners</h4>
-                <FlowAddNewOwner
-                  alertKey={alertKey}
-                  toggleAlert={toggleAlert}
-                  owners={owners?.data || []}
-                />
+                {addOwner && (
+                  <FlowAddNewOwner
+                    alertKey={alertKey}
+                    toggleAlert={toggleAlert}
+                    owners={owners?.data || []}
+                    onSubmit={(data) => {
+                      false && addOwner.mutateAsync(data);
+                    }}
+                  />
+                )}
               </div>
             }
           >
@@ -231,12 +272,18 @@ export default function Multisig() {
           heading={
             <div className="flex w-full justify-between">
               <h4>Transactions</h4>
-              <p className="cursor-pointer text-[var(--primary)]">
-                +{' '}
-                <span className="underline underline-offset-4 hover:underline-offset-2">
-                  New Transaction
-                </span>
-              </p>
+              {submitTransaction && (
+                <FlowAddNewTransaction
+                  alertKey={alertKey}
+                  toggleAlert={toggleAlert}
+                  onSubmit={(data) => {
+                    alert(
+                      `to: ${data.contractAddress}\ndata: ${data.encoded}\nopts: {${data.nonce},${data.gasAmount}}`,
+                    );
+                    false && submitTransaction.mutateAsync(data);
+                  }}
+                />
+              )}
             </div>
           }
           bodyClass="flex flex-col gap-4"
@@ -244,7 +291,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`Queue ( ${pendingTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray4)]"
+            className="h-1/2 bg-[var(--gray3)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
@@ -264,7 +311,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`History ( ${executedTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray4)]"
+            className="h-1/2 bg-[var(--gray3)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">

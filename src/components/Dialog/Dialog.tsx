@@ -64,7 +64,7 @@ const Dialog = ({
           >
             <DialogPrimitive.Overlay
               forceMount
-              className="fixed inset-0 z-20 bg-[var(--blackA11)]"
+              className="fixed inset-0 top-0 bottom-0 z-20 grid place-items-center overflow-y-auto bg-[var(--blackA11)]"
             />
           </Transition.Child>
           <Transition.Child
@@ -81,7 +81,7 @@ const Dialog = ({
               className={tw(
                 'fixed z-50',
                 'flex flex-col justify-start first-letter:gap-4',
-                'w-min-[95vw] w-max rounded-lg',
+                'max-h-[96vh] w-max min-w-[600px] rounded-lg',
                 'top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]',
                 'bg-[var(--white)] text-[var(--black)]',
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
@@ -97,7 +97,7 @@ const Dialog = ({
                 <DialogPrimitive.Close
                   className={tw(
                     'ml-auto inline-flex items-center justify-center rounded-full',
-                    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
+                    'focus:outline-none focus-visible:ring focus-visible:ring-[var(--primary)] focus-visible:ring-opacity-75',
                   )}
                 >
                   <div className="text-[var(--gray10)]">
@@ -110,31 +110,34 @@ const Dialog = ({
                   { actionElement, cancelElement, onSubmit, content },
                   index,
                 ) => (
-                  <div
-                    className={
+                  <form
+                    onSubmit={onSubmit}
+                    acceptCharset="utf-8"
+                    className={tw(
+                      'flex flex-grow flex-col overflow-auto',
                       index !== activeStep - 1
                         ? 'invisible h-0 overflow-hidden'
-                        : ''
-                    }
+                        : '',
+                    )}
                   >
-                    <form onSubmit={onSubmit}>
-                      <div className="p-8">{content}</div>
-                      <div className="flex justify-center gap-8 border-t border-[var(--gray6)] py-4">
-                        {cancelElement ? (
-                          cancelElement({
-                            className: cancelElClass,
-                          })
-                        ) : (
-                          <DialogPrimitive.Close className={cancelElClass}>
-                            Cancel
-                          </DialogPrimitive.Close>
-                        )}
-                        {actionElement({
-                          className: actionElClass,
-                        })}
-                      </div>
-                    </form>
-                  </div>
+                    <div className="scrollbar flex-grow overflow-auto p-8">
+                      {content}
+                    </div>
+                    <div className="flex justify-center gap-8 border-t border-[var(--gray6)] py-4">
+                      {cancelElement ? (
+                        cancelElement({
+                          className: cancelElClass,
+                        })
+                      ) : (
+                        <DialogPrimitive.Close className={cancelElClass}>
+                          Cancel
+                        </DialogPrimitive.Close>
+                      )}
+                      {actionElement({
+                        className: actionElClass,
+                      })}
+                    </div>
+                  </form>
                 ),
               )}
             </DialogPrimitive.Content>
