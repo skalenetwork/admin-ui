@@ -86,7 +86,6 @@ export function FlowAddNewTransaction({
     useForm<InfoFormData>({
       mode: 'all',
       reValidateMode: 'onChange',
-      shouldUnregister: false,
       defaultValues: {
         contractABI: '[]',
         encoded: '',
@@ -94,7 +93,7 @@ export function FlowAddNewTransaction({
     }),
     useForm<AdvancedFormData>({
       mode: 'all',
-      reValidateMode: 'onSubmit',
+      reValidateMode: 'onChange',
       defaultValues: {
         nonce: 1,
         gasAmount: 450213,
@@ -176,8 +175,8 @@ export function FlowAddNewTransaction({
     // is this redudant?
     form[0].resetField('parameters');
     // @todo: re-evaluate this immediate set after reset
-    const data = contractFunction?.definition.inputs.map((input) => ({
-      name: input.name,
+    const data = contractFunction?.definition.inputs.map((input, index) => ({
+      name: input.name || `${index} - ${input.type}`,
       type: input.type,
       value: '',
     }));
@@ -203,15 +202,34 @@ export function FlowAddNewTransaction({
         : '';
     } catch (e) {
       console.log(e);
-      error = e.message;
+      error = {
+        reason: e.reason,
+        code: e.code,
+        argument: e.argument,
+        value: e.value,
+      };
     }
     return [data, error];
-  }, [hexMode, contractInterface, contractMethod, parameters]);
+  }, [hexMode, contractInterface, contractMethod, JSON.stringify(parameters)]);
+
+  form[0].register('encoded', {
+    required: true,
+  });
 
   useEffect(() => {
     if (!encodedValue) return;
     form[0].setValue('encoded', encodedValue);
   }, [encodedValue]);
+
+  useEffect(() => {
+    if (!encodedValueError) {
+      form[0].clearErrors('encoded');
+    } else {
+      form[0].setError('encoded', {
+        message: `"${encodedValueError.argument}=${encodedValueError.value}" is ${encodedValueError.reason}`,
+      });
+    }
+  }, [encodedValueError]);
 
   const handleFinalSubmit = useCallback(
     (lastFormData) => {
@@ -274,13 +292,6 @@ export function FlowAddNewTransaction({
                     <p className="sm">Not signed in</p>
                   )}
                 </div>
-                <div className="max-w-[400px]">
-                  <p className="text-sm text-red-500">
-                    {form[0].getFieldState('parameters').error
-                      ? encodedValueError
-                      : ''}
-                  </p>
-                </div>
                 <div className="w-3/4">
                   <Field<InfoFormData>
                     control={() => <input type="text" />}
@@ -299,7 +310,9 @@ export function FlowAddNewTransaction({
                     required="Please provide a contract address"
                   />
                   <Field<InfoFormData>
-                    control={() => <textarea className="font-mono text-sm" />}
+                    control={() => (
+                      <textarea className="font-mono text-sm" rows={5} />
+                    )}
                     name="contractABI"
                     label="Contract ABI"
                     placeholder="Contract ABI"
@@ -317,41 +330,11 @@ export function FlowAddNewTransaction({
                     }}
                   />
                   <Field<InfoFormData>
-                    control={() => (
-                      <select>
-                        {contractFunctions.map((signature) => (
-                          <option value={signature.definition.name}>
-                            {signature.label}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    name="contractMethod"
-                    label="Function"
-                    placeholder="Contract function"
-                    required="You do need to invoke a function!"
-                  />
-                  {fields.length && !hexMode ? (
-                    fields.map((field, index) => (
-                      <Field<InfoFormData>
-                        key={field.id}
-                        control={() => <input type="text" />}
-                        name={`parameters.${index}.value` as const}
-                        label={field.name}
-                        placeholder={field.type}
-                        required={!hexMode && `${field.name} is required`}
-                        validate={(val) => !encodedValueError || 'Not valid'}
-                      />
-                    ))
-                  ) : (
-                    <></>
-                  )}
-                  <Field<InfoFormData>
                     control={() => <input type="checkbox" />}
                     name="hexMode"
                     label="Use custom data (hex encoded)"
                   />
-                  {hexMode && (
+                  {hexMode ? (
                     <Field<InfoFormData>
                       control={() => <input type="text" />}
                       name="hexData"
@@ -364,6 +347,56 @@ export function FlowAddNewTransaction({
                       }
                       disabled={!hexMode}
                     />
+                  ) : (
+                    <>
+                      <Field<InfoFormData>
+                        control={() => (
+                          <select>
+                            {contractFunctions.map((signature) => (
+                              <option value={signature.definition.name}>
+                                {signature.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        name="contractMethod"
+                        label="Function"
+                        placeholder="Contract function"
+                        required="You do need to invoke a function!"
+                      />
+                      {fields.length ? (
+                        fields.map((field, index) => (
+                          <Field<InfoFormData>
+                            key={field.id}
+                            control={() => (
+                              <input
+                                type={
+                                  field.type === 'bool'
+                                    ? 'checkbox'
+                                    : field.type.includes('uint')
+                                    ? 'number'
+                                    : 'text'
+                                }
+                              />
+                            )}
+                            name={`parameters.${index}.value` as const}
+                            label={field.name}
+                            placeholder={field.type}
+                            required={!hexMode && `${field.name} is required`}
+                          />
+                        ))
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="max-w-[400px]">
+                  {form[0].getFieldState('encoded').error && (
+                    <p className="text-xs text-red-500">
+                      <span className="font-medium">Param Errors:</span>{' '}
+                      {form[0].getFieldState('encoded').error?.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -384,7 +417,7 @@ export function FlowAddNewTransaction({
             </div>
           ),
           content: (
-            <div>
+            <div className="w-[600px]">
               <div className="grid w-full gap-y-2">
                 <p className="font-medium">Details:</p>
                 <div>

@@ -79,9 +79,10 @@ const Dialog = ({
             <DialogPrimitive.Content
               forceMount
               className={tw(
+                'break-words',
                 'fixed z-50',
                 'flex flex-col justify-start first-letter:gap-4',
-                'max-h-[96vh] w-max min-w-[600px] rounded-lg',
+                'max-h-[96vh] w-max min-w-[600px] max-w-[80vw] rounded-lg',
                 'top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]',
                 'bg-[var(--white)] text-[var(--black)]',
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',

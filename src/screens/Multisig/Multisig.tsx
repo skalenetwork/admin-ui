@@ -291,7 +291,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`Queue ( ${pendingTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray3)]"
+            className="h-1/2 bg-[var(--gray4)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
@@ -311,7 +311,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`History ( ${executedTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray3)]"
+            className="h-1/2 bg-[var(--gray4)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
