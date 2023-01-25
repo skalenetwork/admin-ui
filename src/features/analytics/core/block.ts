@@ -48,7 +48,6 @@ export class TimedBlocks {
     after: boolean = true,
     maxRequest: number = 50,
   ): Promise<BlockResponse | null> {
-    console.log(date, after);
     this.maxRequests = maxRequest;
     this.requests = 0;
 

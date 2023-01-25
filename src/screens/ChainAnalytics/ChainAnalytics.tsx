@@ -48,16 +48,12 @@ export function ChainAnalytics() {
     action: 'listaccounts',
   });
 
-  console.log(accounts);
-
   const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
 
   const { isFetching, data } = useBlockHistory({
     time: dayStart,
     includeLatest: true,
   });
-
-  console.log(isFetching, data);
 
   const metrics = useSelector((state) => state.skale_analytics.metrics);
 
@@ -188,7 +184,9 @@ function Bar() {
     },
   ];
 
-  const primaryAxis = useMemo<AxisOptions<typeof data[number]['data'][number]>>(
+  const primaryAxis = useMemo<
+    AxisOptions<(typeof data)[number]['data'][number]>
+  >(
     () => ({
       getValue: (datum) => datum.primary,
     }),
@@ -196,7 +194,7 @@ function Bar() {
   );
 
   const secondaryAxes = useMemo<
-    AxisOptions<typeof data[number]['data'][number]>[]
+    AxisOptions<(typeof data)[number]['data'][number]>[]
   >(
     () => [
       {

@@ -3,12 +3,12 @@ import { useEffect } from 'react';
 // @ts-ignore
 export default function ErrorScreen({ error, resetErrorBoundary }) {
   useEffect(() => {
-    console.log(error);
+    console.error(error);
   }, [error]);
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center w-full h-full gap-4"
+      className="flex h-full w-full flex-col items-center justify-center gap-4"
     >
       <p>Something went wrong:</p>
       <pre>{error.message}</pre>

@@ -87,6 +87,7 @@ export function FlowAddNewTransaction({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
+        contractMethod: '',
         contractABI: '[]',
         encoded: '',
       },
@@ -98,7 +99,6 @@ export function FlowAddNewTransaction({
         nonce: 1,
         gasAmount: 450213,
       },
-      shouldUnregister: false,
     }),
   ] as const;
 
@@ -119,6 +119,9 @@ export function FlowAddNewTransaction({
   } = infoForm;
 
   const contractFunctions = useMemo(() => {
+    if (form[0].getFieldState('contractABI').invalid) {
+      return [];
+    }
     try {
       let abi: Abi = JSON.parse(infoForm.contractABI);
       return (
@@ -150,8 +153,11 @@ export function FlowAddNewTransaction({
   }, [contractFunctions, contractMethod]);
 
   const contractInterface = useMemo(() => {
-    return new ethers.utils.Interface(contractABI);
-  }, [contractABI]);
+    if (form[0].getFieldState('contractABI').invalid) return;
+    try {
+      return new ethers.utils.Interface(contractABI);
+    } catch (e) {}
+  }, [form[0].getFieldState('contractABI').invalid, contractABI]);
 
   /**
    * Set contract ABI if predeployed contract address used
@@ -165,6 +171,7 @@ export function FlowAddNewTransaction({
     );
     if (key) {
       form[0].setValue('contractABI', predeployedAbis[key] || '');
+      form[0].trigger('contractABI');
     }
   }, [contractAddress]);
 
@@ -172,13 +179,14 @@ export function FlowAddNewTransaction({
    * Set fields based on contract function
    */
   useEffect(() => {
-    // is this redudant?
-    form[0].resetField('parameters');
+    replace([]); // clear params because reset won't
+    form[0].resetField('parameters'); // this should clear array by itself, but doesn't
+    if (!contractFunction) return;
     // @todo: re-evaluate this immediate set after reset
     const data = contractFunction?.definition.inputs.map((input, index) => ({
       name: input.name || `${index} - ${input.type}`,
       type: input.type,
-      value: '',
+      value: input.type === 'bool' ? false : '',
     }));
     data && replace(data);
   }, [contractFunction]);
@@ -201,7 +209,6 @@ export function FlowAddNewTransaction({
           )
         : '';
     } catch (e) {
-      console.log(e);
       error = {
         reason: e.reason,
         code: e.code,
@@ -219,6 +226,7 @@ export function FlowAddNewTransaction({
   useEffect(() => {
     if (!encodedValue) return;
     form[0].setValue('encoded', encodedValue);
+    form[0].trigger('encoded');
   }, [encodedValue]);
 
   useEffect(() => {
@@ -311,22 +319,29 @@ export function FlowAddNewTransaction({
                   />
                   <Field<InfoFormData>
                     control={() => (
-                      <textarea className="font-mono text-sm" rows={5} />
+                      <textarea
+                        className="scrollbar font-mono text-sm"
+                        rows={5}
+                      />
                     )}
                     name="contractABI"
                     label="Contract ABI"
                     placeholder="Contract ABI"
                     required="Context ABI is required"
-                    setValueAs={(val) =>
-                      JSON.stringify(JSON.parse(val), undefined, 2)
-                    }
+                    setValueAs={(val) => {
+                      try {
+                        return JSON.stringify(JSON.parse(val), undefined, 2);
+                      } catch (e) {}
+                      return val;
+                    }}
                     validate={(val) => {
+                      let what: boolean | string = true;
                       try {
                         JSON.parse(val);
-                        return true;
                       } catch (e) {
-                        return 'ABI is not a valid JSON';
+                        what = 'ABI is not a valid JSON';
                       }
+                      return what;
                     }}
                   />
                   <Field<InfoFormData>
@@ -340,11 +355,7 @@ export function FlowAddNewTransaction({
                       name="hexData"
                       label="Hex Data"
                       placeholder="0x.."
-                      required={
-                        contractFunction?.definition.inputs?.length && hexMode
-                          ? 'Message is required'
-                          : false
-                      }
+                      required={hexMode ? 'Message is required' : false}
                       disabled={!hexMode}
                     />
                   ) : (
@@ -363,6 +374,10 @@ export function FlowAddNewTransaction({
                         label="Function"
                         placeholder="Contract function"
                         required="You do need to invoke a function!"
+                        disabled={
+                          form[0].getFieldState('contractABI').invalid ||
+                          (contractABI && contractABI === '[]')
+                        }
                       />
                       {fields.length ? (
                         fields.map((field, index) => (
@@ -447,9 +462,14 @@ export function FlowAddNewTransaction({
                 )}
                 <div>
                   <p className="text-[var(--gray10)]">Data (hex)</p>
-                  <span className="font-mono">
+                  <textarea
+                    autoCorrect="off"
+                    spellCheck="false"
+                    readOnly
+                    className="scrollbar w-full bg-[var(--gray1)] p-2 font-mono"
+                  >
                     {form[0].getValues('encoded')}
-                  </span>
+                  </textarea>
                 </div>
                 <div>
                   <FormProvider {...form[1]}>

@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { FieldValues, useFormContext } from 'react-hook-form';
 import { withErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 
-type Props<T extends FieldValues> = {
+type Props<T extends FieldValues> = PropsWithChildren<{
   className?: string;
   name: keyof T;
   label: string;
   placeholder?: string;
   control: () => JSX.Element;
-} & Parameters<ReturnType<typeof useFormContext>['register']>['1'];
+}> &
+  Parameters<ReturnType<typeof useFormContext>['register']>['1'];
 
 function Field<T extends FieldValues>({
   className,
@@ -16,6 +17,7 @@ function Field<T extends FieldValues>({
   label,
   control,
   placeholder,
+  children,
   ...rest
 }: Props<T>) {
   const {
@@ -44,6 +46,7 @@ function Field<T extends FieldValues>({
         >
           {error ? <>{error?.message}</> : '-'}
         </div>
+        {children}
       </fieldset>
     </>
   );
