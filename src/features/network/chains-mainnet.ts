@@ -2,7 +2,7 @@ import { Chain } from '@wagmi/core';
 
 // @later reduce to '@skaleproject/constants/lib/chains'
 
-// #todo impl like chains-staging3.ts
+// @todo impl like chains-staging3.ts
 
 export const mainnet = {
   'adorable-quaint-bellatrix': 'Own Your Stream',

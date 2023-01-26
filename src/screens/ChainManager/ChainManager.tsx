@@ -10,6 +10,7 @@ import type { WidgetWithAlertProps } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { useNetwork } from 'wagmi';
 import { useChainMetadata } from '@/features/network/hooks';
+import { Link } from 'react-router-dom';
 
 /**
  * Show a formatted, colored label reflecting typical states
@@ -322,6 +323,20 @@ export default function ChainManager() {
         </div>
         <div data-id="chain_metadata" data-s="1">
           <WidgetManageMetadata />
+        </div>
+        <div data-id="to_autodeploy" data-s="1">
+          <Card full heading="Set Auto Deploymen in IMA">
+            <div className="flex h-full flex-col justify-around">
+              <p className="text-[var(--slate9)]">
+                SKALE Chain automatic deployment manager
+              </p>
+              <center>
+                <Link to="/ima_manager" className="btn btn-wide w-5/6">
+                  Manage Configurations
+                </Link>
+              </center>
+            </div>
+          </Card>
         </div>
       </div>
     </>

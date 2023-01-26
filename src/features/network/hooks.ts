@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { Address, useNetwork, useProvider } from 'wagmi';
+import { Address, useNetwork } from 'wagmi';
+import { getChainMetadataUrl, NetworkType } from './manifest';
 
 type ExplorerProps = {
   module:
@@ -16,6 +17,21 @@ type ExplorerProps = {
   };
 };
 
+export type ChainManifestItem = {
+  alias: string; // branded chain name (required)
+  background: string; // background color (required)
+  category: 'apps' | 'games'; // category: apps | games (required)
+  url?: string; // url for dapp (optional)
+  minSfuelWei?: string; // minimum allowed sFUEL (optional)
+  faucetUrl?: string; // chain faucet URL (optional)
+  description?: string; // description (optional)
+};
+
+/**
+ * Use API of the block explorer as configured by the chain
+ * @param param0
+ * @returns
+ */
 export function useExplorer({ module, action, args }: ExplorerProps) {
   const { chain } = useNetwork();
   const baseUrl = chain?.blockExplorers?.default.url;
@@ -31,22 +47,7 @@ export function useExplorer({ module, action, args }: ExplorerProps) {
   });
 }
 
-export function useRoles({ signer }: { signer: Address }) {}
-
-export type NetworkType = 'mainnet' | 'staging';
-
-export const registries = {
-  chainlist: {},
-  skale: {
-    baseUrl: 'https://raw.githubusercontent.com',
-    path: 'skalenetwork/skale-network/master',
-  },
-};
-
-const getChainMetadataUrl = (networkType: NetworkType) => {
-  const { path, baseUrl } = registries.skale;
-  return `${baseUrl}/${path}/metadata/${networkType}/chains.json`;
-};
+export function useRoles({ address }: { address: Address }) {}
 
 export function useChainMetadata({
   networkType,
@@ -54,10 +55,10 @@ export function useChainMetadata({
   networkType: NetworkType;
 }) {
   const { data, isError } = useQuery({
-    queryKey: [networkType],
-    queryFn: () => {
+    queryKey: ['offchain', `metadata:${networkType}`] as const,
+    queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
       return fetch(getChainMetadataUrl(networkType)).then((res) => res.json());
     },
   });
-  return { data };
+  return { data, isError };
 }
