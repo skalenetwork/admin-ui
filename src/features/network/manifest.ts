@@ -43,13 +43,13 @@ export const CONTRACT = {
     type: 'predeployed',
     key: 'schain:marionette',
     address: addresses.SCHAIN_MARIONETTE_ADDRESS,
-    name: 'MultisigWallet',
+    name: 'Marionette',
   },
   CONTEXT: {
     type: 'predeployed',
     key: 'schain:context',
     address: addresses.SCHAIN_CONTEXT_ADDRESS,
-    name: 'MultisigWallet',
+    name: 'Context',
   },
   ETHERBASE: {
     type: 'predeployed',

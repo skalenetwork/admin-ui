@@ -26,12 +26,18 @@ setup({
 });
 
 import { chains as skaleChains } from '@/features/network/chains';
-import { WagmiConfig, createClient, configureChains, mainnet } from 'wagmi';
+import {
+  WagmiConfig,
+  createClient,
+  configureChains,
+  mainnet as ethereumMainnet,
+} from 'wagmi';
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
 
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
-const chains = [mainnet, ...Object.values(skaleChains.staging)];
+// update this when @features/chains.mainnet is updated
+const chains = [ethereumMainnet, ...Object.values(skaleChains.staging)];
 
 const { provider } = configureChains(chains, [
   jsonRpcProvider({
@@ -46,7 +52,6 @@ const { provider } = configureChains(chains, [
 ]);
 
 const alchemyId = 'wee';
-
 const wagmiClient = createClient(
   getDefaultClient({
     appName: 'SKALE Admin UI',

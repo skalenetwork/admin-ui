@@ -65,7 +65,7 @@ export function StepperTrigger({
             ></div>
           )}
         </div>
-        {index < steps.length - 1 ? (
+        {index < totalSteps - 1 ? (
           <div
             className={tw(
               'h-0.5',

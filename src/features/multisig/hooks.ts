@@ -4,7 +4,7 @@ import { QueryClient, UseQueryOptions } from '@tanstack/react-query';
  * https://github.com/skalenetwork/multisigwallet-predeployed/blob/develop/contracts/MultiSigWallet.sol
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ethers } from 'ethers';
 import { addresses } from '../network';
 import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
@@ -16,28 +16,12 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 
 import { usePredeployedWrapper } from '../interim/hooks';
+import { scope } from './lib';
 
 const multisigContract = {
   address: `${addresses.SCHAIN_MULTISIG_WALLET_ADDRESS}` as `0x${string}`,
   abi: MultisigWalletABI,
 };
-
-export function useQueriesMap<T>({ queries }: { queries: T }) {
-  const tuple = useQueries({
-    queries,
-  });
-  const data: { [key: string]: (typeof tuple)[0] } = useMemo(() => {
-    let obj = {};
-    if (queries.length > 0) {
-      queries.forEach((query, i) => {
-        obj[query.queryKey[1]] = tuple[i];
-      });
-    }
-    return obj;
-  }, [tuple]);
-
-  return { data };
-}
 
 export function useMultisig({
   address = multisigContract.address,
@@ -58,6 +42,13 @@ export function useMultisig({
     },
   );
 
+  const queryKey = useCallback(
+    (key: any[]) => {
+      return [scope, chainId];
+    },
+    [chainId],
+  );
+
   // queries
 
   const balance = useBalance({ address: address });
@@ -68,7 +59,7 @@ export function useMultisig({
           {
             // ...defaultParams,
             initialData: 0,
-            queryKey: ['multisig', 'countTotalTrx', chainId],
+            queryKey: queryKey(['countTotalTrx']),
             queryFn: () =>
               api
                 .getTransactionCount({
@@ -80,7 +71,7 @@ export function useMultisig({
           {
             // ...defaultParams,
             initialData: 0,
-            queryKey: ['multisig', 'countPendingTrx', chainId],
+            queryKey: queryKey(['countPendingTrx']),
             queryFn: () =>
               api
                 .getTransactionCount({
@@ -92,7 +83,7 @@ export function useMultisig({
           {
             // ...defaultParams,
             initialData: 0,
-            queryKey: ['multisig', 'countExecutedTrx', chainId],
+            queryKey: queryKey(['countExecutedTrx']),
             queryFn: () =>
               api
                 .getTransactionCount({
@@ -104,7 +95,7 @@ export function useMultisig({
           {
             // ...defaultParams,
             initialData: 0,
-            queryKey: ['multisig', 'countReqConfirms', chainId],
+            queryKey: queryKey(['countReqConfirms']),
             queryFn: () => api.getRequired(),
           },
         ]
@@ -132,7 +123,7 @@ export function useMultisig({
   });
 
   const pendingTrxIds = useQuery({
-    queryKey: ['multisig', 'pendingTrxIds', chainId],
+    queryKey: queryKey(['pendingTrxIds']),
     enabled: !!(api && counts['countPendingTrx']?.data),
     initialData: () => [],
     queryFn: () =>
@@ -149,7 +140,7 @@ export function useMultisig({
   });
 
   const executedTrxIds = useQuery({
-    queryKey: ['multisig', 'executedTrxIds', chainId],
+    queryKey: queryKey(['executedTrxIds']),
     enabled: !!(api && counts.countExecutedTrx.data),
     initialData: () => [],
     queryFn: () =>
@@ -169,7 +160,7 @@ export function useMultisig({
     queries: !pendingTrxIds.data
       ? []
       : pendingTrxIds.data.map((trx) => ({
-          queryKey: ['multisig', 'pendingTrxs', chainId],
+          queryKey: queryKey(['pendingTrxIds', trx]),
           enabled: !!(api && trx),
           initialData: () => [],
           queryFn: () =>
@@ -179,7 +170,7 @@ export function useMultisig({
         })),
   });
 
-  // console.log('pendingTrxs', pendingTrxs);
+  console.log('pendingTrxs', pendingTrxs);
 
   return {
     api,

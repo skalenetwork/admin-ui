@@ -15,6 +15,7 @@ import {
   RoleIcon,
 } from '@/components/Icons/Icons';
 import { useConfigController } from '@/features/interim/hooks';
+import RoleList from '@/elements/RoleList/RoleList';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -100,7 +101,7 @@ export default function Layout() {
             </p>
           )}
           <div className="cursor-pointer">
-            <RoleIcon />
+            <RoleList />
           </div>
           <button
             className="btn-outline"
