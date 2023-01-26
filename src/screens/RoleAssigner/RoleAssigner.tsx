@@ -22,7 +22,7 @@ export default function RoleAssigner() {
   });
   const { address } = useAccount();
   return (
-    <div className="h-full w-full rounded-lg bg-[var(--white)] p-6">
+    <div className="h-full w-full rounded-lg bg-[var(--white)] p-6" data-s="-1">
       <div className="py-2">
         <p>Please fill in all inputs to assign role:</p>
         <small className="text-gray-500">

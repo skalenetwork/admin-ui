@@ -331,7 +331,10 @@ export default function ChainManager() {
                 SKALE Chain automatic deployment manager
               </p>
               <center>
-                <Link to="/ima_manager" className="btn btn-wide w-5/6">
+                <Link
+                  to="/ima_manager/autodeployer"
+                  className="btn btn-wide w-5/6"
+                >
                   Manage Configurations
                 </Link>
               </center>

@@ -10,59 +10,51 @@ export const nativeCurrency = {
   symbol: 'SKL',
 };
 
+const NETWORK = {
+  ETHEREUM: 'ethereum',
+  SKALE: 'skale',
+} as const;
+
+function makeDefaultRpcUrls<T extends string>(key: T): Chain['rpcUrls'] {
+  return {
+    default: {
+      http: [`https://staging-v3.skalenodes.com/v1/${key}`],
+      webSocket: [`wss://staging-v3.skalenodes.com/v1/ws/${key}`],
+    },
+    filestorage: {
+      http: [`https://staging-v3.skalenodes.com/fs/${key}`],
+    },
+  };
+}
+
+function makeDefaultBlockExplorers<T extends string>(
+  key: T,
+): Chain['blockExplorers'] {
+  return {
+    default: {
+      name: EXPLORER_NAME,
+      url: `https://${key}.staging-v3.skalenodes.com/`,
+    },
+  };
+}
+
 export const staging = {
   'staging-perfect-parallel-gacrux': {
     id: parseInt('0x51b0923d'),
     name: 'Dog Chain',
-    network: 'skale',
+    network: NETWORK.SKALE,
     nativeCurrency,
-    rpcUrls: {
-      default: {
-        http: [
-          'https://staging-v3.skalenodes.com/v1/staging-perfect-parallel-gacrux',
-        ],
-        webSocket: [
-          'wss://staging-v3.skalenodes.com/v1/ws/staging-perfect-parallel-gacrux',
-        ],
-      },
-      filestorage: {
-        http: [
-          'https://staging-v3.skalenodes.com/fs/staging-perfect-parallel-gacrux',
-        ],
-      },
-    },
-    blockExplorers: {
-      default: {
-        name: EXPLORER_NAME,
-        url: 'https://staging-perfect-parallel-gacrux.explorer.staging-v3.skalenodes.com/',
-      },
-    },
+    rpcUrls: makeDefaultRpcUrls('staging-perfect-parallel-gacrux'),
+    blockExplorers: makeDefaultBlockExplorers(
+      'staging-perfect-parallel-gacrux',
+    ),
   },
   'staging-legal-crazy-castor': {
     id: parseInt('0x1c6199cc'),
     name: 'staging-legal-crazy-castor',
-    network: 'skale',
+    network: NETWORK.SKALE,
     nativeCurrency,
-    rpcUrls: {
-      default: {
-        http: [
-          'https://staging-v3.skalenodes.com/v1/staging-legal-crazy-castor',
-        ],
-        webSocket: [
-          'wss://staging-v3.skalenodes.com/v1/ws/staging-legal-crazy-castor',
-        ],
-      },
-      filestorage: {
-        http: [
-          'https://staging-v3.skalenodes.com/fs/staging-legal-crazy-castor',
-        ],
-      },
-    },
-    blockExplorers: {
-      default: {
-        name: EXPLORER_NAME,
-        url: 'https://staging-legal-crazy-castor.explorer.staging-v3.skalenodes.com/',
-      },
-    },
+    rpcUrls: makeDefaultRpcUrls('staging-legal-crazy-castor'),
+    blockExplorers: makeDefaultBlockExplorers('staging-legal-crazy-castor'),
   },
 } satisfies { [key: string]: Chain };

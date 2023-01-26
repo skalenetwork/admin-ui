@@ -8,6 +8,7 @@ import Multisig from '@/screens/Multisig/Multisig';
 import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
 import ImaManager from '@/screens/ImaManager/ImaManager';
 import Support from '@/views/Support/Support';
+import ImaAutodeploy from './screens/ImaAutodeploy/ImaAutodeploy';
 
 const routes: RouteObject[] = [
   {
@@ -24,7 +25,16 @@ const routes: RouteObject[] = [
       },
       {
         path: 'ima_manager',
-        element: <ImaManager />,
+        children: [
+          {
+            path: '',
+            element: <ImaManager />,
+          },
+          {
+            path: 'autodeployer',
+            element: <ImaAutodeploy />,
+          },
+        ],
       },
       {
         path: 'multisig',

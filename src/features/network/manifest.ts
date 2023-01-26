@@ -1,11 +1,12 @@
 /**
  * @module
  * Manifest for SKLAE version 3 - Scopes all possible slow-to-never-changing defaults
+ * IMA: https://github.com/skalenetwork/IMA/tree/develop/proxy/contracts
  */
 
 export type NetworkType = 'mainnet' | 'staging';
 
-export type ContractType = 'predeployed' | 'ima'; // may scope as ima:subthing
+export type ContractType = 'admin' | 'ima:bridge'; // may scope as ima:subthing
 
 import { addresses } from './addresses';
 
@@ -28,31 +29,31 @@ export const REGISTRY = {
 
 export const CONTRACT = {
   CONFIG_CONTROLLER: {
-    type: 'predeployed',
+    type: 'admin',
     key: 'schain:config_controller',
     address: addresses.SCHAIN_CONFIG_CONTROLLER_ADDRESS,
     name: 'ConfigController',
   },
   MULTISIG_WALLET: {
-    type: 'predeployed',
+    type: 'admin',
     key: 'schain:multisig_wallet',
     address: addresses.SCHAIN_MULTISIG_WALLET_ADDRESS,
     name: 'MultisigWallet',
   },
   MARIONETTE: {
-    type: 'predeployed',
+    type: 'admin',
     key: 'schain:marionette',
     address: addresses.SCHAIN_MARIONETTE_ADDRESS,
     name: 'Marionette',
   },
   CONTEXT: {
-    type: 'predeployed',
+    type: 'admin',
     key: 'schain:context',
     address: addresses.SCHAIN_CONTEXT_ADDRESS,
     name: 'Context',
   },
   ETHERBASE: {
-    type: 'predeployed',
+    type: 'admin',
     key: 'schain:etherbase',
     address: addresses.SCHAIN_ETHERBASE_ADDRESS,
     name: 'Etherbase',
