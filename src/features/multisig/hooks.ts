@@ -44,7 +44,7 @@ export function useMultisig({
 
   const queryKey = useCallback(
     (key: any[]) => {
-      return [scope, chainId];
+      return [chainId, scope, ...key];
     },
     [chainId],
   );
@@ -169,8 +169,6 @@ export function useMultisig({
             }),
         })),
   });
-
-  console.log('pendingTrxs', pendingTrxs);
 
   return {
     api,

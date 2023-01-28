@@ -67,6 +67,7 @@ export default function RoleAssigner() {
             >
               <div className="my-2 flex flex-row gap-4">
                 <button
+                  className="btn slim text-sm"
                   onClick={() => {
                     form.setValue(
                       'assigneeAddress',
@@ -78,7 +79,7 @@ export default function RoleAssigner() {
                   Fill pre-deployed Multisig
                 </button>
                 <button
-                  className="slim"
+                  className="btn slim text-sm"
                   onClick={() => {
                     form.setValue('assigneeAddress', address as string);
                     form.trigger('assigneeAddress');

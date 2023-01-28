@@ -28,6 +28,10 @@ import { ConfigControllerABI } from '@/features/network/abi-configcontroller';
 import { MarionetteABI } from '@/features/network/abi-marionette';
 import { MultisigWalletABI } from '@/features/network/abi-multisigwallet';
 
+import { manifest } from '@/features/network';
+
+const { CONTRACT } = manifest;
+
 export type InfoFormData = {
   contractAddress: string;
   contractABI: string;
@@ -87,8 +91,11 @@ export function FlowAddNewTransaction({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
+        contractAddress: '',
         contractMethod: '',
         contractABI: '[]',
+        hexData: '',
+        hexMode: false,
         encoded: '',
       },
     }),
@@ -164,13 +171,12 @@ export function FlowAddNewTransaction({
    */
   useEffect(() => {
     if (!contractAddress) return;
-    const key = Object.keys(predeployedAddresses).find(
-      (key) =>
-        predeployedAddresses[key].toLowerCase() ===
-        contractAddress.toLocaleLowerCase(),
+    const found = Object.values(CONTRACT).find(
+      (contract) => contract.address === contractAddress,
     );
-    if (key) {
-      form[0].setValue('contractABI', predeployedAbis[key] || '');
+    console.log('firefirefire', contractAddress, found?.name);
+    if (found?.name) {
+      form[0].setValue('contractABI', predeployedAbis[found.name] || '');
       form[0].trigger('contractABI');
     }
   }, [contractAddress]);
@@ -309,7 +315,8 @@ export function FlowAddNewTransaction({
                     setValueAs={(val: string) =>
                       val.includes('0x')
                         ? val
-                        : predeployedAddresses[val] || val
+                        : Object.values(CONTRACT).find((c) => c.name === val)
+                            ?.address || val
                     }
                     pattern={{
                       value: /^0x[a-fA-F0-9]{40}$/,
@@ -345,7 +352,7 @@ export function FlowAddNewTransaction({
                     }}
                   />
                   <Field<InfoFormData>
-                    control={() => <input type="checkbox" />}
+                    control={(field) => <Switch />}
                     name="hexMode"
                     label="Use custom data (hex encoded)"
                   />
@@ -463,10 +470,11 @@ export function FlowAddNewTransaction({
                 <div>
                   <p className="text-[var(--gray10)]">Data (hex)</p>
                   <textarea
+                    rows={4}
                     autoCorrect="off"
                     spellCheck="false"
                     readOnly
-                    className="scrollbar w-full bg-[var(--gray1)] p-2 font-mono"
+                    className="scrollbar w-full bg-[var(--gray1)] p-2 font-mono text-[var(--black)]"
                   >
                     {form[0].getValues('encoded')}
                   </textarea>

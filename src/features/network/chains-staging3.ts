@@ -4,16 +4,7 @@ import { Chain } from '@wagmi/core';
 
 export const EXPLORER_NAME = 'SKALE Explorer';
 
-export const nativeCurrency = {
-  decimals: 18,
-  name: 'SKALE',
-  symbol: 'SKL',
-};
-
-const NETWORK = {
-  ETHEREUM: 'ethereum',
-  SKALE: 'skale',
-} as const;
+import { NETWORK, nativeCurrency } from './manifest';
 
 function makeDefaultRpcUrls<T extends string>(key: T): Chain['rpcUrls'] {
   return {

@@ -41,12 +41,7 @@ const Dialog = ({
   steps,
 }: Props) => {
   const [step, setStep] = useState(1);
-  const cancelElClass = tw(
-    'inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-    'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 hover:dark:bg-gray-600',
-    'border border-gray-300 dark:border-transparent',
-    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-  );
+  const cancelElClass = tw('btn btn-outline');
   const actionElClass = tw('btn btn-wide cursor-pointer');
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>

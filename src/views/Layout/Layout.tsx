@@ -104,7 +104,7 @@ export default function Layout() {
             <RoleList />
           </div>
           <button
-            className="btn-outline"
+            className="btn btn-outline"
             onClick={(e) => setInspectMode(!inspectMode)}
           >
             {inspectMode ? 'Hide' : 'Show'} Flags

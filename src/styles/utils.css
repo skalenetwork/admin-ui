@@ -1,17 +1,17 @@
 @tailwind utilities;
 
 @layer utilities {
-  .scrollbar::-webkit-scrollbar {
+  ::-webkit-scrollbar {
     width: 6px;
   }
-  .scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+  /* Scroll track styles (Background) */
+  ::-webkit-scrollbar-track {
+    background: var(--gray8);
     border-radius: 1rem;
   }
-
-  /* Scroll track styles (Background) */
-  .scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+  ::-webkit-scrollbar-thumb {
+    width: 5px;
+    background: var(--gray10);
     border-radius: 1rem;
   }
 }

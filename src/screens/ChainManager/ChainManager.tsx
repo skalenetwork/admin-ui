@@ -24,7 +24,7 @@ const FormattedStatus = ({
   status: 'disabled' | 'no-auth' | 'pending' | [true, string] | [false, string];
 }) => {
   return status === 'disabled' || status === 'no-auth' ? (
-    <span className="ml-6 text-sm text-[var(--gray6)]">Not Available</span>
+    <span className="ml-6 text-sm text-[var(--gray6)]">Not Supported</span>
   ) : status === 'pending' ? (
     <span className="ml-6 text-sm text-[var(--yellow6)]">Pending Change</span>
   ) : status[0] === true ? (
@@ -56,7 +56,7 @@ const FlagStatus = ({
   isLoading: boolean;
 }) => {
   return !connected ? (
-    <span className="ml-6 text-sm text-[var(--gray6)]">Not Available</span>
+    <span className="ml-6 text-sm text-[var(--gray6)]">Not Supported</span>
   ) : isLoading ? (
     <span className="ml-6 text-sm text-[var(--yellow6)]">Pending Change</span>
   ) : isEnabled ? (
@@ -93,7 +93,7 @@ export const WidgetConfigFcd = ({
       }
       tooltip={'Peep Peeep'}
     >
-      <div className="flex h-full flex-col justify-around">
+      <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--slate9)]">
           Authorization to deploy contracts on the chain is removed.
           <br />
@@ -153,7 +153,7 @@ export const WidgetConfigMtm = ({
       }
       tooltip={'Peep Peeep'}
     >
-      <div className="flex h-full flex-col justify-around">
+      <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--slate9)]">
           Allows accounts to send multiple transactions with incremental nonces
           per block
@@ -220,7 +220,7 @@ export const WidgetManageChainlist = () => {
         </>
       }
     >
-      <div className="flex h-full flex-col justify-around">
+      <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--slate9)]">
           Chainlist.wtf provides users appropriate Chain ID and Network ID to
           connect to their wallets and Web3 middleware providers.
@@ -270,7 +270,7 @@ export const WidgetManageMetadata = () => {
         </p>
       }
     >
-      <div className="flex h-full flex-col justify-around">
+      <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--slate9)]">
           Submit metadata to display in the SKALE network UI
         </p>
@@ -326,7 +326,7 @@ export default function ChainManager() {
         </div>
         <div data-id="to_autodeploy" data-s="1">
           <Card full heading="Set Auto Deploymen in IMA">
-            <div className="flex h-full flex-col justify-around">
+            <div className="flex h-full flex-col justify-between">
               <p className="text-[var(--slate9)]">
                 SKALE Chain automatic deployment manager
               </p>

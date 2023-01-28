@@ -75,7 +75,7 @@ main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
     bg-[var(--gray8)] px-[4px] text-xs font-medium;
 }
 
-button,
+
 .btn {
   @apply block rounded-lg bg-[var(--primary)]
   px-6 py-2 text-white;

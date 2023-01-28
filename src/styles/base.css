@@ -17,10 +17,12 @@
     @apply text-lg font-medium;
   }
 
-  button,
   .btn {
-    @apply rounded-lg bg-[var(--primary)]
-  px-6 py-2 text-white;
+    @apply rounded-lg bg-[var(--primary)] px-6 py-2 text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-[var(--white)] text-[var(--black)] shadow-black;
   }
 
   button[disabled],

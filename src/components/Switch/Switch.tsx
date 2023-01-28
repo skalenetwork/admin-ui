@@ -2,18 +2,22 @@ import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { tw } from 'twind';
 import React from 'react';
 
-interface SwitchProps {}
+type SwitchProps = {
+  onChange: (checked: boolean) => void
+}
 
 const Switch = (props: SwitchProps) => {
   return (
     <SwitchPrimitive.Root
       className={tw(
         'group',
-        'radix-state-checked:bg-purple-600',
-        'radix-state-unchecked:bg-gray-200 dark:radix-state-unchecked:bg-gray-800',
+        'radix-state-checked:bg-[var(--slate10)]',
+        'radix-state-unchecked:bg-[var(--slate4)]',
         'relative inline-flex h-[24px] w-[44px] flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
         'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
       )}
+      onCheckedChange={props.onChange}
+      {...props}
     >
       <SwitchPrimitive.Thumb
         className={tw(

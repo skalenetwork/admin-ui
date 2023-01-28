@@ -47,7 +47,7 @@ export default function FileStorageReserve({
   return (
     <Card full heading="Filestorage">
       <div className="flex h-full flex-col justify-around">
-        <StorageStatus className="" occupiedSpace={500} reservedSpace={1000} />
+        <StorageStatus className="flex flex-col gap-1" occupiedSpace={500} reservedSpace={1000} />
         <center>
           <AlertDialog
             open={alertKey === id}

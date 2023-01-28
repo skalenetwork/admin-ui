@@ -4,11 +4,11 @@
  * IMA: https://github.com/skalenetwork/IMA/tree/develop/proxy/contracts
  */
 
+import { addresses } from './addresses';
+
 export type NetworkType = 'mainnet' | 'staging';
 
 export type ContractType = 'admin' | 'ima:bridge'; // may scope as ima:subthing
-
-import { addresses } from './addresses';
 
 export type ContractManifest = {
   [key: string]: {
@@ -19,9 +19,20 @@ export type ContractManifest = {
   };
 };
 
+export const nativeCurrency = {
+  decimals: 18,
+  name: 'SKALE',
+  symbol: 'SKL',
+};
+
+export const NETWORK = {
+  ETHEREUM: 'ethereum',
+  SKALE: 'skale',
+} as const;
+
 export const REGISTRY = {
   chainlist: {},
-  skale: {
+  [NETWORK.SKALE]: {
     baseUrl: 'https://raw.githubusercontent.com',
     path: 'skalenetwork/skale-network/master',
   },
@@ -61,11 +72,11 @@ export const CONTRACT = {
 } as const satisfies ContractManifest;
 
 export const getChainMetadataUrl = (networkType: NetworkType) => {
-  const { path, baseUrl } = REGISTRY.skale;
+  const { path, baseUrl } = REGISTRY[NETWORK.SKALE];
   return `${baseUrl}/${path}/metadata/${networkType}/chains.json`;
 };
 
 /**
- * @todo
+ * @todo bring associated chain metadata if needed (icons etc)
  * https://github.com/skalenetwork/skale-network/blob/master/metadata/mainnet/chains.json
  */

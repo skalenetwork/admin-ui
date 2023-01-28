@@ -1722,10 +1722,10 @@
     "@skaleproject/utils" "*"
     ethers "^5.7.2"
 
-"@skaleproject/skale.js@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@skaleproject/skale.js/-/skale.js-0.1.2.tgz#392757f02921997e7f766624614e4462e9ab4aea"
-  integrity sha512-hG+V+NbzdqC4lv4rnXKHtAomUZI42BK81I+EI1hEjWJseAVcX5hIf1q9Pb+RNwJxrb9aBN0oWo0/NGOq6oNExA==
+"@skaleproject/skale.js@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@skaleproject/skale.js/-/skale.js-0.2.1.tgz#ecf20f0be91ed290af69fdf213b793f9c2dd8818"
+  integrity sha512-JaabdUfRpa/th7HH8lieBkqwzu5P5rS37STxvrdAMdEDlrLfbtgkQh4rgtQ12oqoHSzkPbTF/q035kWikl+4ww==
   dependencies:
     "@skaleproject/config-controller" "*"
     "@skaleproject/constants" "*"
