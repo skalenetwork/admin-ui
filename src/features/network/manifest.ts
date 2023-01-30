@@ -1,3 +1,4 @@
+import { TOKEN_MANAGER_ERC1155_ADDRESS } from './addresses-predeployed';
 /**
  * @module
  * Manifest for SKLAE version 3 - Scopes all possible slow-to-never-changing defaults
@@ -68,6 +69,36 @@ export const CONTRACT = {
     key: 'schain:etherbase',
     address: addresses.SCHAIN_ETHERBASE_ADDRESS,
     name: 'Etherbase',
+  },
+  TOKEN_MANAGER_ETH: {
+    type: 'ima:bridge',
+    key: 'schain:tokenmanagereth',
+    address: addresses.TOKEN_MANAGER_ETH_ADDRESS,
+    name: 'TokenManagerEth',
+  },
+  TOKEN_MANAGER_ERC20: {
+    type: 'ima:bridge',
+    key: 'schain:tokenmanager20',
+    address: addresses.TOKEN_MANAGER_ERC20_ADDRESS,
+    name: 'TokenManagerERC20',
+  },
+  TOKEN_MANAGER_ERC721: {
+    type: 'ima:bridge',
+    key: 'schain:tokenmanager721',
+    address: addresses.TOKEN_MANAGER_ERC721_ADDRESS,
+    name: 'TokenManagerERC721',
+  },
+  TOKEN_MANAGER_ERC1155: {
+    type: 'ima:bridge',
+    key: 'schain:tokenmanager1155',
+    address: addresses.TOKEN_MANAGER_ERC1155_ADDRESS,
+    name: 'TokenManagerERC1155',
+  },
+  TOKEN_MANAGER_LINKER: {
+    type: 'ima:bridge',
+    key: 'schain:tokenmanagerlinker',
+    address: addresses.TOKEN_MANAGER_LINKER_ADDRESS,
+    name: 'TokenManagerLinker',
   },
 } as const satisfies ContractManifest;
 

@@ -8,7 +8,7 @@ import { useCallback, useMemo } from 'react';
 import { ethers } from 'ethers';
 import { addresses } from '../network';
 import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
-import { MultisigWalletABI } from '../network/abi-multisigwallet';
+import { MultisigWalletABI } from '../network/abi/abi-multisigwallet';
 
 import { useBalance, useContract } from 'wagmi';
 import { useQueries, useQuery } from '@tanstack/react-query';

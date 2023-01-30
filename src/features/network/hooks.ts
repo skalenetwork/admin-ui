@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { Address, useNetwork } from 'wagmi';
-import { getChainMetadataUrl, NetworkType } from './manifest';
+import { usePromise } from 'react-use';
+import { Address, useContract, useNetwork } from 'wagmi';
+import {
+  ContractManifestId,
+  getAbi,
+  GetAbiProps,
+  ContractManifestIdAbi,
+} from './abi/abi';
+import { CONTRACT, getChainMetadataUrl, NetworkType } from './manifest';
 import { ChainManifestItem } from './types';
 
 type ExplorerProps = {
@@ -52,4 +59,41 @@ export function useChainMetadata({
     },
   });
   return { data, isError };
+}
+
+export function useAbi<T extends ContractManifestIdAbi>({
+  id,
+}: GetAbiProps<T>) {
+  const { data } = useQuery({
+    queryKey: ['*', 'abi', id],
+    queryFn: () => getAbi({ id }),
+  });
+  return data;
+}
+
+/**
+ * Use interfaces for any network supported contract by preset ID
+ * @param param0
+ * @returns
+ */
+export function useManifestContract<T extends ContractManifestIdAbi>({
+  id,
+}: {
+  id: T;
+}) {
+  const { address } = CONTRACT[id];
+  const abi = useAbi({
+    id,
+  });
+
+  const contract = useContract({
+    address,
+    abi,
+  });
+
+  return {
+    address,
+    abi,
+    api: contract?.callStatic,
+  };
 }

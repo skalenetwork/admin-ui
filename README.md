@@ -27,7 +27,11 @@ To build a flying car that actually flies:
 
 <br clear="both">
 
-# :package: Features Usage
+# :package: Features
+
+Features are an implementation detail of the application-level usability of the network capabilities.
+
+# :crystal_ball: Screens
 
 In current micro-mono hybrid architecture, screens being HOC compositions of stateless components, forward the context of features they consume.
 
@@ -104,6 +108,7 @@ Following are being built along-side `admin-ui` app specifically for re-usabilit
 
 - `src/features`
 - `src/screens`
+- `src/components`: Reusable common components on SKALE's design system, built with headless accessible libraries
 - `src/elements`: JSX UI Elements (ideally framework-agnostic)
 - `src/types`
 

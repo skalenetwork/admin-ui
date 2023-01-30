@@ -11,7 +11,7 @@ const SingleConfig = ({
   onClick: () => void;
 }) => {
   return (
-    <div className="flex flex-row items-center rounded-lg border py-2 px-4">
+    <div className="flex flex-row items-center rounded-lg border border-[var(--gray4)] py-2 px-4">
       <div>
         <h6 className="font-medium">{title}</h6>
         {status == true ? (
@@ -22,11 +22,11 @@ const SingleConfig = ({
       </div>
       <div className="ml-auto">
         {status == true ? (
-          <button className="negative w-36" onClick={onClick}>
+          <button className="btn negative w-36" onClick={onClick}>
             Disable
           </button>
         ) : (
-          <button className="positive w-36" onClick={onClick}>
+          <button className="btn positive w-36" onClick={onClick}>
             Enable
           </button>
         )}

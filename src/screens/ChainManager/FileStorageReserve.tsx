@@ -46,8 +46,12 @@ export default function FileStorageReserve({
 }: WidgetWithAlertProps) {
   return (
     <Card full heading="Filestorage">
-      <div className="flex h-full flex-col justify-around">
-        <StorageStatus className="flex flex-col gap-1" occupiedSpace={500} reservedSpace={1000} />
+      <div className="flex h-full flex-col justify-between">
+        <StorageStatus
+          className="flex flex-col gap-1"
+          occupiedSpace={500}
+          reservedSpace={1000}
+        />
         <center>
           <AlertDialog
             open={alertKey === id}

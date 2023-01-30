@@ -24,9 +24,9 @@ import { MultisigOwner } from './MultisigOwner';
 import { NiceAddress } from './NiceAddress';
 
 import { addresses } from '@/features/network/addresses';
-import { ConfigControllerABI } from '@/features/network/abi-configcontroller';
-import { MarionetteABI } from '@/features/network/abi-marionette';
-import { MultisigWalletABI } from '@/features/network/abi-multisigwallet';
+import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
+import { MarionetteABI } from '@/features/network/abi/abi-marionette';
+import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
 
 import { manifest } from '@/features/network';
 

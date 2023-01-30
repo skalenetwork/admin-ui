@@ -3,7 +3,7 @@ import {
   IContractParams,
 } from '@skaleproject/utils/lib/contracts/base_contract';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
-import { ConfigControllerABI } from '@/features/network/abi-configcontroller';
+import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
 
 import { SCHAIN_CONFIG_CONTROLLER_ADDRESS } from '@skaleproject/constants/lib/addresses/predeployed';
 
