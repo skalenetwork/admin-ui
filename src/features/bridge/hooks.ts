@@ -36,7 +36,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
     standard: 'ERC20',
   });
 
-  const { data: isEnabled } = useContractRead({
+  const { data: isEnabled, refetch } = useContractRead({
     address,
     abi,
     functionName: 'automaticDeploy',
@@ -49,6 +49,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
       ? 'disableAutomaticDeploy'
       : 'enableAutomaticDeploy',
     enabled: isEnabled !== undefined,
+    onSuccess: () => refetch(),
   });
 
   const {

@@ -21,7 +21,7 @@ const SingleConfig = ({
   return (
     <div className="flex flex-row items-center rounded-lg border border-[var(--gray4)] py-2 px-4">
       <div>
-        <h6 className="font-medium">{title}</h6>
+        <p className="font-medium">{title}</p>
         {isEnabled === true ? (
           <p className="text-sm leading-none text-[var(--green7)]">Enabled</p>
         ) : (
@@ -31,7 +31,7 @@ const SingleConfig = ({
       <div className="ml-auto">
         {isEnabled === true ? (
           <button
-            className="btn slim negative w-36"
+            className="btn slim negative w-44"
             onClick={() => toggle?.()}
             disabled={isLoading}
           >
@@ -39,7 +39,7 @@ const SingleConfig = ({
           </button>
         ) : (
           <button
-            className="btn slim positive w-36"
+            className="btn slim positive w-44"
             onClick={() => toggle?.()}
             disabled={isLoading}
           >
@@ -56,7 +56,7 @@ export default function ImaAutodeploy() {
     <div className="grid h-full w-full rounded-lg bg-[var(--white)] p-4">
       <Card
         full
-        className="max-w-lg"
+        className="max-w-xl"
         heading="SKALE Chain automatic deployment manager"
       >
         <div className="flex flex-col gap-4 py-4">
