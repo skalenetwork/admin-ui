@@ -31,6 +31,7 @@ import {
   createClient,
   configureChains,
   mainnet as ethereumMainnet,
+  goerli,
 } from 'wagmi';
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
 

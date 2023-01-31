@@ -97,7 +97,7 @@ export default function Stepper({
       value={activeId || steps[0].id}
       onValueChange={(val) => setActiveId(val)}
     >
-      <TabsPrimitive.List className="flex">
+      <TabsPrimitive.List className="flex justify-center">
         {steps.map(({ id, label }, index) => (
           <TabsPrimitive.Trigger value={id} asChild>
             {trigger({

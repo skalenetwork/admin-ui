@@ -1,11 +1,19 @@
-import { useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { useManifestContract } from '../network/hooks';
+import { TOKEN_STANDARD } from '@/features/network/manifest';
+import { useManifestContract } from '@/features/network/hooks';
+import { ethers } from 'ethers';
+import {
+  useContractWrite,
+  useContractRead,
+  usePrepareContractWrite,
+} from 'wagmi';
 
-type TokenTypeProps<T> = {
-  standard: T;
+type TokenTypeProps<S> = {
+  standard: S;
 };
 
-type TokenStandard = 'ERC20' | 'ERC1155' | 'ERC721' | 'ETH';
+const standards = Object.values(TOKEN_STANDARD);
+
+type TokenStandard = Uppercase<(typeof standards)[number]['name']>;
 
 export function useTokenManager<T extends TokenStandard>({
   standard,
@@ -21,28 +29,66 @@ export function useTokenManagerLinker() {
   });
 }
 
-export function useSomethingExample({ standard }: TokenTypeProps) {
-  const { address, abi, api } = useTokenManager({
+export function useToggleAutodeploy<T extends TokenStandard>({
+  standard,
+}: TokenTypeProps<T>) {
+  const { address, abi, api, contract } = useTokenManager({
     standard: 'ERC20',
   });
 
+  const { data: isEnabled } = useContractRead({
+    address,
+    abi,
+    functionName: 'automaticDeploy',
+  });
+
   const { config } = usePrepareContractWrite({
     address,
     abi,
-    functionName: 'addERC20TokenByOwner',
+    functionName: isEnabled
+      ? 'disableAutomaticDeploy'
+      : 'enableAutomaticDeploy',
+    enabled: isEnabled !== undefined,
   });
 
-  const { data } = useContractWrite(config);
+  const {
+    data,
+    error,
+    isError,
+    isLoading,
+    isSuccess,
+    write: toggle,
+  } = useContractWrite(config);
+
+  return {
+    isEnabled,
+    toggle,
+    data,
+    isLoading,
+    isSuccess,
+    isError,
+  };
 }
 
-export function useConnectChain() {
+/**
+ * Manage chain connectivity and statuses
+ * @param param0
+ */
+export function useConnectChain({ chainName }: { chainName: string }) {
   const { address, abi, api } = useTokenManagerLinker();
 
-  const { config } = usePrepareContractWrite({
+  const overrides = {
+    gasPrice: 100000000000,
+    gasLimit: ethers.BigNumber.from(8000000),
+  };
+
+  const { config: connectConfig } = usePrepareContractWrite({
     address,
     abi,
     functionName: 'connectSchain',
+    args: [chainName],
+    overrides,
   });
 
-  const { data } = useContractWrite(config);
+  const { write: connect } = useContractWrite(connectConfig);
 }

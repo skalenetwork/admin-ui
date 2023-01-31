@@ -145,15 +145,13 @@ export default function Multisig() {
             active={activeWalletAddress}
             onActiveChange={(val) => console.log}
           />
-          <div className="flex h-full items-center rounded-3xl border-[var(--gray6)] bg-[var(--white)] px-4 shadow-sm">
-            <FlowAddNewWallet
-              alertKey={alertKey}
-              toggleAlert={toggleAlert}
-              onSubmit={(data) => {
-                // false && addOwner.mutateAsync(data);
-              }}
-            />
-          </div>
+          <FlowAddNewWallet
+            alertKey={alertKey}
+            toggleAlert={toggleAlert}
+            onSubmit={(data) => {
+              // false && addOwner.mutateAsync(data);
+            }}
+          />
         </div>
       </div>
 

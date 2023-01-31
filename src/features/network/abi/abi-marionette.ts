@@ -476,4 +476,4 @@ export const MarionetteABI = [
     stateMutability: 'payable',
     type: 'receive',
   },
-];
+] as const;

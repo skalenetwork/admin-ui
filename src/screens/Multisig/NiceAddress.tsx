@@ -6,13 +6,17 @@ import useCopyToClipboard from 'react-use/lib/useCopyToClipboard';
 export function NiceAddress({
   className = '',
   address,
+  label,
   balance,
   copyable = false,
+  iconUrl,
 }: {
   className?: string;
   address: string;
+  label?: string;
   balance?: string;
   copyable?: boolean;
+  iconUrl?: string;
 }) {
   const [copied, copy] = useCopyToClipboard();
   useEffect(() => {
@@ -25,8 +29,15 @@ export function NiceAddress({
     <div
       className={`grid grid-cols-[max-content_max-content_1fr] items-center gap-x-4 gap-y-1 ${className}`}
     >
-      <Avatar address={address as `0x${string}`} size={32}></Avatar>
-      <div className="flex flex-col justify-start">{address}</div>
+      {iconUrl ? (
+        <img src={iconUrl} alt="" className="w-8" />
+      ) : (
+        <Avatar address={address as `0x${string}`} size={32}></Avatar>
+      )}
+      <div className="flex flex-col justify-start">
+        {label}
+        {address}
+      </div>
       <div className="flex items-center gap-2">
         {copyable && (
           <div className="relative">

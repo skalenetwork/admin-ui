@@ -1,6 +1,14 @@
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { usePromise } from 'react-use';
-import { Address, useContract, useNetwork } from 'wagmi';
+import {
+  Address,
+  useContract,
+  useNetwork,
+  useSigner,
+  useAccount,
+  useProvider,
+} from 'wagmi';
+import { getContract } from '@wagmi/core';
 import {
   ContractManifestId,
   getAbi,
@@ -9,6 +17,13 @@ import {
 } from './abi/abi';
 import { CONTRACT, getChainMetadataUrl, NetworkType } from './manifest';
 import { ChainManifestItem } from './types';
+
+import {
+  BaseContract,
+  IContractParams,
+} from '@skaleproject/utils/lib/contracts/base_contract';
+import { Abi, AbiFunction, ExtractAbiFunctions } from 'abitype';
+import { ethers } from 'ethers';
 
 type ExplorerProps = {
   module:
@@ -94,6 +109,53 @@ export function useManifestContract<T extends ContractManifestIdAbi>({
   return {
     address,
     abi,
+    contract,
     api: contract?.callStatic,
   };
 }
+
+/**
+ * with chain state: return predeployed contract SDK wrapper instance
+ * @param creator
+ * @returns
+ */
+export function useSdkContract<T extends BaseContract>(
+  creator: (params: IContractParams) => T,
+) {
+  const { chain } = useNetwork();
+
+  const {
+    data: signer,
+    isError: signerIsError,
+    isLoading: signerIsLoading,
+  } = useSigner();
+
+  const { address } = useAccount();
+
+  const connected = useMemo(
+    () => (chain ? chain.network === 'skale' : false),
+    [chain],
+  );
+
+  const api = useMemo(
+    () =>
+      connected && chain && signer
+        ? creator({
+            rpcUrl: chain.rpcUrls.default.http[0],
+            signer,
+          })
+        : undefined,
+    [connected, chain],
+  );
+
+  useEffect(() => {
+    address && api?.setSigner({ signer });
+  }, [address, api]);
+
+  return { connected, chainId: chain?.id, signer, api };
+}
+
+/**
+ * useContract with methods API i.e. functionName({...}: { [arg_name]: [arg_type] })
+ */
+function useContractWithApi() {}

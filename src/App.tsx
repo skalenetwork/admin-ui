@@ -9,6 +9,7 @@ import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
 import ImaManager from '@/screens/ImaManager/ImaManager';
 import Support from '@/views/Support/Support';
 import ImaAutodeploy from './screens/ImaAutodeploy/ImaAutodeploy';
+import ImaMapToken from './screens/ImaMapToken/ImaMapToken';
 
 const routes: RouteObject[] = [
   {
@@ -33,6 +34,10 @@ const routes: RouteObject[] = [
           {
             path: 'autodeployer',
             element: <ImaAutodeploy />,
+          },
+          {
+            path: 'maptoken/:chainName',
+            element: <ImaMapToken />,
           },
         ],
       },

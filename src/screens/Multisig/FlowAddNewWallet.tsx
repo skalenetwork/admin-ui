@@ -51,12 +51,9 @@ export function FlowAddNewWallet({
   return (
     <Dialog
       trigger={
-        <p className="cursor-pointer text-[var(--primary)]">
-          +{' '}
-          <span className="underline underline-offset-4 hover:underline-offset-2">
-            Add new wallet
-          </span>
-        </p>
+        <button className="btn h-full cursor-pointer rounded-full text-[var(--primary)]">
+          + Add new wallet
+        </button>
       }
       description=""
       title={`Add new Multisig`}

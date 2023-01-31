@@ -30,6 +30,14 @@
     @apply cursor-default grayscale transition-all;
   }
 
+  .btn.negative {
+    @apply bg-[var(--red8)];
+  }
+
+  .btn.positive {
+    @apply bg-[var(--green8)];
+  }
+
   fieldset {
     @apply my-1;
   }

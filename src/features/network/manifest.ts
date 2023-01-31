@@ -1,4 +1,3 @@
-import { TOKEN_MANAGER_ERC1155_ADDRESS } from './addresses-predeployed';
 /**
  * @module
  * Manifest for SKLAE version 3 - Scopes all possible slow-to-never-changing defaults
@@ -38,6 +37,31 @@ export const REGISTRY = {
     path: 'skalenetwork/skale-network/master',
   },
 };
+
+/**
+ * Token standard "name" is heavily used as a convention
+ * if and when that convention breaks, custom mapping to token managers will be needed
+ * ex: ETH: {..., manager: 'TOKEN_MANAGER_ETH'}
+ */
+
+export const TOKEN_STANDARD = {
+  ETH: {
+    name: 'eth',
+    label: 'ETH',
+  },
+  ERC20: {
+    name: 'erc20',
+    label: 'ERC-20',
+  },
+  ERC721: {
+    name: 'erc721',
+    label: 'ERC-721',
+  },
+  ERC1155: {
+    name: 'erc1155',
+    label: 'ERC-1155',
+  },
+} as const;
 
 export const CONTRACT = {
   CONFIG_CONTROLLER: {

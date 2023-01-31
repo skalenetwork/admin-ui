@@ -1,73 +1,23 @@
-import {
-  BaseContract,
-  IContractParams,
-} from '@skaleproject/utils/lib/contracts/base_contract';
-import { ConfigController } from '@skaleproject/config-controller/lib/contract';
 import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
+import { ConfigController } from '@skaleproject/config-controller/lib/contract';
 
 import { SCHAIN_CONFIG_CONTROLLER_ADDRESS } from '@skaleproject/constants/lib/addresses/predeployed';
 
 import {
-  useNetwork,
-  useContractWrite,
-  useSigner,
-  useContractRead,
   useContractReads,
+  useContractWrite,
+  useNetwork,
   usePrepareContractWrite,
-  useAccount,
-  Address,
+  useSigner,
 } from 'wagmi';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { useInterval, useTimeout } from 'react-use';
-import { Wallet } from 'ethers';
+import { NETWORK } from '@/features/network/manifest';
+import { useEffect, useMemo } from 'react';
 
 const configControllerContract = {
   address: `${SCHAIN_CONFIG_CONTROLLER_ADDRESS}` as `0x${string}`,
   abi: ConfigControllerABI,
 } as const;
-
-/**
- * with chain state: return predeployed contract SDK wrapper instance
- * @param creator
- * @returns
- */
-export function usePredeployedWrapper<T extends BaseContract>(
-  creator: (params: IContractParams) => T,
-) {
-  const { chain } = useNetwork();
-
-  const {
-    data: signer,
-    isError: signerIsError,
-    isLoading: signerIsLoading,
-  } = useSigner();
-
-  const { address } = useAccount();
-
-  const connected = useMemo(
-    () => (chain ? chain.network === 'skale' : false),
-    [chain],
-  );
-
-  const api = useMemo(
-    () =>
-      connected && chain && signer
-        ? creator({
-            rpcUrl: chain.rpcUrls.default.http[0],
-            signer,
-          })
-        : undefined,
-    [connected, chain],
-  );
-
-  useEffect(() => {
-    address && api?.setSigner({ signer });
-  }, [address, api]);
-
-  return { connected, chainId: chain?.id, signer, api };
-}
 
 export function useConfigController() {
   const { chain } = useNetwork();
@@ -78,7 +28,7 @@ export function useConfigController() {
     isLoading: signerIsLoading,
   } = useSigner();
 
-  const connected = useMemo(() => (chain?.id || 0) > 1, [chain]);
+  const connected = useMemo(() => chain?.network === NETWORK.SKALE, [chain]);
 
   const controller = useMemo(
     () =>
@@ -123,6 +73,10 @@ export function useConfigController() {
   };
 }
 
+/**
+ * Use multi-transaction mode status and toggling
+ * @returns
+ */
 export function useMtm() {
   const { flags, controller } = useConfigController();
 
@@ -150,6 +104,10 @@ export function useMtm() {
   };
 }
 
+/**
+ * Use free contract deployment status and toggling
+ * @returns
+ */
 export function useFcd() {
   const { flags, controller } = useConfigController();
 

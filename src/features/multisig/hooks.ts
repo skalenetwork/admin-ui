@@ -1,21 +1,20 @@
-import { QueryClient, UseQueryOptions } from '@tanstack/react-query';
 /**
  * predeployed: MultiSigWallet
  * https://github.com/skalenetwork/multisigwallet-predeployed/blob/develop/contracts/MultiSigWallet.sol
  */
 
-import { useCallback, useMemo } from 'react';
-import { ethers } from 'ethers';
-import { addresses } from '../network';
-import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
-import { MultisigWalletABI } from '../network/abi/abi-multisigwallet';
+import { addresses } from '@/features/network';
+import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
+import { useSdkContract } from '@/features/network/hooks';
 
-import { useBalance, useContract } from 'wagmi';
+import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
+import { ethers } from 'ethers';
+import { useCallback } from 'react';
+
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { useBalance, useContract } from 'wagmi';
 
 import { Address } from '@wagmi/core';
-
-import { usePredeployedWrapper } from '../interim/hooks';
 import { scope } from './lib';
 
 const multisigContract = {
@@ -33,14 +32,12 @@ export function useMultisig({
     abi: MultisigWalletABI,
   });
 
-  const { connected, api, chainId, signer } = usePredeployedWrapper(
-    (params) => {
-      return new MultisigWallet({
-        ...params,
-        address,
-      });
-    },
-  );
+  const { connected, api, chainId, signer } = useSdkContract((params) => {
+    return new MultisigWallet({
+      ...params,
+      address,
+    });
+  });
 
   const queryKey = useCallback(
     (key: any[]) => {
