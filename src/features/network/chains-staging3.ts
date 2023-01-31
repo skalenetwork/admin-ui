@@ -48,4 +48,12 @@ export const staging = {
     rpcUrls: makeDefaultRpcUrls('staging-legal-crazy-castor'),
     blockExplorers: makeDefaultBlockExplorers('staging-legal-crazy-castor'),
   },
+  'staging-utter-unripe-menkar': {
+    id: parseInt('0x1482a7b2'),
+    name: 'staging-utter-unripe-menkar',
+    network: NETWORK.SKALE,
+    nativeCurrency,
+    rpcUrls: makeDefaultRpcUrls('staging-utter-unripe-menkar'),
+    blockExplorers: makeDefaultBlockExplorers('staging-utter-unripe-menkar'),
+  },
 } satisfies { [key: string]: Chain };
