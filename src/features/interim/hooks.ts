@@ -48,19 +48,18 @@ export function useConfigController() {
     signer && controller?.setSigner({ signer: signer });
   }, [signer, controller]);
 
-  const { data, status } = useContractReads({
-    contracts: connected
-      ? [
-          {
-            ...configControllerContract,
-            functionName: 'isMTMEnabled',
-          },
-          {
-            ...configControllerContract,
-            functionName: 'isFCDEnabled',
-          },
-        ]
-      : [],
+  const { data, status, refetch } = useContractReads({
+    enabled: !!connected,
+    contracts: [
+      {
+        ...configControllerContract,
+        functionName: 'isMTMEnabled',
+      },
+      {
+        ...configControllerContract,
+        functionName: 'isFCDEnabled',
+      },
+    ],
   });
 
   const flags = (status === 'success' || undefined) &&
@@ -81,9 +80,10 @@ export function useConfigController() {
  * @returns
  */
 export function useMtm() {
-  const { flags, controller } = useConfigController();
+  const { flags, controller, connected } = useConfigController();
 
   const { config } = usePrepareContractWrite({
+    enabled: !!connected,
     ...configControllerContract,
     functionName: flags?.mtmEnabled ? 'disableMTM' : 'enableMTM',
   });
@@ -112,9 +112,10 @@ export function useMtm() {
  * @returns
  */
 export function useFcd() {
-  const { flags, controller } = useConfigController();
+  const { flags, controller, connected } = useConfigController();
 
   const { config } = usePrepareContractWrite({
+    enabled: !!connected,
     ...configControllerContract,
     functionName: flags?.fcdEnabled
       ? 'disableFreeContractDeployment'

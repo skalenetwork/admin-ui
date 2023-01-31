@@ -174,7 +174,6 @@ export function FlowAddNewTransaction({
     const found = Object.values(CONTRACT).find(
       (contract) => contract.address === contractAddress,
     );
-    console.log('firefirefire', contractAddress, found?.name);
     if (found?.name) {
       form[0].setValue('contractABI', predeployedAbis[found.name] || '');
       form[0].trigger('contractABI');

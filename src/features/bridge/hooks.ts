@@ -1,5 +1,5 @@
 import { TOKEN_STANDARD } from '@/features/network/manifest';
-import { useManifestContract } from '@/features/network/hooks';
+import { useTypedContract } from '@/features/network/hooks';
 import { ethers } from 'ethers';
 import {
   useContractWrite,
@@ -20,11 +20,11 @@ export function useTokenManager<T extends TokenStandard>({
 }: TokenTypeProps<T>) {
   const id = `TOKEN_MANAGER_${standard}` as const;
 
-  return useManifestContract({ id });
+  return useTypedContract({ id });
 }
 
 export function useTokenManagerLinker() {
-  return useManifestContract({
+  return useTypedContract({
     id: 'TOKEN_MANAGER_LINKER',
   });
 }

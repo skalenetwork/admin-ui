@@ -5,7 +5,7 @@
 
 import { addresses } from '@/features/network';
 import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
-import { useSdkContract } from '@/features/network/hooks';
+import { useContractApi } from '@/features/network/hooks';
 
 import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
 import { ethers } from 'ethers';
@@ -32,12 +32,14 @@ export function useMultisig({
     abi: MultisigWalletABI,
   });
 
-  const { connected, api, chainId, signer } = useSdkContract((params) => {
+  const { connected, api, chainId, signer } = useContractApi((params) => {
     return new MultisigWallet({
       ...params,
       address,
     });
   });
+
+  api?.contract;
 
   const queryKey = useCallback(
     (key: any[]) => {

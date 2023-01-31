@@ -87,11 +87,11 @@ export function useAbi<T extends ContractManifestIdAbi>({
 }
 
 /**
- * Use interfaces for any network supported contract by preset ID
+ * Use wagmi:useContractWrites compatible typed interfaces for any network supported contract by preset ID
  * @param param0
  * @returns
  */
-export function useManifestContract<T extends ContractManifestIdAbi>({
+export function useTypedContract<T extends ContractManifestIdAbi>({
   id,
 }: {
   id: T;
@@ -115,11 +115,14 @@ export function useManifestContract<T extends ContractManifestIdAbi>({
 }
 
 /**
- * with chain state: return predeployed contract SDK wrapper instance
- * @param creator
+ * Use predeployed contract SDK wrapper instance
+ * @todo make consistent with useTypedContract signature
+ * @todo after wrapper registration in manifest: refactor to remove injection
+ * @todo consider consuming useTypedContract within
+ * @param param0
  * @returns
  */
-export function useSdkContract<T extends BaseContract>(
+export function useContractApi<T extends BaseContract>(
   creator: (params: IContractParams) => T,
 ) {
   const { chain } = useNetwork();
