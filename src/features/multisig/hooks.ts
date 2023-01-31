@@ -50,53 +50,56 @@ export function useMultisig({
 
   const balance = useBalance({ address: address });
 
-  const countsQueries =
-    api && contract
-      ? [
-          {
-            // ...defaultParams,
-            initialData: 0,
-            queryKey: queryKey(['countTotalTrx']),
-            queryFn: () =>
-              api
-                .getTransactionCount({
-                  pending: true,
-                  executed: true,
-                })
-                .then((val) => val.toNumber()),
-          },
-          {
-            // ...defaultParams,
-            initialData: 0,
-            queryKey: queryKey(['countPendingTrx']),
-            queryFn: () =>
-              api
-                .getTransactionCount({
-                  pending: true,
-                  executed: false,
-                })
-                .then((val) => val.toNumber()),
-          },
-          {
-            // ...defaultParams,
-            initialData: 0,
-            queryKey: queryKey(['countExecutedTrx']),
-            queryFn: () =>
-              api
-                .getTransactionCount({
-                  pending: false,
-                  executed: true,
-                })
-                .then((val) => val.toNumber()),
-          },
-          {
-            // ...defaultParams,
-            initialData: 0,
-            queryKey: queryKey(['countReqConfirms']),
-            queryFn: () => api.getRequired(),
-          },
-        ]
-      : [];
+  const countsEnabled = !!(api && contract);
+  console.log('counts enabled', countsEnabled);
+
+  const countsQueries = [
+    {
+      // ...defaultParams,
+      queryKey: queryKey(['countTotalTrx']),
+      queryFn: () =>
+        api
+          ?.getTransactionCount({
+            pending: true,
+            executed: true,
+          })
+          .then((val) => val.toNumber()),
+      enabled: countsEnabled,
+    },
+    {
+      // ...defaultParams,
+      initialData: 0,
+      queryKey: queryKey(['countPendingTrx']),
+      queryFn: () =>
+        api
+          ?.getTransactionCount({
+            pending: true,
+            executed: false,
+          })
+          .then((val) => val.toNumber()),
+      enabled: countsEnabled,
+    },
+    {
+      // ...defaultParams,
+      initialData: 0,
+      queryKey: queryKey(['countExecutedTrx']),
+      queryFn: () =>
+        api
+          ?.getTransactionCount({
+            pending: false,
+            executed: true,
+          })
+          .then((val) => val.toNumber()),
+      enabled: countsEnabled,
+    },
+    {
+      // ...defaultParams,
+      initialData: 0,
+      queryKey: queryKey(['countReqConfirms']),
+      queryFn: () => api?.getRequired(),
+      enabled: countsEnabled,
+    },
+  ];
 
   const [countTotalTrx, countPendingTrx, countExecutedTrx, countReqConfirms] =
     useQueries({
@@ -109,6 +112,8 @@ export function useMultisig({
     countExecutedTrx,
     countReqConfirms,
   };
+
+  console.log('counts', counts);
 
   // Derviatives
 

@@ -132,21 +132,15 @@ export function useSdkContract<T extends BaseContract>(
 
   const { address } = useAccount();
 
-  const connected = useMemo(
-    () => (chain ? chain.network === 'skale' : false),
-    [chain?.id],
-  );
+  const connected = chain ? chain.network === 'skale' : false;
 
-  const api = useMemo(
-    () =>
-      connected && chain && signer
-        ? creator({
-            rpcUrl: chain.rpcUrls.default.http[0],
-            signer,
-          })
-        : undefined,
-    [connected, chain?.id],
-  );
+  const api =
+    connected && chain && signer
+      ? creator({
+          rpcUrl: chain.rpcUrls.default.http[0],
+          signer,
+        })
+      : undefined;
 
   useEffect(() => {
     address && api?.setSigner({ signer });
