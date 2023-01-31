@@ -134,7 +134,7 @@ export function useSdkContract<T extends BaseContract>(
 
   const connected = useMemo(
     () => (chain ? chain.network === 'skale' : false),
-    [chain],
+    [chain?.id],
   );
 
   const api = useMemo(
@@ -145,7 +145,7 @@ export function useSdkContract<T extends BaseContract>(
             signer,
           })
         : undefined,
-    [connected, chain],
+    [connected, chain?.id],
   );
 
   useEffect(() => {

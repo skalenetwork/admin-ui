@@ -78,17 +78,15 @@ export function useToggleAutodeploy<T extends TokenStandard>({
 export function useConnectChain({ chainName }: { chainName: string }) {
   const { address, abi, api } = useTokenManagerLinker();
 
-  const overrides = {
-    gasPrice: 100000000000,
-    gasLimit: ethers.BigNumber.from(8000000),
-  };
-
   const { config: connectConfig } = usePrepareContractWrite({
     address,
     abi,
     functionName: 'connectSchain',
     args: [chainName],
-    overrides,
+    overrides: {
+      has: ethers.BigNumber.from(100000000000),
+      gasLimit: ethers.BigNumber.from(8000000),
+    },
   });
 
   const { write: connect } = useContractWrite(connectConfig);

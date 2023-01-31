@@ -24,15 +24,15 @@ const FormattedStatus = ({
   status: 'disabled' | 'no-auth' | 'pending' | [true, string] | [false, string];
 }) => {
   return status === 'disabled' || status === 'no-auth' ? (
-    <span className="ml-6 text-sm text-[var(--gray6)]">Not Supported</span>
+    <span className="ml-6 text-sm text-[var(--gray8)]">Not Supported</span>
   ) : status === 'pending' ? (
-    <span className="ml-6 text-sm text-[var(--yellow6)]">Pending Change</span>
+    <span className="ml-6 text-sm text-[var(--yellow8)]">Pending Change</span>
   ) : status[0] === true ? (
-    <span className="ml-6 text-sm text-[var(--green6)]">
+    <span className="ml-6 text-sm text-[var(--green8)]">
       {status[1] || 'Disabled'}
     </span>
   ) : status[0] === false ? (
-    <span className="ml-6 text-sm text-[var(--red6)]">
+    <span className="ml-6 text-sm text-[var(--red8)]">
       {status[1] || 'Enabled'}
     </span>
   ) : (
@@ -56,13 +56,13 @@ const FlagStatus = ({
   isLoading: boolean;
 }) => {
   return !connected ? (
-    <span className="ml-6 text-sm text-[var(--gray6)]">Not Supported</span>
+    <span className="ml-6 text-sm text-[var(--gray8)]">Not Supported</span>
   ) : isLoading ? (
-    <span className="ml-6 text-sm text-[var(--yellow6)]">Pending Change</span>
+    <span className="ml-6 text-sm text-[var(--yellow8)]">Pending Change</span>
   ) : isEnabled ? (
-    <span className="ml-6 text-sm text-[var(--green6)]">Enabled</span>
+    <span className="ml-6 text-sm text-[var(--green8)]">Enabled</span>
   ) : (
-    <span className="ml-6 text-sm text-[var(--red6)]">Disabled</span>
+    <span className="ml-6 text-sm text-[var(--red8)]">Disabled</span>
   );
 };
 
@@ -77,18 +77,17 @@ export const WidgetConfigFcd = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isLoading } = useMtm();
+  const { toggle, isEnabled, isSuccess, isLoading, isError } = useMtm();
+  const status = isLoading
+    ? 'pending'
+    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
   return (
     <Card
       full
       heading={
         <>
           <h4 className="inline">Free Contract Deployment</h4>{' '}
-          <FlagStatus
-            connected={connected}
-            isEnabled={isEnabled}
-            isLoading={isLoading}
-          />
+          <FormattedStatus status={status} />
         </>
       }
       tooltip={'Peep Peeep'}
@@ -137,18 +136,17 @@ export const WidgetConfigMtm = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isLoading } = useFcd();
+  const { toggle, isEnabled, isSuccess, isError, isLoading } = useFcd();
+  const status = isLoading
+    ? 'pending'
+    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
   return (
     <Card
       full
       heading={
         <>
           <h4 className="inline">Multi-transaction mode</h4>{' '}
-          <FlagStatus
-            connected={connected}
-            isEnabled={isEnabled}
-            isLoading={isLoading}
-          />
+          <FormattedStatus status={status} />
         </>
       }
       tooltip={'Peep Peeep'}

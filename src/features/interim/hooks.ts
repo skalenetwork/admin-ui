@@ -28,7 +28,10 @@ export function useConfigController() {
     isLoading: signerIsLoading,
   } = useSigner();
 
-  const connected = useMemo(() => chain?.network === NETWORK.SKALE, [chain]);
+  const connected = useMemo(
+    () => chain?.network === NETWORK.SKALE,
+    [chain?.id],
+  );
 
   const controller = useMemo(
     () =>
@@ -38,7 +41,7 @@ export function useConfigController() {
         ...configControllerContract,
         rpcUrl: chain.rpcUrls.default.http[0],
       }),
-    [connected, chain],
+    [connected, chain?.id],
   );
 
   useEffect(() => {
