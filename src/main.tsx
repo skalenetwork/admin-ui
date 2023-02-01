@@ -26,6 +26,7 @@ setup({
 });
 
 import { chains as skaleChains } from '@/features/network/chains';
+
 import {
   WagmiConfig,
   createClient,
