@@ -72,7 +72,12 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <QueryClientProvider client={queryClient}>
         <WagmiConfig client={wagmiClient}>
           <BrowserRouter>
-            <ConnectKitProvider theme="nouns">
+            <ConnectKitProvider
+              theme="nouns"
+              options={{
+                initialChainId: 0,
+              }}
+            >
               <App />
             </ConnectKitProvider>
           </BrowserRouter>

@@ -53,7 +53,6 @@ export function useMultisig({
   const balance = useBalance({ address: address });
 
   const countsEnabled = !!(api && contract);
-  console.log('counts enabled', countsEnabled);
 
   const countsQueries = [
     {
@@ -114,8 +113,6 @@ export function useMultisig({
     countExecutedTrx,
     countReqConfirms,
   };
-
-  console.log('counts', counts);
 
   // Derviatives
 

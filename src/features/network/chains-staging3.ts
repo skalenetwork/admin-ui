@@ -56,4 +56,12 @@ export const staging = {
     rpcUrls: makeDefaultRpcUrls('staging-utter-unripe-menkar'),
     blockExplorers: makeDefaultBlockExplorers('staging-utter-unripe-menkar'),
   },
+  'staging-aware-chief-gianfar': {
+    id: parseInt('0x5a79c44e'),
+    name: 'staging-aware-chief-gianfar',
+    network: NETWORK.SKALE,
+    nativeCurrency,
+    rpcUrls: makeDefaultRpcUrls('staging-aware-chief-gianfar'),
+    blockExplorers: makeDefaultBlockExplorers('staging-aware-chief-gianfar'),
+  },
 } satisfies { [key: string]: Chain };

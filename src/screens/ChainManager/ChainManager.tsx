@@ -78,9 +78,12 @@ export const WidgetConfigFcd = ({
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
   const { toggle, isEnabled, isSuccess, isLoading, isError } = useMtm();
-  const status = isLoading
+  const status = !connected
+    ? 'disabled'
+    : isLoading
     ? 'pending'
     : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
+  console.log(status);
   return (
     <Card
       full
@@ -137,7 +140,9 @@ export const WidgetConfigMtm = ({
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
   const { toggle, isEnabled, isSuccess, isError, isLoading } = useFcd();
-  const status = isLoading
+  const status = !connected
+    ? 'disabled'
+    : isLoading
     ? 'pending'
     : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
   return (
@@ -323,7 +328,7 @@ export default function ChainManager() {
           <WidgetManageMetadata />
         </div>
         <div data-id="to_autodeploy" data-s="1">
-          <Card full heading="Set Auto Deploymen in IMA">
+          <Card full heading="Set Auto Deployment in IMA">
             <div className="flex h-full flex-col justify-between">
               <p className="text-[var(--slate9)]">
                 SKALE Chain automatic deployment manager

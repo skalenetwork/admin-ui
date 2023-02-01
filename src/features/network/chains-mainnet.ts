@@ -27,6 +27,15 @@ function makeDefaultBlockExplorers<T extends string>(
   };
 }
 
+const MULTICALL_ADDRESS = '0x';
+
+const contracts = {
+  multicall3: {
+    address: MULTICALL_ADDRESS,
+    blockCreated: 1,
+  },
+};
+
 // outdated chainIDs
 // @todo compile static from rpc calls
 export const mainnet = {
