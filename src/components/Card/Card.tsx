@@ -43,9 +43,9 @@ export default function Card({
         <div className={tw`h-[max-content] w-full pb-2`}>
           {typeof heading === 'string' ? (
             lean ? (
-              <h5 className="font-semibold">{heading}</h5>
+              <h5 className="font-medium">{heading}</h5>
             ) : (
-              <h4 className="font-semibold">{heading}</h4>
+              <h4 className="font-medium">{heading}</h4>
             )
           ) : (
             heading

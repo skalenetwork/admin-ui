@@ -22,9 +22,32 @@
   --bg-color-menuitem-active: var(--primary);
 }
 
+html {
+  font-size: 14px;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
   @apply m-0 p-0 text-[var(--black)];
+}
+
+@media screen and (min-width: 1366px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  html {
+    font-size: 22px;
+  }
 }
 
 body #app {

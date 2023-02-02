@@ -12,6 +12,7 @@ import {
   PeopleIcon,
 } from '@/components/Icons/Icons';
 import DarkModeToggle from '@/elements/DarkModeToggle/DarkModeToggle';
+import { tw } from 'twind';
 
 const activeStyle = {
   background: 'var(--bg-color-menuitem-active)',
@@ -47,9 +48,9 @@ export default function SideNavigation() {
       onOpenChange={setNavOpen}
       className="grid h-full bg-[var(--white)] py-4 text-[var(--black)]"
       style={{
-        width: navOpen ? '320px' : 'min-content',
+        width: navOpen ? '25vw' : '160px',
         gridTemplateRows: 'min-content 1fr min-content',
-        transition: 'width 1s ease',
+        transition: 'width 0.3s ease',
       }}
     >
       <div className="flex items-center justify-between p-4">
