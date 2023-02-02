@@ -4,9 +4,9 @@ import Layout from '@/views/Layout/Layout';
 
 import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
 import ChainManager from '@/screens/ChainManager/ChainManager';
+import ImaManager from '@/screens/ImaManager/ImaManager';
 import Multisig from '@/screens/Multisig/Multisig';
 import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
-import ImaManager from '@/screens/ImaManager/ImaManager';
 import Support from '@/views/Support/Support';
 import ImaAutodeploy from './screens/ImaAutodeploy/ImaAutodeploy';
 import ImaMapToken from './screens/ImaMapToken/ImaMapToken';

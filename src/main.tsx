@@ -1,23 +1,22 @@
 import './polyfills';
 
+import { store } from '@/app/store'; // order this early
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux/';
-import { store } from '@/app/store'; // order this early
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { setup as tailwindSetup } from 'twind';
 
-import { setup, strict, voidSheet } from 'twind';
-
-import '@/styles/colors.css';
 import '@/styles/base.css';
+import '@/styles/colors.css';
 import '@/styles/components.css';
-import '@/styles/utils.css';
 import '@/styles/main.css';
+import '@/styles/utils.css';
 
-setup({
+tailwindSetup({
   preflight: false, // do not include base style reset (default: use tailwind preflight)
   mode: 'warn', // throw errors for invalid rules (default: warn)
   hash: false, // hash all generated class names (default: false)
@@ -27,18 +26,17 @@ setup({
 
 import { chains as skaleChains } from '@/features/network/chains';
 
-import {
-  WagmiConfig,
-  createClient,
-  configureChains,
-  mainnet as ethereumMainnet,
-  goerli,
-} from 'wagmi';
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
+import {
+  configureChains,
+  createClient,
+  mainnet as ethereumMainnet,
+  WagmiConfig,
+} from 'wagmi';
 
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
-// update this when @features/chains.mainnet is updated
+// update this when @features/../chains.mainnet is updated
 const chains = [ethereumMainnet, ...Object.values(skaleChains.staging)];
 
 const { provider } = configureChains(chains, [

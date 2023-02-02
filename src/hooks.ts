@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { singletonHook } from 'react-singleton-hook';
 
 // to be moved to app context

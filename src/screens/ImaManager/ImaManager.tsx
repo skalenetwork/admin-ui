@@ -20,7 +20,7 @@ const TransactionItem = ({
   blocksElapsed?: number;
 }) => {
   return (
-    <div className="min-h-1/2 flex flex-col rounded-lg bg-[var(--gray4)] px-12 py-2 text-[var(--gray12)]">
+    <div className="min-h-1/2 flex flex-col rounded-lg bg-[var(--slate)] px-12 py-2 text-[var(--gray12)]">
       <div>
         {id} - {actionText} by {author}
       </div>
@@ -31,20 +31,113 @@ const TransactionItem = ({
   );
 };
 
-const PeerChainItem = ({
+const SelectedPeerChainItem = ({
   name,
-  connectionStatus,
-  tokenList = [],
   alertKey,
   toggleAlert,
 }: AlertProps & {
   name: string;
-  connectionStatus: 'full' | 'origin' | 'target';
-  tokenList: [];
 }) => {
   const { chain } = useNetwork();
   return (
-    <div className="flex justify-between rounded-lg bg-[var(--gray4)] px-6 py-2 text-[var(--gray12)]">
+    <Dialog
+      title={'ERC-20 Tokens (6)'}
+      description={''}
+      trigger={
+        <button>
+          <ChevronRightIcon />
+        </button>
+      }
+      onOpenChange={toggleAlert(`${name}`)}
+      steps={[
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+          },
+          actionElement: ({ className }) => (
+            <Link
+              className={`${className}`}
+              to={`maptoken/${name}?standard=erc20`}
+            >
+              Add new ERC-20 token
+            </Link>
+          ),
+          cancelElement: () => <></>,
+          content: (
+            <div>
+              <p>
+                List of mapped ERC-20 tokens with{' '}
+                <span className="font-semibold">{name}</span> chain:
+              </p>
+              <Card
+                className="max-h-36 p-0"
+                bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
+                heading={
+                  <p className="font-medium text-[var(--primary)]">
+                    Origin: {chain?.name}
+                  </p>
+                }
+              >
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+              </Card>
+              <Card
+                className="max-h-36 p-0"
+                bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
+                heading={
+                  <p className="font-medium text-[var(--primary)]">
+                    Target: {name}
+                  </p>
+                }
+              >
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+                <NiceAddress
+                  address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                  copyable
+                />
+              </Card>
+            </div>
+          ),
+        },
+      ]}
+      open={alertKey === `${name}`}
+      activeStep={1}
+    />
+  );
+};
+
+const PeerChainItem = ({
+  name,
+  connectionStatus,
+  tokenList = [],
+}: {
+  name: string;
+  connectionStatus: 'full' | 'origin' | 'target';
+  tokenList: [];
+}) => {
+  return (
+    <div
+      className="flex
+    justify-between rounded-lg bg-[var(--slate)] px-6
+    py-2 text-[var(--gray12)]"
+    >
       <div className="flex flex-col justify-between">
         <h5 className="font-medium">{name}</h5>
         <div className="flex items-center gap-4">
@@ -84,93 +177,12 @@ const PeerChainItem = ({
         </div>
       </div>
       <div className="flex flex-row gap-4 text-[var(--blue12)]">
-        <div>
-          <div>ERC20</div>
-          <div>ERC721</div>
-          <div>ERC1155</div>
+        <div className="text-sm">
+          <p>ERC20</p>
+          <p>ERC721</p>
+          <p>ERC1155</p>
         </div>
-        <div className="flex items-center justify-center">
-          <Dialog
-            title={'ERC-20 Tokens (6)'}
-            description={''}
-            trigger={
-              <button>
-                <ChevronRightIcon />
-              </button>
-            }
-            onOpenChange={toggleAlert(`${name}`)}
-            steps={[
-              {
-                onSubmit: (e) => {
-                  e.preventDefault();
-                },
-                actionElement: ({ className }) => (
-                  <Link
-                    className={`${className}`}
-                    to={`maptoken/${name}?standard=erc20`}
-                  >
-                    Add new ERC-20 token
-                  </Link>
-                ),
-                cancelElement: () => <></>,
-                content: (
-                  <div>
-                    <p>
-                      List of mapped ERC-20 tokens with{' '}
-                      <span className="font-semibold">{name}</span> chain:
-                    </p>
-                    <Card
-                      className="max-h-36 p-0"
-                      bodyClass="p-4 pt-4 bg-[var(--gray2)] rounded-lg flex flex-col gap-2"
-                      heading={
-                        <p className="font-medium text-[var(--primary)]">
-                          Origin: {chain?.name}
-                        </p>
-                      }
-                    >
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                    </Card>
-                    <Card
-                      className="max-h-36 p-0"
-                      bodyClass="p-4 pt-4 bg-[var(--gray2)] rounded-lg flex flex-col gap-2"
-                      heading={
-                        <p className="font-medium text-[var(--primary)]">
-                          Target: {name}
-                        </p>
-                      }
-                    >
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                      <NiceAddress
-                        address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                        copyable
-                      />
-                    </Card>
-                  </div>
-                ),
-              },
-            ]}
-            open={alertKey === `${name}`}
-            activeStep={1}
-          />
-        </div>
+        <div className="flex items-center justify-center"></div>
       </div>
     </div>
   );
@@ -189,39 +201,29 @@ export default function ImaManager() {
   );
 
   return (
-    <div className="grid h-full w-full grid-rows-2 rounded-lg bg-[var(--white)]">
+    <div className="grid h-full w-full grid-rows-2 gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
       <Card
         full
         heading={
-          <div className="flex justify-between">
+          <div className="flex h-max items-center justify-between">
             <h4 className="font-semibold">Connected chains</h4>
-            <button className="btn rounded-full">Connect new chain</button>
+            <button className="btn slim rounded-full text-sm">
+              Connect new chain
+            </button>
           </div>
         }
       >
-        <div className="grid grid-flow-col grid-cols-2">
-          <Card full heading="" bodyClass="scrollbar flex flex-col gap-3 p-0">
+        <div className="grid h-full grid-flow-col grid-cols-2">
+          <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
             {['ethereum', ...Object.keys(chains.staging)].map((name) => (
               <PeerChainItem
                 name={name}
                 connectionStatus="full"
                 tokenList={[]}
-                alertKey={alertKey}
-                toggleAlert={toggleAlert}
               />
             ))}
-          </Card>
-          <Card full heading="" bodyClass="scrollbar flex flex-col gap-3 p-0">
-            {['origin', 'target', 'origin', 'origin'].map((x) => (
-              <PeerChainItem
-                name="Other"
-                connectionStatus={x}
-                tokenList={[]}
-                alertKey={alertKey}
-                toggleAlert={toggleAlert}
-              />
-            ))}
-          </Card>
+          </div>
+          <div className="h-full w-full rounded-lg bg-[var(--slate)]"></div>
         </div>
       </Card>
       <Card

@@ -5,22 +5,20 @@
 import { CONTRACT } from '@/features/network/manifest';
 
 import { ConfigControllerABI } from './abi-configcontroller';
-import { MultisigWalletABI } from './abi-multisigwallet';
 import { MarionetteABI } from './abi-marionette';
+import { MultisigWalletABI } from './abi-multisigwallet';
 
 // later better to come from autogen out of IMA releases
 // impl side on skale.js
 import unionIMA from './abi-ima.union';
 
+import { getContract, Provider } from '@wagmi/core';
 import {
-  ExtractAbiFunction,
   Abi,
   AbiStateMutability,
+  ExtractAbiFunction,
   ExtractAbiFunctionNames,
-  AbiParametersToPrimitiveTypes,
 } from 'abitype';
-import { ZodStringCheck } from 'zod';
-import { getContract, Provider } from '@wagmi/core';
 
 /**
  * @todo type(s) for autogen wrapper with named parameters around ethers contract functions
@@ -86,6 +84,7 @@ export function importAbi<T extends ContractManifestId>({
   const lowerName = CONTRACT[id].name.toLocaleLowerCase() as ContractName<T>;
   const path = `./abi-${lowerName}` as const;
   // will require a default export from abi-*.ts when used
+  /* @vite-ignore */
   return import(path).then((x) => x.default);
 }
 

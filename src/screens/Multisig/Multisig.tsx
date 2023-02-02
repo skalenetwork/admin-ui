@@ -53,7 +53,7 @@ export function WalletSelect({
       <Select
         triggerClass="z-50 flex h-full px-2 items-center shadow-sm bg-[var(--white)] text-[var(--black)] rounded-3xl"
         listClass="z-50 w-full bg-[var(--white)] rounded-3xl text-[var(--black)]"
-        listItemClass="shadow-sm p-1 hover:bg[var(--gray2)] text-[var(--black)]"
+        listItemClass="shadow-sm p-1 hover:bg[var(--slate)] text-[var(--black)]"
         onValueChange={onActiveChange}
         items={wallets.map((address) => ({
           value: address,
@@ -289,7 +289,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`Queue ( ${pendingTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray4)]"
+            className="h-1/2 bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
@@ -309,7 +309,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`History ( ${executedTrxIds?.data.length} )`}
-            className="h-1/2 bg-[var(--gray4)]"
+            className="h-1/2 bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 :root {
   --white: #fff;
   --black: #000;
+  --slate: hsla(214, 21%, 94%, 1);
   --primary: hsla(225, 77%, 56%, 1);
   --color-footer: hsla(219, 33%, 35%, 1);
   --bg-color-footer: hsla(213, 46%, 84%, 0.4);
@@ -11,6 +12,7 @@
 .dark-theme {
   --white: #000;
   --black: #fff;
+  --slate: var(--gray2);
   --color-footer: var(--black);
   --bg-color-footer: var(--gray1);
   --primary: hsla(36, 76%, 60%, 1);
@@ -74,7 +76,6 @@ main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
     flex items-center justify-center rounded-md
     bg-[var(--gray8)] px-[4px] text-xs font-medium;
 }
-
 
 .btn {
   @apply block rounded-lg bg-[var(--primary)]
