@@ -48,12 +48,16 @@ export default function SideNavigation() {
       onOpenChange={setNavOpen}
       className="grid h-full bg-[var(--white)] py-4 text-[var(--black)]"
       style={{
-        width: navOpen ? '25vw' : '160px',
+        width: navOpen ? '25vw' : '7rem',
         gridTemplateRows: 'min-content 1fr min-content',
         transition: 'width 0.3s ease',
       }}
     >
-      <div className="flex items-center justify-between p-4">
+      <div
+        className={tw`flex items-center justify-${
+          navOpen ? 'between' : 'center'
+        } p-4`}
+      >
         <CHide
           className="text-xs uppercase text-[var(--gray8)]"
           style={{ letterSpacing: '2px' }}
@@ -63,6 +67,7 @@ export default function SideNavigation() {
         <DarkModeToggle
           value={darkMode}
           onChange={(value) => setDarkMode(value)}
+          size={5}
         />
       </div>
       <nav className="p-4 font-medium text-[var(--color-menu)]">
