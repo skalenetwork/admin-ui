@@ -83,7 +83,9 @@ const Dialog = ({
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
               )}
             >
-              <div className="flex flex-row items-center gap-4 border-b border-[var(--gray6)] p-4">
+              <div
+                className={tw`flex flex-row items-center gap-12 border-b p-4`}
+              >
                 <DialogPrimitive.Title asChild>
                   <h4>{title}</h4>
                 </DialogPrimitive.Title>
@@ -119,7 +121,9 @@ const Dialog = ({
                     <div className="scrollbar flex-grow overflow-auto p-8">
                       {content}
                     </div>
-                    <div className="flex justify-center gap-8 border-t border-[var(--gray6)] py-4">
+                    <div
+                      className={tw`flex justify-center gap-8 border-t py-4`}
+                    >
                       {cancelElement ? (
                         cancelElement({
                           className: cancelElClass,

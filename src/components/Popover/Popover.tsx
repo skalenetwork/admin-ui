@@ -25,16 +25,17 @@ const Popover = ({
           align="center"
           sideOffset={4}
           className={tw(
+            'border',
             'radix-side-top:animate-slide-up radix-side-bottom:animate-slide-down',
             'rounded-lg p-4 shadow-md',
             'bg-[var(--white)]',
+            'max-h-[60vh]',
+            'flex flex-col',
           )}
         >
           <PopoverPrimitive.Arrow className="fill-current text-[var(--white)]" />
           <h4>{title}</h4>
-
-          {children}
-
+          <div className="flex-grow overflow-auto pr-2">{children}</div>
           {hasCross && (
             <PopoverPrimitive.Close
               className={tw(

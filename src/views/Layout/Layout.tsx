@@ -67,7 +67,7 @@ export default function Layout() {
         px-8 py-1 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
-        <p className="flex items-center justify-center gap-2 pl-24">
+        <p className="flex items-center justify-center gap-2 pl-16">
           {connected ? (
             <>
               <span

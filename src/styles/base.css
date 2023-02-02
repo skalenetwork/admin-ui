@@ -1,6 +1,13 @@
 @tailwind base;
 
 @layer base {
+  /** one bypass due to tw going nuts with border-[var(..)] **/
+  *,
+  ::before,
+  ::after {
+    border-color: var(--gray6);
+  }
+
   h1 {
     @apply py-4 text-3xl font-medium;
   }
@@ -18,7 +25,15 @@
   }
 
   .btn {
-    @apply rounded-lg bg-[var(--primary)] px-6 py-2 text-white;
+    @apply rounded-lg bg-[var(--primary)] px-6 py-2 text-white transition-all;
+  }
+
+  .btn:hover:not([disabled]) {
+    @apply ring-2 ring-[var(--slate)] ring-offset-2 ring-offset-transparent;
+  }
+
+  .btn:target {
+    @apply translate-x-3;
   }
 
   .btn-secondary {
@@ -58,5 +73,16 @@
   fieldset select,
   fieldset textarea {
     @apply rounded border border-[var(--gray8)] bg-[var(--white)] py-3 px-4 text-[var(--gray11)];
+    @apply focus:border-[var(--primary)] focus:outline-none;
+  }
+
+  input[data-state='error'],
+  select[data-state='error'],
+  textarea[data-state='error'] {
+    @apply border-[var(--red10)];
+  }
+
+  .border-\[var\(--gray6\)\] {
+    border-width: auto !important;
   }
 }

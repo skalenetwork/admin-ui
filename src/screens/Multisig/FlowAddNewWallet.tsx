@@ -51,7 +51,7 @@ export function FlowAddNewWallet({
   return (
     <Dialog
       trigger={
-        <button className="btn h-full cursor-pointer rounded-full text-[var(--primary)]">
+        <button className="btn h-full cursor-pointer rounded-full border border-slate-500">
           Add new wallet
         </button>
       }

@@ -54,7 +54,7 @@ export default function Card({
         {tooltip && (
           <Tooltip
             trigger={
-              <div className="cursor-pointer">
+              <div className="cursor-pointer transition-all hover:-translate-x-1">
                 <InfoIcon color={'var(--gray8)'} />
               </div>
             }

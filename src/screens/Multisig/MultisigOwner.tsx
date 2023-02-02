@@ -14,7 +14,9 @@ export function MultisigOwner({
       <NiceAddress address={address} copyable />
       {showControls && (
         <div className="ml-auto">
-          <TrashIcon className="h-6 w-6 cursor-pointer text-[var(--red10)]" />
+          <button className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[var(--red3)]">
+            <TrashIcon className="h-6 w-6 cursor-pointer rounded-full text-[var(--red10)]" />
+          </button>
         </div>
       )}
     </div>

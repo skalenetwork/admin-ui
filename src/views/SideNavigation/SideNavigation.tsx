@@ -33,7 +33,7 @@ export default function SideNavigation() {
 
   const linkProps = useMemo(() => {
     return {
-      className: `flex items-center gap-2 p-4 ${
+      className: `flex items-center gap-2 p-4 rounded-lg transition-all hover:bg-[var(--slate)] my-1 ${
         !navOpen ? 'justify-center' : ''
       }`,
       style: ({ isActive }: { isActive: boolean }) =>

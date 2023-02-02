@@ -9,13 +9,13 @@ interface Props {
 
 const Tooltip = ({ trigger, content }: Props) => {
   return (
-    <TooltipPrimitive.Provider>
+    <TooltipPrimitive.Provider skipDelayDuration={0} delayDuration={20}>
       <TooltipPrimitive.Root>
         <TooltipPrimitive.Trigger asChild>{trigger}</TooltipPrimitive.Trigger>
         <TooltipPrimitive.Content
           sideOffset={4}
           className={tw(
-            'inline-flex items-center rounded-md px-4 py-2.5',
+            'z-50 inline-flex items-center rounded-full px-4 py-2.5',
             'bg-[var(--black)]',
           )}
         >

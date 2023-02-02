@@ -20,11 +20,14 @@ const TransactionItem = ({
   blocksElapsed?: number;
 }) => {
   return (
-    <div className="min-h-1/2 flex flex-col rounded-lg bg-[var(--slate)] px-12 py-2 text-[var(--gray12)]">
+    <div
+      className="min-h-1/2 flex flex-col rounded-lg bg-[var(--slate)] 
+    px-12 py-2 text-[var(--gray12)]"
+    >
       <div>
         {id} - {actionText} by {author}
       </div>
-      <div className="text-sm text-[var(--slate10)]">
+      <div className="text-sm text-[var(--gray10)]">
         About {blocksElapsed} blocks ago
       </div>
     </div>
@@ -207,7 +210,7 @@ export default function ImaManager() {
         heading={
           <div className="flex h-max items-center justify-between">
             <h4 className="font-semibold">Connected chains</h4>
-            <button className="btn slim rounded-full text-sm">
+            <button className="btn btn-wide rounded-full text-sm">
               Connect new chain
             </button>
           </div>
