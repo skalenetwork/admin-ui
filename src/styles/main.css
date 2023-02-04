@@ -110,7 +110,7 @@ main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
 }
 
 .btn-outline {
-  @apply border border-[var(--black)] bg-transparent text-[var(--black)];
+  @apply border border-[var(--primary)] bg-transparent text-[var(--primary)];
 }
 
 .btn-wide {

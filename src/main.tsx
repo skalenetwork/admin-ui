@@ -1,4 +1,5 @@
 import './polyfills';
+import { MotionConfig } from 'framer-motion';
 
 import { store } from '@/app/store'; // order this early
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -77,7 +78,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                 initialChainId: 0,
               }}
             >
-              <App />
+              <MotionConfig transition={{ duration: 0.3, ease: 'easeIn' }}>
+                <App />
+              </MotionConfig>
             </ConnectKitProvider>
           </BrowserRouter>
         </WagmiConfig>
