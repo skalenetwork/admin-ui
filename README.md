@@ -33,14 +33,14 @@ Features are an implementation detail of the application-level usability of the 
 
 # :crystal_ball: Screens
 
-In current micro-mono hybrid architecture, screens being HOC compositions of stateless components, forward the context of features they consume.
+In current micro-mono hybrid architecture, screens are HOC compositions of stateless `elements`.
 
-:crystal_ball: It might help to think of screens as portals of stateful features. These portals depend on a redux store provider up the tree.
+:crystal_ball: It might help to think of screens as portals of stateful features.
 
 This directly enables:
 
 1. Portability of client-agnostic stateful features, and submodules.
-2. Portability of stateful screens (react) through _"optionally bring your own redux store"_ strategy
+2. Portability of stateful screens (react).
 
 ## Use via screens @ react
 
@@ -61,8 +61,8 @@ export const store = configureStore({
 **`view.jsx`**
 
 ```tsx
-import { store } from './store';
 import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
+import { store } from './store';
 
 function View() {
   return (

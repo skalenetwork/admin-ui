@@ -1,37 +1,9 @@
 import { useIsFetching, useQueries } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
 import { TimedBlocks } from './core/block';
 
-import {
-  addMetricGroup,
-  useSliceDispatch,
-  useSliceSelector,
-} from './analytics-slice';
-
-export function useAnalytics() {
-  const dispatch = useSliceDispatch();
-  const metrics = useSliceSelector((state) => state.metrics);
-
-  let isFetching = false;
-
-  const data = {
-    kpis: [
-      {
-        key: 'count',
-        label: 'Count',
-        value: 20,
-      },
-    ],
-    period: '30d',
-  };
-
-  useEffect(() => {
-    data && dispatch(addMetricGroup(data));
-  }, []);
-
-  return [isFetching, data];
-}
+export function useAnalytics() {}
 
 /**
  *

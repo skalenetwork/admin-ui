@@ -1,4 +1,3 @@
-import { useSelector } from '@/app';
 import {
   context as analyticsContext,
   useAnalytics,
@@ -50,32 +49,29 @@ export function ChainAnalytics() {
 
   const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
 
-  const { isFetching, data } = useBlockHistory({
+  const { isFetching, data: blocks } = useBlockHistory({
     time: dayStart,
     includeLatest: true,
   });
 
-  const metrics = useSelector((state) => state.skale_analytics.metrics);
-
-  const blk = Math.random() * 72000;
   const tx = Math.random() * 50000;
 
-  return metrics.length ? (
+  return blocks ? (
     <div className="grid h-full w-full grid-rows-[1fr_3fr]">
       <div className="grid grid-cols-2">
         <div data-id="blocks" data-s="2">
           <Card full heading="Blocks">
             <div className="flex h-full min-w-max items-center justify-between gap-4">
               <FormattedMetric
-                amount={data.blocksTotal}
+                amount={blocks.blocksTotal}
                 label="Total block count"
               />
               <FormattedMetric
-                amount={data.blocksLatestMonth}
+                amount={blocks.blocksLatestMonth}
                 label="Blocks last 30 days"
               />
               <FormattedMetric
-                amount={data.blocksLatestWeek}
+                amount={blocks.blocksLatestWeek}
                 label="Blocks last 7 days"
               />
             </div>
@@ -94,9 +90,9 @@ export function ChainAnalytics() {
         </div>
       </div>
       <div className="grid grid-cols-3">
-        <div className="grid grid-rows-[3fr_2fr]">
+        <div className="grid grid-rows-[60%_40%]">
           <div data-id="active_users" data-s="-1">
-            <Card full heading="Active Users">
+            <Card full heading="Active users">
               <div className="flex h-full flex-col">
                 <div className="flex flex-col gap-2">
                   <FormattedMetric amount={tx} label="Total user count" />
@@ -112,7 +108,9 @@ export function ChainAnalytics() {
               </div>
             </Card>
           </div>
-          <div data-id="ima_pool" data-s="0"></div>
+          <div data-id="ima_pool" data-s="1">
+            <Card full heading="IMA Community pool"></Card>
+          </div>
         </div>
         <div data-id="transactions+chart" data-s="-1">
           <Card full heading="Transactions">

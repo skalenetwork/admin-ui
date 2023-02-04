@@ -3,10 +3,8 @@
  * Registration of all sorts of reducers
  * Exporting derivative and aliased redux types
  */
-
-import { configureStore, PreloadedState } from '@reduxjs/toolkit';
-
 import { context as analytics } from '@/screens/ChainAnalytics/ChainAnalytics';
+import { configureStore, PreloadedState } from '@reduxjs/toolkit';
 
 export const store = configureStore({
   reducer: {
