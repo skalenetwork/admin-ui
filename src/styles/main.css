@@ -2,6 +2,7 @@
   --white: #fff;
   --black: #000;
   --slate: hsla(214, 21%, 94%, 1);
+  --slate1: hsla(214, 20%, 90%, 1);
   --primary: hsla(225, 77%, 56%, 1);
   --color-footer: hsla(219, 33%, 35%, 1);
   --color-highlighted: hsla(220, 79%, 92%, 1);
@@ -14,6 +15,7 @@
   --white: #000;
   --black: #fff;
   --slate: var(--gray2);
+  --slate1: var(--gray4);
   --primary: hsla(36, 76%, 60%, 1);
   --color-footer: var(--black);
   --color-highlighted: var(--gray6);

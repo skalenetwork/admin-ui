@@ -1,3 +1,4 @@
+import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { CopyIcon } from '@radix-ui/react-icons';
 import { Avatar } from 'connectkit';
 import { useEffect } from 'react';
@@ -19,12 +20,14 @@ export function NiceAddress({
   iconUrl?: string;
 }) {
   const [copied, copy] = useCopyToClipboard();
+
   useEffect(() => {
     copied.value &&
       window.setTimeout(() => {
         copy('');
       }, 1000);
   }, [copied.value]);
+
   return (
     <div
       className={`grid grid-cols-[max-content_max-content_1fr] items-center gap-x-4 gap-y-1 ${className}`}
@@ -41,21 +44,16 @@ export function NiceAddress({
       <div className="flex items-center gap-2">
         {copyable && (
           <div className="relative">
-            {copied.value && (
-              <div
-                className="
-              z-100 absolute left-[125%] bottom-[50%]
-              rounded-md border bg-[var(--white)] py-0.5 px-2 text-xs text-[var(--gray11)] shadow-sm
-              "
-              >
-                Copied
-              </div>
-            )}
-
-            <CopyIcon
+            <button
+              className="flex items-center justify-center"
               onClick={() => copy(address)}
-              className="ml-auto h-6 w-6 cursor-pointer text-[var(--gray10)]"
-            />
+            >
+              {copied.value ? (
+                <CheckBadgeIcon className="ml-auto h-6 w-6 cursor-pointer text-[var(--green10)]" />
+              ) : (
+                <CopyIcon className="ml-auto h-6 w-6 cursor-pointer text-[var(--gray10)]" />
+              )}
+            </button>
           </div>
         )}
       </div>

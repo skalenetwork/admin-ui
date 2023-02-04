@@ -51,7 +51,7 @@ export function WalletSelect({
   return (
     <div className="h-full w-min">
       <Select
-        triggerClass="z-50 flex h-full px-2 items-center border shadow-sm bg-[var(--white)] text-[var(--black)] rounded-3xl"
+        triggerClass="z-50 flex h-full px-2 items-center border bg-[var(--white)] text-[var(--black)] rounded-3xl"
         listClass="z-50 w-full bg-[var(--white)] rounded-3xl text-[var(--black)]"
         listItemClass="shadow-sm p-1 hover:bg[var(--slate)] text-[var(--black)]"
         onValueChange={onActiveChange}
