@@ -1,8 +1,8 @@
 import { CONTRACT } from '@/features/network/manifest';
 
-import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { RoleIcon } from '@/components/Icons/Icons';
 import Popover from '@/components/Popover/Popover';
+import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 
 type Props = {};
 

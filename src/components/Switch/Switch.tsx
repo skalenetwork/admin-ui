@@ -1,10 +1,9 @@
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { tw } from 'twind';
-import React from 'react';
 
 type SwitchProps = {
-  onChange: (checked: boolean) => void
-}
+  onChange: (checked: boolean) => void;
+};
 
 const Switch = (props: SwitchProps) => {
   return (

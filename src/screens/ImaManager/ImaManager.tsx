@@ -1,25 +1,16 @@
-import { motion } from 'framer-motion';
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
+import { NiceAddress } from '@/elements/NiceAddress';
 import { chains } from '@/features/network';
 import { TOKEN_STANDARD } from '@/features/network/manifest';
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon, ChevronRightIcon } from '@radix-ui/react-icons';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { motion } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
-import { AlertProps } from '../ChainManager/types';
-import { NiceAddress } from '../Multisig/NiceAddress';
-import {
-  BellAlertIcon,
-  ExclamationCircleIcon,
-} from '@heroicons/react/24/outline';
+import { AlertProps } from '../types';
 
 type ConnectionStatus = 'full' | 'origin' | 'target';
 
@@ -89,7 +80,7 @@ const SelectedPeerChainItem = ({
       animate={{ opacity: 1 }}
     >
       <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
-      <div className="mt-12">
+      <div className="flex flex-grow items-center">
         {connectionStatus === 'target' ? (
           <button className="btn btn-outline m-auto w-2/3 rounded-full">
             Accept request
@@ -271,7 +262,6 @@ const PeerChainItem = ({
       className={tw`group flex justify-between
       rounded-lg bg-[var(--slate)] px-6 py-2 text-left text-[var(--blue12)]
       transition-all
-      hover:bg-[var(--slate1)]
       ${
         selected
           ? `translate-x-1 cursor-default bg-[var(--slate1)] ${
@@ -279,7 +269,7 @@ const PeerChainItem = ({
                 ? 'bg-[var(--color-highlighted)]'
                 : ''
             }`
-          : ''
+          : 'hover:bg-[var(--slate1)]'
       }
       `}
     >

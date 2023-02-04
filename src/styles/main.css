@@ -1,3 +1,13 @@
+::-moz-selection {
+  color: var(--white);
+  background: var(--primary);
+}
+
+::selection {
+  color: var(--white);
+  background: var(--primary);
+}
+
 :root {
   --white: #fff;
   --black: #000;
@@ -18,7 +28,7 @@
   --slate1: var(--gray4);
   --primary: hsla(36, 76%, 60%, 1);
   --color-footer: var(--black);
-  --color-highlighted: var(--gray6);
+  --color-highlighted: hsla(32, 20%, 16%, 1);
   --bg-color-footer: var(--gray1);
   --color-menu: white;
   --bg-color-menuitem-active: var(--primary);

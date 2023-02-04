@@ -1,24 +1,20 @@
-import Avatar from '@/components/Avatar/Avatar';
-import Card from '@/components/Card/Card';
-import Select from '@/components/Select/Select';
-import { useMultisig } from '@/features/multisig/hooks';
-import { useQueries } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
-import { FlowAddNewOwner, DataOut as NewOwner } from './FlowAddNewOwner';
-import {
-  FlowAddNewTransaction,
-  DataOut as NewTransaction,
-} from './FlowAddNewTransaction';
-
-import { CopyIcon, TrashIcon } from '@radix-ui/react-icons';
-import { WalletIcon } from '@heroicons/react/20/solid';
-import { addresses } from '@/features/network';
 import { Address, useMutation } from 'wagmi';
-import { NiceAddress } from './NiceAddress';
-import { MultisigOwner } from './MultisigOwner';
-import { tw } from 'twind';
+
+import Card from '@/components/Card/Card';
+import Select from '@/components/Select/Select';
+import { NiceAddress } from '@/elements/NiceAddress';
+import { useMultisig } from '@/features/multisig/hooks';
+import { addresses } from '@/features/network';
+
+import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
+import {
+  DataOut as NewTransaction,
+  FlowAddNewTransaction,
+} from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
+import { MultisigOwner } from './MultisigOwner';
 
 export function EventSummary({ id }: { id: any }) {
   return (

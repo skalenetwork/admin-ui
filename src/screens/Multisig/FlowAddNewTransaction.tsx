@@ -1,34 +1,26 @@
-import Dialog from '@/components/Dialog/Dialog';
-import { Switch } from '@/components/Switch/Switch';
-import Field from '@/elements/Field/Field';
-import { useMultisig } from '@/features/multisig/hooks';
-import { Abi, AbiFunction, AbiParameter, AbiType } from 'abitype';
+import { Abi, AbiFunction } from 'abitype';
 import { ethers } from 'ethers';
 import {
-  useState,
-  useLayoutEffect,
   useCallback,
-  useMemo,
   useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
 } from 'react';
-import {
-  useForm,
-  FormProvider,
-  useWatch,
-  useFieldArray,
-} from 'react-hook-form';
-import { toSentenceCase } from '../../utils';
-import { useSigner, useAccount, useBalance } from 'wagmi';
-import { AlertProps } from '../ChainManager/types';
-import { MultisigOwner } from './MultisigOwner';
-import { NiceAddress } from './NiceAddress';
+import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { useAccount, useBalance } from 'wagmi';
 
-import { addresses } from '@/features/network/addresses';
+import { toSentenceCase } from '../../utils';
+
+import { addresses, manifest } from '@/features/network';
 import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
 import { MarionetteABI } from '@/features/network/abi/abi-marionette';
 import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
 
-import { manifest } from '@/features/network';
+import Dialog from '@/components/Dialog/Dialog';
+import { Switch } from '@/components/Switch/Switch';
+import Field from '@/elements/Field/Field';
+import { NiceAddress } from '@/elements/NiceAddress';
 
 const { CONTRACT } = manifest;
 

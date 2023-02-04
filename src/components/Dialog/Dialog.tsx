@@ -1,14 +1,7 @@
 import { Transition } from '@headlessui/react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Cross1Icon, Cross2Icon } from '@radix-ui/react-icons';
-import React, {
-  ComponentProps,
-  Fragment,
-  PropsWithChildren,
-  PropsWithoutRef,
-  useState,
-} from 'react';
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { Cross1Icon } from '@radix-ui/react-icons';
+import React, { Fragment, PropsWithChildren, useState } from 'react';
 import { tw } from 'twind';
 
 type Footer = {

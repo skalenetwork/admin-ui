@@ -2,7 +2,7 @@ import { Chain } from '@wagmi/core';
 
 export const EXPLORER_NAME = 'SKALE Explorer';
 
-import { NETWORK, nativeCurrency } from './manifest';
+import { nativeCurrency, NETWORK } from './manifest';
 
 function makeDefaultRpcUrls<T extends string>(key: T): Chain['rpcUrls'] {
   return {

@@ -1,18 +1,17 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import * as Collapsible from '@radix-ui/react-collapsible';
-import { NavLink } from 'react-router-dom';
-import { useTheme } from '../../../src/hooks';
 import {
   BridgeIcon,
   CrownIcon,
   DashboardIcon,
   IIcon,
-  InfoIcon,
   ManagerIcon,
   PeopleIcon,
 } from '@/components/Icons/Icons';
 import DarkModeToggle from '@/elements/DarkModeToggle/DarkModeToggle';
+import * as Collapsible from '@radix-ui/react-collapsible';
+import { useMemo, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { tw } from 'twind';
+import { useTheme } from '../../../src/hooks';
 
 const activeStyle = {
   background: 'var(--bg-color-menuitem-active)',

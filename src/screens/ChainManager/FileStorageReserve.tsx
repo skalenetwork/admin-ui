@@ -2,9 +2,9 @@ import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import Card from '@/components/Card/Card';
 import Progress from '@/components/Progress/Progress';
 import prettyBytes from 'pretty-bytes';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
-import type { WidgetWithAlertProps } from './types';
+import type { WidgetWithAlertProps } from '../types';
 
 export const FormattedSize = ({ value }: { value: number }) =>
   value !== undefined ? <>{prettyBytes(value || 0)}</> : <></>;

@@ -1,20 +1,7 @@
-import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Address,
-  useContract,
-  useNetwork,
-  useSigner,
-  useAccount,
-  useProvider,
-} from 'wagmi';
-import { getContract } from '@wagmi/core';
-import {
-  ContractManifestId,
-  getAbi,
-  GetAbiProps,
-  ContractManifestIdAbi,
-} from './abi/abi';
+import { useEffect } from 'react';
+import { Address, useAccount, useContract, useNetwork, useSigner } from 'wagmi';
+import { ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
 import { CONTRACT, getChainMetadataUrl, NetworkType } from './manifest';
 import { ChainManifestItem } from './types';
 
@@ -22,8 +9,6 @@ import {
   BaseContract,
   IContractParams,
 } from '@skaleproject/utils/lib/contracts/base_contract';
-import { Abi, AbiFunction, ExtractAbiFunctions } from 'abitype';
-import { ethers } from 'ethers';
 
 type ExplorerProps = {
   module:

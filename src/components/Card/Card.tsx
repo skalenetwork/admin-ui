@@ -1,7 +1,6 @@
 import { PropsWithChildren } from 'react';
 import { tw } from 'twind';
 import { InfoIcon } from '../Icons/Icons';
-import ScrollZone from '../ScrollZone/ScrollZone';
 import Tooltip from '../Tooltip/Tooltip';
 
 /**

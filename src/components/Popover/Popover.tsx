@@ -1,7 +1,7 @@
-import * as PopoverPrimitive from '@radix-ui/react-popover';
-import { tw } from 'twind';
-import React, { PropsWithChildren } from 'react';
 import { Cross1Icon } from '@radix-ui/react-icons';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { PropsWithChildren } from 'react';
+import { tw } from 'twind';
 
 type PopoverProps = PropsWithChildren<{
   trigger: JSX.Element;

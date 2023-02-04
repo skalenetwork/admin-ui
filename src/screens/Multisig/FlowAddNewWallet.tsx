@@ -1,10 +1,8 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
-import { useMultisig } from '@/features/multisig/hooks';
-import { useState, useLayoutEffect, useCallback } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { AlertProps } from '../ChainManager/types';
-import { MultisigOwner } from './MultisigOwner';
+import { useCallback, useLayoutEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { AlertProps } from '../types';
 
 export type DataOut = {
   name: string;

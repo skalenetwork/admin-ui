@@ -1,16 +1,16 @@
 import Card from '@/components/Card/Card';
 
-import { useMtm, useConfigController, useFcd } from '@/features/interim/hooks';
-import { useCallback, useState, Fragment } from 'react';
+import { useConfigController, useFcd, useMtm } from '@/features/interim/hooks';
+import { useCallback, useState } from 'react';
 
 import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import FileStorageReserve from './FileStorageReserve';
 
-import type { WidgetWithAlertProps } from './types';
-import { useQuery } from '@tanstack/react-query';
-import { useNetwork } from 'wagmi';
 import { useChainMetadata } from '@/features/network/hooks';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { useNetwork } from 'wagmi';
+import type { WidgetWithAlertProps } from '../types';
 
 /**
  * Show a formatted, colored label reflecting typical states

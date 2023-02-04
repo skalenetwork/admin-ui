@@ -1,13 +1,9 @@
-import React, {
-  BaseSyntheticEvent,
-  PropsWithChildren,
-  SyntheticEvent,
-} from 'react';
+import React, { BaseSyntheticEvent, PropsWithChildren } from 'react';
 import {
-  FieldValues,
-  useFormContext,
   Controller,
   ControllerRenderProps,
+  FieldValues,
+  useFormContext,
 } from 'react-hook-form';
 
 import { withErrorBoundary } from '../ErrorBoundary/ErrorBoundary';

@@ -6,5 +6,8 @@ module.exports = {
   singleQuote: true,
   printWidth: 80,
   bracketSpacing: true,
-  plugins: [require('prettier-plugin-tailwindcss')]
+  plugins: [
+    require('prettier-plugin-tailwindcss'),
+    require('prettier-plugin-organize-imports')
+  ]
 }

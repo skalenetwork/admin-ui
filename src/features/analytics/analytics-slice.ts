@@ -10,7 +10,7 @@ import {
   PayloadAction,
   ThunkDispatch,
 } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useSelector, useDispatch } from 'react-redux';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 // make the slice
 

@@ -1,17 +1,17 @@
-import { useMemo } from 'react';
+import { useSelector } from '@/app';
 import {
-  useAnalytics,
   context as analyticsContext,
+  useAnalytics,
   useBlockHistory,
 } from '@/features/analytics';
-import { useSelector } from '@/app';
+import { useMemo } from 'react';
 
-import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Card from '@/components/Card/Card';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 
 // @ts-ignore
-import { AxisOptions, Chart } from 'react-charts';
 import { useExplorer } from '@/features/network/hooks';
+import { AxisOptions, Chart } from 'react-charts';
 import { useTheme } from '../../hooks';
 
 const fmtnum = Intl.NumberFormat('en-US');

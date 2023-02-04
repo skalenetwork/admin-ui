@@ -1,9 +1,9 @@
-import { TOKEN_STANDARD } from '@/features/network/manifest';
 import { useTypedContract } from '@/features/network/hooks';
+import { TOKEN_STANDARD } from '@/features/network/manifest';
 import { ethers } from 'ethers';
 import {
-  useContractWrite,
   useContractRead,
+  useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
 

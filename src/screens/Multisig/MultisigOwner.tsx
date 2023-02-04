@@ -1,5 +1,5 @@
+import { NiceAddress } from '@/elements/NiceAddress';
 import { TrashIcon } from '@radix-ui/react-icons';
-import { NiceAddress } from './NiceAddress';
 
 export function MultisigOwner({
   address,

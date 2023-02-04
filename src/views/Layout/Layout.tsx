@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import SideNavigation from '@/views/SideNavigation/SideNavigation';
+import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import useKey from 'react-use/lib/useKey';
-import SideNavigation from '@/views/SideNavigation/SideNavigation';
 
 import { ConnectKitButton } from 'connectkit';
 
-import { useNetwork } from 'wagmi';
-import { tw } from 'twind';
-import {
-  FcdIcon,
-  GithubIcon,
-  LinkIcon,
-  MtmIcon,
-  RoleIcon,
-} from '@/components/Icons/Icons';
-import { useConfigController } from '@/features/interim/hooks';
+import { FcdIcon, GithubIcon, MtmIcon } from '@/components/Icons/Icons';
 import RoleList from '@/elements/RoleList/RoleList';
+import { useConfigController } from '@/features/interim/hooks';
+import { tw } from 'twind';
+import { useNetwork } from 'wagmi';
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);

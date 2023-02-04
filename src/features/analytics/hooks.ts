@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useBlockNumber, useProvider, useNetwork } from 'wagmi';
-import { BlockResponse, TimedBlocks } from './core/block';
 import { useIsFetching, useQueries } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo } from 'react';
+import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
+import { TimedBlocks } from './core/block';
 
 import {
+  addMetricGroup,
   useSliceDispatch,
   useSliceSelector,
-  addMetricGroup,
 } from './analytics-slice';
 
 export function useAnalytics() {

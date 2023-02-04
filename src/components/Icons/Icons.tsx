@@ -1,5 +1,3 @@
-import { tw } from 'twind';
-
 const defaultColor = 'currentColor';
 
 export const InfoIcon = ({ color = defaultColor }: { color?: string }) => (
