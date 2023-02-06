@@ -76,9 +76,9 @@
     @apply focus:border-[var(--primary)] focus:outline-none;
   }
 
-  input[data-state='error'],
-  select[data-state='error'],
-  textarea[data-state='error'] {
+  input[data-error],
+  select[data-error],
+  textarea[data-error] {
     @apply border-[var(--red10)];
   }
 

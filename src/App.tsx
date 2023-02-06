@@ -4,12 +4,13 @@ import Layout from '@/views/Layout/Layout';
 
 import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
 import ChainManager from '@/screens/ChainManager/ChainManager';
+import ImaAutodeploy from '@/screens/ImaAutodeploy/ImaAutodeploy';
+import ImaConnectChain from '@/screens/ImaConnectChain/ImaConnectChain';
 import ImaManager from '@/screens/ImaManager/ImaManager';
+import ImaMapToken from '@/screens/ImaMapToken/ImaMapToken';
 import Multisig from '@/screens/Multisig/Multisig';
 import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
 import Support from '@/views/Support/Support';
-import ImaAutodeploy from './screens/ImaAutodeploy/ImaAutodeploy';
-import ImaMapToken from './screens/ImaMapToken/ImaMapToken';
 
 const routes: RouteObject[] = [
   {
@@ -34,6 +35,10 @@ const routes: RouteObject[] = [
           {
             path: 'autodeployer',
             element: <ImaAutodeploy />,
+          },
+          {
+            path: 'connect',
+            element: <ImaConnectChain />,
           },
           {
             path: 'maptoken/:chainName',

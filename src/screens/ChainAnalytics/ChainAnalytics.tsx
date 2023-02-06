@@ -57,8 +57,8 @@ export function ChainAnalytics() {
   const tx = Math.random() * 50000;
 
   return blocks ? (
-    <div className="grid h-full w-full grid-rows-[1fr_3fr]">
-      <div className="grid grid-cols-2">
+    <div className="grid spaced h-full w-full grid-rows-[1fr_3fr]">
+      <div className="grid spaced grid-cols-2">
         <div data-id="blocks" data-s="2">
           <Card full heading="Blocks">
             <div className="flex h-full min-w-max items-center justify-between gap-4">
@@ -89,8 +89,8 @@ export function ChainAnalytics() {
           </Card>
         </div>
       </div>
-      <div className="grid grid-cols-3">
-        <div className="grid grid-rows-[60%_40%]">
+      <div className="grid spaced grid-cols-3">
+        <div className="grid spaced grid-rows-[60%_40%]">
           <div data-id="active_users" data-s="-1">
             <Card full heading="Active users">
               <div className="flex h-full flex-col">

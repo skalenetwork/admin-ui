@@ -1,5 +1,6 @@
 import Card from '@/components/Card/Card';
 import Stepper from '@/components/Stepper/Stepper';
+import { NiceAddress } from '@/elements/NiceAddress';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 export default function ImaMapToken() {
@@ -13,8 +14,14 @@ export default function ImaMapToken() {
       id: 'select-origin',
       label: 'Select origin token',
       content: (
-        <div>
-          <p>Select Origin: {chainName}</p>
+        <div className="flex flex-col justify-center h-full w-3/4 m-auto">
+          <p className="font-medium pb-8">Available tokens on {chainName}:</p>
+          <NiceAddress
+            className="gap-1"
+            address="0xF3a2eEBcad289dC01acFBa45eDC34b"
+            label="USDC"
+            iconUrl="/logo.png"
+          />
         </div>
       ),
     },
@@ -35,9 +42,12 @@ export default function ImaMapToken() {
     },
   ];
   return (
-    <div className="grid h-full w-full grid-rows-2 rounded-lg bg-[var(--white)]">
-      <Card heading={`Add ${standard} with ${chainName}`}>
-        <Stepper steps={steps} />
+    <div className="grid h-full w-full rounded-lg bg-[var(--white)]">
+      <Card full heading={`Add ${standard} with ${chainName}`}>
+        <Stepper
+          steps={steps}
+          className="h-full grid grid-rows-[max-content_1fr]"
+        />
       </Card>
     </div>
   );

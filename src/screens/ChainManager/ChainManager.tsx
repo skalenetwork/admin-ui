@@ -299,7 +299,7 @@ export default function ChainManager() {
 
   return (
     <>
-      <div className="grid h-full w-full grid-cols-2 grid-rows-3">
+      <div className="grid spaced h-full w-full grid-cols-2 grid-rows-3">
         <div data-id="contract_deploy" data-s="2">
           <WidgetConfigFcd
             id="contract_deploy"

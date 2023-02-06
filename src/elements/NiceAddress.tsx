@@ -1,8 +1,9 @@
+import Avatar from '@/components/Avatar/Avatar';
 import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { CopyIcon } from '@radix-ui/react-icons';
-import { Avatar } from 'connectkit';
+import { Avatar as AddressAvatar } from 'connectkit';
 import { useEffect } from 'react';
-import useCopyToClipboard from 'react-use/lib/useCopyToClipboard';
+import { useCopyToClipboard } from 'react-use';
 
 export function NiceAddress({
   className = '',
@@ -33,17 +34,20 @@ export function NiceAddress({
       className={`grid grid-cols-[max-content_max-content_1fr] items-center gap-x-4 gap-y-1 ${className}`}
     >
       {iconUrl ? (
-        <img src={iconUrl} alt="" className="w-8" />
+        <Avatar imageUrl={iconUrl} />
       ) : (
-        <Avatar address={address as `0x${string}`} size={32}></Avatar>
+        <AddressAvatar
+          address={address as `0x${string}`}
+          size={32}
+        ></AddressAvatar>
       )}
-      <div className="flex flex-col justify-start">
-        {label}
-        {address}
+      <div className="flex justify-start gap-4">
+        {label && <span className="font-semibold">{label}</span>}{' '}
+        <span>{address}</span>
       </div>
       <div className="flex items-center gap-2">
         {copyable && (
-          <div className="relative">
+          <div className="relative ml-auto">
             <button
               className="flex items-center justify-center"
               onClick={() => copy(address)}
@@ -57,6 +61,7 @@ export function NiceAddress({
           </div>
         )}
       </div>
+      {/* row break at 3rd col ^ */}
       {balance && (
         <>
           <div></div>

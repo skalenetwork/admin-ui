@@ -7,16 +7,23 @@ enum Variant {
 }
 
 type Props = {
-  name: `${string}.eth` | `0x${string}` | string;
+  name?: `${string}.eth` | `0x${string}` | string;
+  imageUrl?: string;
   variant?: Variant;
   isOnline?: boolean;
 };
 
-const Avatar = ({ name, variant = Variant.Circle, isOnline }: Props) => {
+const Avatar = ({
+  name,
+  variant = Variant.Circle,
+  isOnline,
+  imageUrl,
+}: Props) => {
   return (
     <AvatarPrimitive.Root className="relative inline-flex h-10 w-10">
       <AvatarPrimitive.Image
         alt="Avatar"
+        src={imageUrl}
         className={tw(
           'h-full w-full object-cover',
           {
@@ -48,11 +55,13 @@ const Avatar = ({ name, variant = Variant.Circle, isOnline }: Props) => {
         )}
         delayMs={600}
       >
-        <span className="text-sm font-medium text-[var(--gray10)]">
-          {name.slice(0, 2) === '0x'
-            ? name.slice(2, 4)
-            : (name.slice(0, 2) || '').toUpperCase()}
-        </span>
+        {name && (
+          <span className="text-sm font-medium text-[var(--gray10)]">
+            {name.slice(0, 2) === '0x'
+              ? name.slice(2, 4)
+              : (name.slice(0, 2) || '').toUpperCase()}
+          </span>
+        )}
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   );

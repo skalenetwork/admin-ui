@@ -69,7 +69,7 @@ function Field<T extends FieldValues>({
               ref: field.ref,
               value: field.value,
               disabled,
-              'data-state': error ? 'error' : '',
+              'data-error': error || undefined,
             })
           }
         />

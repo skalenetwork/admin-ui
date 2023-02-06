@@ -82,7 +82,7 @@ export function StepperTrigger({
 }
 
 export default function Stepper({
-  className,
+  className = '',
   steps,
   trigger = StepperTrigger,
 }: Props) {
@@ -110,10 +110,13 @@ export default function Stepper({
           </TabsPrimitive.Trigger>
         ))}
       </TabsPrimitive.List>
-
-      {steps.map(({ id, content }) => (
-        <TabsPrimitive.Content value={id}>{content}</TabsPrimitive.Content>
-      ))}
+      <div>
+        {steps.map(({ id, content }) => (
+          <TabsPrimitive.Content value={id} asChild>
+            {content}
+          </TabsPrimitive.Content>
+        ))}
+      </div>
     </TabsPrimitive.Root>
   );
 }

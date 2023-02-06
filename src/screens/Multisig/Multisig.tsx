@@ -131,7 +131,7 @@ export default function Multisig() {
 
   return (
     <div
-      className="grid h-full w-full grid-cols-[7fr_3fr] grid-rows-[50px_auto]"
+      className="grid spaced h-full w-full grid-cols-[7fr_3fr] grid-rows-[50px_auto]"
       style={{ gridTemplateRows: '50px 1fr', gridTemplateColumns: '7fr 3fr' }}
     >
       <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
@@ -151,7 +151,10 @@ export default function Multisig() {
         </div>
       </div>
 
-      <div data-id="scene" className="row-span-2 grid grid-cols-3 grid-rows-4">
+      <div
+        data-id="scene"
+        className="row-span-2 grid spaced grid-cols-3 grid-rows-4"
+      >
         {/* Counts */}
 
         <div data-id="wallet_balance" data-s="2">

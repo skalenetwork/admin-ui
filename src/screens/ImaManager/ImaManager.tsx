@@ -307,7 +307,7 @@ export default function ImaManager() {
   );
 
   return (
-    <div className="grid h-full w-full grid-rows-2 !gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
+    <div className="grid spaced h-full w-full grid-rows-2 !gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
       <Card
         full
         heading={
@@ -319,7 +319,7 @@ export default function ImaManager() {
           </div>
         }
       >
-        <div className="grid h-full grid-flow-col grid-cols-2">
+        <div className="grid spaced h-full grid-flow-col grid-cols-2">
           <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
             {['ethereum', ...Object.keys(chains.staging)].map((name) => (
               <PeerChainItem
