@@ -313,9 +313,9 @@ export default function ImaManager() {
         heading={
           <div className="flex h-max items-center justify-between">
             <h4 className="font-medium">Connected chains</h4>
-            <button className="btn btn-wide rounded-full text-sm">
+            <Link to="connect" className="btn btn-wide rounded-full text-sm">
               Connect new chain
-            </button>
+            </Link>
           </div>
         }
       >
