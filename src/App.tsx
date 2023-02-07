@@ -1,4 +1,9 @@
-import { RouteObject, useRoutes } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Link,
+  RouteObject,
+  RouterProvider,
+} from 'react-router-dom';
 
 import Layout from '@/views/Layout/Layout';
 
@@ -6,11 +11,14 @@ import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
 import ChainManager from '@/screens/ChainManager/ChainManager';
 import ImaAutodeploy from '@/screens/ImaAutodeploy/ImaAutodeploy';
 import ImaConnectChain from '@/screens/ImaConnectChain/ImaConnectChain';
+import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
 import ImaManager from '@/screens/ImaManager/ImaManager';
 import ImaMapToken from '@/screens/ImaMapToken/ImaMapToken';
 import Multisig from '@/screens/Multisig/Multisig';
 import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
 import Support from '@/views/Support/Support';
+
+<Link to="ima_manager">IMA Manager</Link>;
 
 const routes: RouteObject[] = [
   {
@@ -41,8 +49,17 @@ const routes: RouteObject[] = [
             element: <ImaConnectChain />,
           },
           {
-            path: 'maptoken/:chainName',
-            element: <ImaMapToken />,
+            path: 'token_map',
+            children: [
+              {
+                path: '',
+                element: <ImaConnectToken />,
+              },
+              {
+                path: ':chainName',
+                element: <ImaMapToken />,
+              },
+            ],
           },
         ],
       },
@@ -62,7 +79,12 @@ const routes: RouteObject[] = [
   },
 ];
 
+const router = createBrowserRouter(routes);
+
 export default function App() {
-  const currentRouteElement = useRoutes(routes);
-  return <div id="app">{currentRouteElement}</div>;
+  return (
+    <div id="app">
+      <RouterProvider router={router} />
+    </div>
+  );
 }

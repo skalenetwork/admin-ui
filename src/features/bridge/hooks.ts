@@ -75,7 +75,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
  * Manage chain connectivity and statuses
  * @param param0
  */
-export function useConnectChain({ chainName }: { chainName: string }) {
+export function useChainConnect({ chainName }: { chainName: string }) {
   const { address, abi, api } = useTokenManagerLinker();
 
   const { config: connectConfig } = usePrepareContractWrite({
@@ -89,5 +89,14 @@ export function useConnectChain({ chainName }: { chainName: string }) {
     },
   });
 
-  const { write: connect } = useContractWrite(connectConfig);
+  const connect = useContractWrite(connectConfig);
+
+  let status;
+
+  return {
+    connect,
+    status,
+  };
 }
+
+export function useTokenMapping({}: {}) {}

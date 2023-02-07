@@ -121,7 +121,7 @@ const SelectedPeerChainItem = ({
                   actionElement: ({ className }) => (
                     <Link
                       className={`${className}`}
-                      to={`maptoken/${name}?standard=${selectedStandard?.name}`}
+                      to={`token_map/${name}?standard=${selectedStandard?.name}`}
                     >
                       Add new {selectedStandard?.label} token
                     </Link>

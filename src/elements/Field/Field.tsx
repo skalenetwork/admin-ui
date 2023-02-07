@@ -1,3 +1,7 @@
+/**
+ * @description A featured form field around react-hook-form
+ */
+
 import React, { BaseSyntheticEvent, PropsWithChildren } from 'react';
 import {
   Controller,

@@ -7,6 +7,7 @@ import { ConnectKitButton } from 'connectkit';
 
 import { FcdIcon, GithubIcon, MtmIcon } from '@/components/Icons/Icons';
 import RoleList from '@/elements/RoleList/RoleList';
+import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
 import { useConfigController } from '@/features/interim/hooks';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
@@ -26,11 +27,14 @@ export default function Layout() {
 
   return (
     <>
-      <header className="flex h-min w-full items-center justify-between border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-6 text-[var(--black)]">
+      <header className="grid grid-cols-[20vw_1fr_max-content] grid-flow-col w-full border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-6 text-[var(--black)]">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.png" alt="" className="w-8 rounded" />
           <h3 className="">SKALE Chain UI</h3>
         </Link>
+        <div className="flex items-center h-full">
+          <RouterCrumb />
+        </div>
         <div className="flex items-center gap-4">
           <div className="font-mono">
             <ConnectKitButton />

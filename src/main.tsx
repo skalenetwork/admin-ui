@@ -73,18 +73,16 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <WagmiConfig client={wagmiClient}>
-          <BrowserRouter>
-            <ConnectKitProvider
-              theme="nouns"
-              options={{
-                initialChainId: 0,
-              }}
-            >
-              <MotionConfig transition={{ duration: 0.3, ease: 'easeIn' }}>
-                <App />
-              </MotionConfig>
-            </ConnectKitProvider>
-          </BrowserRouter>
+          <ConnectKitProvider
+            theme="nouns"
+            options={{
+              initialChainId: 0,
+            }}
+          >
+            <MotionConfig transition={{ duration: 0.3, ease: 'easeIn' }}>
+              <App />
+            </MotionConfig>
+          </ConnectKitProvider>
         </WagmiConfig>
       </QueryClientProvider>
     </Provider>
