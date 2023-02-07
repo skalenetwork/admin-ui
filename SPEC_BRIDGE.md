@@ -10,35 +10,31 @@
 
 ### Peer discovery
 
-`origin` is connected to `target`
+- `origin` has connected to `target`
 
 ```ts
 TokenManagerLinker<`target`>.hasSchain(origin.name)
 ```
 
-`target` is connected to `origin`
+- `target` has connected to `origin`
 
 ```ts
-TokenManagerLinker<`origin`>.connectSChain(target.name)
+TokenManagerLinker<`target`>.hasSchain(origin.name)
 ```
 
 #### Tokens
 
-`origin` tokens mapped to `target`
+tokens mapped between peers
 
 ```ts
-MessageProxyForSchain.grantRole(
-  CHAIN_CONNECTOR_ROLE,
-  TokenManagerLinker.address,
-);
+...
 ```
 
 ### Peer communication
 
-Access authorization
+Auhtorization
 
 ```ts
-
 // network gate
 MessageProxyForSchain.grantRole(CHAIN_CONNECTOR_ROLE, TokenManagerLinker.address)
 
@@ -46,17 +42,23 @@ MessageProxyForSchain.grantRole(CHAIN_CONNECTOR_ROLE, TokenManagerLinker.address
 TokenManagerLinker<`origin`>.hasRole(REGISTRAR_ROLE)
 ```
 
-`origin` connects to `target` **OR** `origin` accepts `target` as a connection
+- `origin` is connecting to `target` **OR** `origin` is accepting `target` as a connection
 
 ```ts
 TokenManagerLinker<`origin`>.connectSChain(target.name)
 ```
 
-> For both of the above: What for other than schain (ethereum main or etc) (is it Twin?), if same, then what is `schainName` value?
-
 #### Tokens
 
+**Condition:** fully connected `peers`
+
+`origin` is mapping its tokens to `target`
+
+```ts
 ...
+```
+
+> What for other than schain (ethereum main or etc) (is it `Twin`?), if same, then what is `schainName` value?
 
 ## IMA-js internal web3 usage
 
