@@ -19,7 +19,7 @@ type ExplorerProps = {
     | 'block'
     | 'token'
     | 'contract';
-  action: 'listaccounts';
+  action: 'listaccounts' | 'getLogs' | string;
   args?: {
     [key: string]: string;
   };

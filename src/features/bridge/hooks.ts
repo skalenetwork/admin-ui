@@ -3,18 +3,16 @@ import {
   useExplorer,
   useTypedContract,
 } from '@/features/network/hooks';
-import {
-  ConnectionStatus,
-  CONTRACT,
-  TOKEN_STANDARD,
-} from '@/features/network/manifest';
+import { ConnectionStatus, TOKEN_STANDARD } from '@/features/network/manifest';
 import { ethers } from 'ethers';
+import { useAsync } from 'react-use';
 import {
   useContractRead,
   useContractReads,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
+  useProvider,
 } from 'wagmi';
 import { toSentenceCase } from '../../utils';
 
@@ -159,35 +157,63 @@ export function useHistory() {
   });
   const iface = abi && new ethers.utils.Interface(abi);
 
-  const response = useExplorer({
+  const { address, api, contract } = useTypedContract({
+    id: 'TOKEN_MANAGER_ERC20',
+  });
+
+  const provider = useProvider();
+
+  const { value, loading, error } = useAsync(() =>
+    provider.getLogs({
+      address,
+      fromBlock: 0,
+      toBlock: 'latest',
+    }),
+  );
+
+  console.log(value, loading, error);
+
+  let response = value;
+
+  const explorerLogs = useExplorer({
     module: 'logs',
     action: 'getLogs',
     args: {
+      address,
       fromBlock: '0',
       toBlock: 'latest',
-      address: CONTRACT.TOKEN_MANAGER_ERC20.address,
     },
   });
 
   const events =
     iface &&
-    response?.data?.result?.map((log) => {
-      console.log(log);
-      let parsed = iface.parseLog(log);
+    explorerLogs?.data?.result &&
+    explorerLogs?.data?.result?.map(function (
+      log: ethers.providers.Log & { timeStamp: 'string' },
+      index: number,
+    ) {
+      console.log('response', log);
+      let parsedLog;
+      try {
+        parsedLog = iface.parseLog(log);
+      } catch (e) {
+        console.error('woah woot', log, e);
+        parsedLog = { name: 'unknown' };
+      }
       return {
         timestamp: ethers.BigNumber.from(log.timeStamp).toNumber(),
-        name: parsed.name,
-        label: toSentenceCase(parsed.name),
+        name: parsedLog.name,
+        label: toSentenceCase(parsedLog.name),
         value: log.data,
       };
     });
 
-  console.log(
-    'use history',
-    CONTRACT.TOKEN_MANAGER_ERC20.address,
-    response,
-    events,
-  );
+  // console.log(
+  //   'use history',
+  //   CONTRACT.TOKEN_MANAGER_ERC20.address,
+  //   response,
+  //   events,
+  // );
 
   return {
     events,
