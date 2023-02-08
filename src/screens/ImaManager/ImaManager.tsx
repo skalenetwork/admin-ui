@@ -212,17 +212,7 @@ const FormattedPeerChain = ({
     )}
     <div className="flex flex-col gap-4">
       <h5 className="font-medium">{name}</h5>
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-[var(--slate10)]">
-          {connectionStatus === 'full'
-            ? 'Connected'
-            : connectionStatus === 'origin'
-            ? 'Partially connected'
-            : connectionStatus === 'target'
-            ? 'Request for connection'
-            : 'Not connected'}
-        </span>
-
+      <div className="flex items-center gap-2">
         <svg
           width="14"
           height="12"
@@ -257,6 +247,15 @@ const FormattedPeerChain = ({
             />
           )}
         </svg>
+        <span className="text-sm text-[var(--slate10)]">
+          {connectionStatus === 'full'
+            ? 'Connected'
+            : connectionStatus === 'origin'
+            ? 'Partially connected'
+            : connectionStatus === 'target'
+            ? 'Request for connection'
+            : 'Not connected'}
+        </span>
 
         {/* <svg
           width="14"

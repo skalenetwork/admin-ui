@@ -21,6 +21,7 @@ import Dialog from '@/components/Dialog/Dialog';
 import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
 const { CONTRACT } = manifest;
 
@@ -407,7 +408,10 @@ export function FlowAddNewTransaction({
                 <div className="max-w-[400px]">
                   {form[0].getFieldState('encoded').error && (
                     <p className="text-xs text-red-500">
-                      <span className="font-medium">Param Errors:</span>{' '}
+                      <span className="font-medium">
+                        <ExclamationTriangleIcon className="w-4" /> Param Errors
+                      </span>{' '}
+                      <br />
                       {form[0].getFieldState('encoded').error?.message}
                     </p>
                   )}

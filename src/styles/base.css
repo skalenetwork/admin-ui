@@ -42,7 +42,7 @@
 
   button[disabled],
   .btn[disabled] {
-    @apply cursor-default grayscale transition-all;
+    @apply cursor-default opacity-50 grayscale transition-all;
   }
 
   .btn.negative {

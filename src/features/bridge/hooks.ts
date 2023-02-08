@@ -5,14 +5,12 @@ import {
 } from '@/features/network/hooks';
 import { ConnectionStatus, TOKEN_STANDARD } from '@/features/network/manifest';
 import { ethers } from 'ethers';
-import { useAsync } from 'react-use';
 import {
   useContractRead,
   useContractReads,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
-  useProvider,
 } from 'wagmi';
 import { toSentenceCase } from '../../utils';
 
@@ -161,20 +159,6 @@ export function useHistory() {
     id: 'TOKEN_MANAGER_ERC20',
   });
 
-  const provider = useProvider();
-
-  const { value, loading, error } = useAsync(() =>
-    provider.getLogs({
-      address,
-      fromBlock: 0,
-      toBlock: 'latest',
-    }),
-  );
-
-  console.log(value, loading, error);
-
-  let response = value;
-
   const explorerLogs = useExplorer({
     module: 'logs',
     action: 'getLogs',
@@ -188,25 +172,29 @@ export function useHistory() {
   const events =
     iface &&
     explorerLogs?.data?.result &&
-    explorerLogs?.data?.result?.map(function (
-      log: ethers.providers.Log & { timeStamp: 'string' },
-      index: number,
-    ) {
-      console.log('response', log);
-      let parsedLog;
-      try {
-        parsedLog = iface.parseLog(log);
-      } catch (e) {
-        console.error('woah woot', log, e);
-        parsedLog = { name: 'unknown' };
-      }
-      return {
-        timestamp: ethers.BigNumber.from(log.timeStamp).toNumber(),
-        name: parsedLog.name,
-        label: toSentenceCase(parsedLog.name),
-        value: log.data,
-      };
-    });
+    (explorerLogs?.data?.result as [])
+      ?.reverse()
+      .map(function (
+        log: Omit<ethers.providers.Log, 'blockHash'> & { timeStamp: string },
+        index: number,
+      ) {
+        // filter because rpc fetched logs don't have null members in topic
+        log.topics = log.topics.filter((topic) => topic !== null);
+        let parsedLog;
+        try {
+          parsedLog = iface.parseLog(log);
+        } catch (e) {
+          console.error(index, log, e);
+          parsedLog = { name: 'unknown' };
+        }
+        return {
+          timestamp: ethers.BigNumber.from(log.timeStamp).toNumber(),
+          name: parsedLog.name,
+          label: toSentenceCase(parsedLog.name),
+          value: log.data,
+          params: parsedLog.args,
+        };
+      });
 
   // console.log(
   //   'use history',

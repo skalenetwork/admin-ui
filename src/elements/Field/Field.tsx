@@ -2,6 +2,7 @@
  * @description A featured form field around react-hook-form
  */
 
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import React, { BaseSyntheticEvent, PropsWithChildren } from 'react';
 import {
   Controller,
@@ -82,7 +83,13 @@ function Field<T extends FieldValues>({
             !error ? 'opacity-0' : ''
           }`}
         >
-          {error ? <>{error?.message}</> : '-'}
+          {error ? (
+            <>
+              {error?.message} <ExclamationTriangleIcon className="w-4" />
+            </>
+          ) : (
+            '-'
+          )}
         </div>
         {children}
       </fieldset>
