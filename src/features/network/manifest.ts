@@ -10,6 +10,8 @@ export type NetworkType = 'mainnet' | 'staging';
 
 export type ContractType = 'admin' | 'ima:bridge'; // may scope as ima:subthing
 
+export type ConnectionStatus = 'full' | 'origin' | 'target' | 'none';
+
 export type ContractManifest = {
   [key: string]: {
     type: ContractType;

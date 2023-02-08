@@ -1,41 +1,44 @@
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { NiceAddress } from '@/elements/NiceAddress';
+import { useChainConnect, useHistory } from '@/features/bridge';
 import { chains } from '@/features/network';
-import { TOKEN_STANDARD } from '@/features/network/manifest';
+import { ConnectionStatus, TOKEN_STANDARD } from '@/features/network/manifest';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
+import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
 
-type ConnectionStatus = 'full' | 'origin' | 'target';
-
 const TransactionItem = ({
   id,
   actionText,
   author,
-  blocksElapsed,
+  timestamp,
 }: {
-  id: string;
+  id?: string;
   actionText: string;
   author: string;
-  blocksElapsed?: number;
+  timestamp?: number;
 }) => {
+  const elapsed = humanizeDuration(
+    (Number(timestamp) - Math.floor(new Date() / 1000)) * 1000,
+    { largest: 1 },
+  );
   return (
     <div
       className="min-h-1/2 flex flex-col rounded-lg bg-[var(--slate)] 
     px-12 py-2 text-[var(--gray12)]"
     >
       <div>
-        {id} - {actionText} by {author}
+        {id ? id + ' - ' : ''}
+        {actionText} by {author}
       </div>
-      <div className="text-sm text-[var(--gray10)]">
-        About {blocksElapsed} blocks ago
-      </div>
+      <div className="text-sm text-[var(--gray10)]">About {elapsed} ago</div>
     </div>
   );
 };
@@ -44,16 +47,17 @@ const standards = Object.values(TOKEN_STANDARD);
 
 const SelectedPeerChainItem = ({
   name,
-  connectionStatus,
   alertKey,
   toggleAlert,
   className = '',
 }: AlertProps & {
   className: string;
   name: string;
-  connectionStatus: ConnectionStatus;
 }) => {
   const { chain } = useNetwork();
+  const { status: connectionStatus } = useChainConnect({
+    chainName: name,
+  });
 
   // mocking subdata of useChainConnections
   const supported = [
@@ -66,6 +70,7 @@ const SelectedPeerChainItem = ({
   const selectedStandard = useMemo(() => {
     return standards.find((s) => s.name === standardName);
   }, [standardName]);
+
   useEffect(() => {
     if (alertKey !== name) {
       window.setTimeout(() => setStandardName(''), 500);
@@ -74,7 +79,10 @@ const SelectedPeerChainItem = ({
 
   return (
     <motion.div
-      className={className}
+      className={tw(
+        className,
+        connectionStatus === 'target' ? '!bg-[var(--color-highlighted)]' : '',
+      )}
       key={name}
       initial={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
@@ -214,7 +222,58 @@ const FormattedPeerChain = ({
             ? 'Request for connection'
             : 'Not connected'}
         </span>
+
         <svg
+          width="14"
+          height="12"
+          viewBox="0 0 14 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {connectionStatus === 'origin' || connectionStatus === 'full' ? (
+            <path
+              d="M6 10C6 11.1046 5.07999 12.0326 4.03621 11.6713C1.68693 10.8579 0 8.62595 0 6C0 3.37405 1.68693 1.14211 4.03621 0.328744C5.07999 -0.0326319 6 0.895431 6 2V10Z"
+              fill="var(--green10)"
+            />
+          ) : (
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M0 6C0 8.97446 2.16441 11.4434 5.00419 11.9177C5.54892 12.0087 6 11.5523 6 11V11C6 10.4477 5.54533 10.0128 5.01012 9.87657C3.27976 9.43606 2 7.86748 2 6C2 4.13252 3.27976 2.56394 5.01012 2.12343C5.54533 1.98717 6 1.55228 6 1V1C6 0.447715 5.54893 -0.00873472 5.00419 0.0822574C2.16441 0.556609 0 3.02554 0 6Z"
+              fill="var(--red10)"
+            />
+          )}
+          {connectionStatus === 'target' || connectionStatus === 'full' ? (
+            <path
+              d="M8 10C8 11.1046 8.92001 12.0326 9.96379 11.6713C12.3131 10.8579 14 8.62595 14 6C14 3.37405 12.3131 1.14211 9.96379 0.328744C8.92001 -0.0326319 8 0.895431 8 2V10Z"
+              fill="var(--green10)"
+            />
+          ) : (
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M14 5.92936C14 8.90382 11.8356 11.3727 8.99581 11.8471C8.45108 11.9381 8 11.4816 8 10.9294V10.9294C8 10.3771 8.45467 9.94219 8.98988 9.80593C10.7202 9.36542 12 7.79684 12 5.92936C12 4.06188 10.7202 2.4933 8.98988 2.05279C8.45467 1.91653 8 1.48164 8 0.929359V0.929359C8 0.377074 8.45107 -0.0793755 8.99581 0.0116166C11.8356 0.485968 14 2.9549 14 5.92936Z"
+              fill="var(--red10)"
+            />
+          )}
+        </svg>
+
+        {/* <svg
+          width="14"
+          height="12"
+          viewBox="0 0 14 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M0 6C0 8.97446 2.16441 11.4434 5.00419 11.9177C5.54892 12.0087 6 11.5523 6 11V11C6 10.4477 5.54533 10.0128 5.01012 9.87657C3.27976 9.43606 2 7.86748 2 6C2 4.13252 3.27976 2.56394 5.01012 2.12343C5.54533 1.98717 6 1.55228 6 1V1C6 0.447715 5.54893 -0.00873472 5.00419 0.0822574C2.16441 0.556609 0 3.02554 0 6Z"
+            fill="#299764"
+          />
+        </svg> */}
+
+        {/* <svg
           width="30"
           height="19"
           viewBox="0 0 30 19"
@@ -237,7 +296,7 @@ const FormattedPeerChain = ({
                 : 'var(--red10)'
             }
           />
-        </svg>
+        </svg> */}
       </div>
     </div>
   </div>
@@ -245,17 +304,18 @@ const FormattedPeerChain = ({
 
 const PeerChainItem = ({
   name,
-  connectionStatus,
   tokenList = [],
   selected = false,
   onSelect,
 }: {
   name: string;
-  connectionStatus: 'full' | 'origin' | 'target';
   tokenList: [];
   selected?: boolean;
   onSelect?: () => void;
 }) => {
+  const { status: connectionStatus } = useChainConnect({
+    chainName: name,
+  });
   return (
     <button
       onClick={() => onSelect?.()}
@@ -297,6 +357,8 @@ export default function ImaManager() {
     Object.values(chains.staging)[0].name,
   );
 
+  const { events } = useHistory();
+
   const toggleAlert = useCallback(
     (toKey: string = '') => {
       return (open: boolean) => {
@@ -324,7 +386,6 @@ export default function ImaManager() {
             {['ethereum', ...Object.keys(chains.staging)].map((name) => (
               <PeerChainItem
                 name={name}
-                connectionStatus={name === 'ethereum' ? 'target' : 'full'}
                 tokenList={[]}
                 selected={selectedChain === name}
                 onSelect={() => setSelectedChain(name)}
@@ -334,17 +395,8 @@ export default function ImaManager() {
           <div>
             <SelectedPeerChainItem
               className={`flex h-full w-full flex-col rounded-lg bg-[var(--slate1)] px-6
-                py-2 text-[var(--gray12)]
-                ${
-                  (selectedChain === 'ethereum' ? 'target' : 'full') ===
-                  'target'
-                    ? 'bg-[var(--color-highlighted)]'
-                    : 'bg-[var(--slate)]'
-                }`}
+                py-2 text-[var(--gray12)]`}
               name={selectedChain}
-              connectionStatus={
-                selectedChain === 'ethereum' ? 'target' : 'full'
-              }
               alertKey={alertKey}
               toggleAlert={toggleAlert}
             />
@@ -356,14 +408,14 @@ export default function ImaManager() {
         heading="Recent transactions"
         bodyClass="scrollbar flex flex-col gap-3"
       >
-        {[1, 2, 3, 5, 6, 7, 8].map((x) => (
-          <TransactionItem
-            id={x}
-            actionText="Add ERC-20 Token"
-            author="owner"
-            blocksElapsed={20}
-          />
-        ))}
+        {events &&
+          events.map((event) => (
+            <TransactionItem
+              actionText={event.label}
+              author="_____"
+              timestamp={event.timestamp}
+            />
+          ))}
       </Card>
       {/* <div data-id="main"></div>
       <div data-id="collapse"></div> */}

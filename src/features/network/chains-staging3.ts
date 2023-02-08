@@ -24,7 +24,7 @@ function makeDefaultBlockExplorers<T extends string>(
   return {
     default: {
       name: EXPLORER_NAME,
-      url: `https://${key}.staging-v3.skalenodes.com/`,
+      url: `https://${key}.explorer.staging-v3.skalenodes.com/`,
     },
   };
 }

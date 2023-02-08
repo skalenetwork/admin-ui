@@ -1,9 +1,11 @@
 import { utils } from 'ethers';
 
-export function toSentenceCase(camelCase: string) {
-  if (camelCase) {
-    const result = camelCase.replace(/([A-Z])/g, ' $1');
-    return result[0].toUpperCase() + result.substring(1).toLowerCase();
+export function toSentenceCase(anyCamelCase: string) {
+  if (anyCamelCase) {
+    const result = anyCamelCase
+      .replace(/([A-Z]+)/g, '$1')
+      .replace(/([A-Z][a-z])/g, ' $1');
+    return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
   }
   return '';
 }
