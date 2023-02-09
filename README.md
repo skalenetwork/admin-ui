@@ -112,6 +112,69 @@ Following are being built along-side `admin-ui` app specifically for re-usabilit
 - `src/elements`: JSX UI Elements (ideally framework-agnostic)
 - `src/types`
 
+# Concept: Managing access control
+
+Existing primary
+
+```ts
+export type ContractDetail = {
+  type: ContractType;
+  key: string;
+  name: string;
+  address: `0x${string}`;
+};
+
+export const CONTRACT = {
+  [:ContractManifestId]: ContractDetail
+} as const satisfies ContractManifest;
+```
+
+Precedent
+
+```ts
+// ~ pseudo-ts
+
+export const ABI = {...} as const
+satisfies { [key in ContractManifestId]: Abi }
+```
+
+Proposed extension
+
+**`role.ts`**
+
+```ts
+// ~ pseudo-ts
+
+type RoleFromContract<TContractId extends ContractId>; // extract from ts ABI (const)
+
+type RoleId<TContractId extends ContractId> = Array<[TContractId, RoleFromContract<TContractId>]>
+
+type RoleDetail = {
+  key: string; // making role another possible vector in requests caching layer
+  name: string; // basically RoleKey but not implicitly
+  description: string;
+}
+
+// manfest const ROLE to be satisfied by
+type RoleManifest = {
+  [contractId as ContractId]: {
+    [contractRoleId as RoleFromContract<contractId>]: RoleDetail
+  }
+}
+```
+
+> Note: Keys across the constants and types represent getters on contracts
+
+### Advanced ACL rules (scope-overflow):
+
+Identify members of contracts
+
+```matlab
+AddressableMember[] ⊆ filter(type:function && output*.type:address)`
+```
+
+`AddressibleMember` is a single or multi-address getter, which becomes candidate for `RoleDetail.owners[]`, `RoleDetail.granters[]` and `RoleDetail.grantees[]`. Each set could have further conditions, demanding an ACL tree, manually maintained or statically generated from contracts (modifier analysis).
+
 # Links
 
 ## Consumables

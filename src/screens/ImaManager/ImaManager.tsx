@@ -320,7 +320,7 @@ const PeerChainItem = ({
       onClick={() => onSelect?.()}
       className={tw`group flex justify-between
       rounded-lg bg-[var(--slate)] px-6 py-2 text-left text-[var(--blue12)]
-      transition-all
+      transition-all delay-100
       ${
         selected
           ? `translate-x-1 cursor-default bg-[var(--slate1)] ${
