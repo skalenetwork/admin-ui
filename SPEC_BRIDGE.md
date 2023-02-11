@@ -32,7 +32,7 @@ tokens mapped between peers
 
 ### Peer communication
 
-Auhtorization
+Authorization
 
 ```ts
 // network gate

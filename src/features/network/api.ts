@@ -8,7 +8,7 @@ import { ABI } from '@/features/network/abi/abi';
 import { CONTRACT } from '@/features/network/contract';
 import { Provider } from '@ethersproject/providers';
 // import { TokenManagerERC1155 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC1155';
-// import { TokenManagerERC20 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC20';
+import { TokenManagerERC20 } from '@skalenetwork/ima-js/build/contracts/schain/TokenManagerERC20';
 // import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC721';
 // import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 // import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
@@ -65,10 +65,10 @@ export const API = {
       },
     ],
   ),
-  // TOKEN_MANAGER_ERC20: buildApi(
-  //   TokenManagerERC20,
-  //   ({ address, abi, chain }) => [{ eth: {} }, address, abi],
-  // ),
+  TOKEN_MANAGER_ERC20: buildApi(
+    TokenManagerERC20,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
   // TOKEN_MANAGER_ERC721: buildApi(
   //   TokenManagerERC721,
   //   ({ address, abi, chain }) => [{ eth: {} }, address, abi],
