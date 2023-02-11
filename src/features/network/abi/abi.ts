@@ -2,23 +2,21 @@
  * register TS ABIs
  */
 
-import { CONTRACT } from '@/features/network/manifest';
-
-import { ConfigControllerABI } from './abi-configcontroller';
-import { MarionetteABI } from './abi-marionette';
-import { MultisigWalletABI } from './abi-multisigwallet';
-
-// later better to come from autogen out of IMA releases
-// impl side on skale.js
-import unionIMA from './abi-ima.union';
-
+import { CONTRACT } from '@/features/network/contract';
 import { getContract, Provider } from '@wagmi/core';
 import {
   Abi,
+  AbiError,
+  AbiEvent,
+  AbiFunction,
   AbiStateMutability,
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
+import { ConfigControllerABI } from './abi-configcontroller';
+import unionIMA from './abi-ima.union';
+import { MarionetteABI } from './abi-marionette';
+import { MultisigWalletABI } from './abi-multisigwallet';
 
 /**
  * @todo type(s) for autogen wrapper with named parameters around ethers contract functions
@@ -48,6 +46,12 @@ export type ContractName<K extends ContractManifestId> = Lowercase<
   (typeof CONTRACT)[K]['name']
 >;
 
+type RelaxedAbi = Readonly<
+  (Omit<AbiFunction, 'stateMutability'> | AbiEvent | AbiError)[]
+>;
+
+// ABIs are missing if not satisfied
+// Change RelaxedAbi to Abi for strict Abi checking
 export const ABI = {
   CONFIG_CONTROLLER: ConfigControllerABI,
   MULTISIG_WALLET: MultisigWalletABI,
@@ -57,7 +61,9 @@ export const ABI = {
   TOKEN_MANAGER_ERC1155: unionIMA['token_manager_erc1155_abi'],
   TOKEN_MANAGER_ETH: unionIMA['token_manager_eth_abi'],
   TOKEN_MANAGER_LINKER: unionIMA['token_manager_linker_abi'],
-} as const satisfies { [key in ContractManifestId]: [] };
+} as const satisfies {
+  [key in ContractManifestId]: RelaxedAbi;
+};
 
 export type ContractManifestIdAbi = keyof typeof ABI;
 

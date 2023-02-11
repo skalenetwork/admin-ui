@@ -27,7 +27,7 @@ tailwindSetup({
   darkMode: 'class', // use a different dark mode strategy (default: 'media')
 });
 
-import { chains as skaleChains } from '@/features/network/chains';
+import { chains as skaleChains } from '@/features/network/chains/chains';
 
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
 import {

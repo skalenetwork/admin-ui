@@ -7,3 +7,6 @@ export type ChainManifestItem = {
   faucetUrl?: string; // chain faucet URL (optional)
   description?: string; // description (optional)
 };
+export type NetworkType = 'mainnet' | 'staging';
+export type ContractType = 'sudo' | 'ima:bridge' | 'storage'; // may scope as ima:subthing
+export type ConnectionStatus = 'full' | 'origin' | 'target' | 'none';

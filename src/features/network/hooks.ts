@@ -1,14 +1,20 @@
+import { API, getApi } from '@/features/network/api';
+import { NETWORK } from '@/features/network/constants';
+import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { Address, useAccount, useContract, useNetwork, useSigner } from 'wagmi';
-import { ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
-import { CONTRACT, getChainMetadataUrl, NetworkType } from './manifest';
-import { ChainManifestItem } from './types';
-
 import {
-  BaseContract,
-  IContractParams,
-} from '@skaleproject/utils/lib/contracts/base_contract';
+  Address,
+  useAccount,
+  useContract,
+  useNetwork,
+  useProvider,
+  useSigner,
+} from 'wagmi';
+import { ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
+import { build, CONTRACT } from './manifest';
+
+const { chainMetadataUrl } = build;
 
 type ExplorerProps = {
   module:
@@ -55,7 +61,7 @@ export function useChainMetadata({
   const { data, isError } = useQuery({
     queryKey: ['offchain', `metadata:${networkType}`] as const,
     queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
-      return fetch(getChainMetadataUrl(networkType)).then((res) => res.json());
+      return fetch(chainMetadataUrl(networkType)).then((res) => res.json());
     },
   });
   return { data, isError };
@@ -107,31 +113,29 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
  * @param param0
  * @returns
  */
-export function useContractApi<T extends BaseContract>(
-  creator: (params: IContractParams) => T,
-) {
+export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
   const { chain } = useNetwork();
-
   const {
     data: signer,
     isError: signerIsError,
     isLoading: signerIsLoading,
   } = useSigner();
-
+  const provider = useProvider();
   const { address } = useAccount();
 
-  const connected = chain ? chain.network === 'skale' : false;
+  const connected = chain ? chain.network === NETWORK.SKALE : false;
 
   const api =
-    connected && chain && signer
-      ? creator({
-          rpcUrl: chain.rpcUrls.default.http[0],
+    connected && chain && signer && provider
+      ? getApi(id, {
+          chain,
+          provider,
           signer,
         })
       : undefined;
 
   useEffect(() => {
-    address && api?.setSigner({ signer });
+    address && api?.setSigner?.({ signer });
   }, [address, api]);
 
   return { connected, chainId: chain?.id, signer, api };

@@ -3,6 +3,8 @@
  * exports are modified to be as TS constants
  */
 
+export * as otherAddresses from '@skaleproject/constants/lib/addresses/constants';
+
 export const SCHAIN_CONTEXT_ADDRESS =
   '0xD2001000000000000000000000000000000000D2' as const;
 

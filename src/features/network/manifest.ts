@@ -4,22 +4,14 @@
  * IMA: https://github.com/skalenetwork/IMA/tree/develop/proxy/contracts
  */
 
-import { addresses } from './addresses';
+import { ABI } from '@/features/network/abi/abi';
+import { CONTRACT, ContractId } from '@/features/network/contract';
+import { NetworkType } from '@/features/network/types';
+import { Address } from 'abitype';
+import { NETWORK } from './constants';
 
-export type NetworkType = 'mainnet' | 'staging';
-
-export type ContractType = 'admin' | 'ima:bridge'; // may scope as ima:subthing
-
-export type ConnectionStatus = 'full' | 'origin' | 'target' | 'none';
-
-export type ContractManifest = {
-  [key: string]: {
-    type: ContractType;
-    key: string;
-    name: string;
-    address: `0x${string}`;
-  };
-};
+export { CONTRACT } from './contract';
+export type { ContractId } from './contract';
 
 export const nativeCurrency = {
   decimals: 18,
@@ -27,12 +19,7 @@ export const nativeCurrency = {
   symbol: 'SKL',
 };
 
-export const NETWORK = {
-  ETHEREUM: 'ethereum',
-  SKALE: 'skale',
-} as const;
-
-export const REGISTRY = {
+export const OFFCHAIN = {
   chainlist: {},
   [NETWORK.SKALE]: {
     baseUrl: 'https://raw.githubusercontent.com',
@@ -40,100 +27,21 @@ export const REGISTRY = {
   },
 };
 
-/**
- * Token standard "name" is heavily used as a convention
- * if and when that convention breaks, custom mapping to token managers will be needed
- * ex: ETH: {..., manager: 'TOKEN_MANAGER_ETH'}
- */
-
-export const TOKEN_STANDARD = {
-  ETH: {
-    name: 'eth',
-    label: 'ETH',
+export const build = {
+  chainMetadataUrl(networkType: NetworkType) {
+    const { path, baseUrl } = OFFCHAIN[NETWORK.SKALE];
+    return `${baseUrl}/${path}/metadata/${networkType}/chains.json`;
   },
-  ERC20: {
-    name: 'erc20',
-    label: 'ERC-20',
+  addressAbiPair(contractId: ContractId, address?: Address) {
+    return {
+      address: CONTRACT[contractId].address,
+      abi: ABI[contractId],
+    };
   },
-  ERC721: {
-    name: 'erc721',
-    label: 'ERC-721',
-  },
-  ERC1155: {
-    name: 'erc1155',
-    label: 'ERC-1155',
-  },
-} as const;
-
-export const CONTRACT = {
-  CONFIG_CONTROLLER: {
-    type: 'admin',
-    key: 'schain:config_controller',
-    address: addresses.SCHAIN_CONFIG_CONTROLLER_ADDRESS,
-    name: 'ConfigController',
-  },
-  MULTISIG_WALLET: {
-    type: 'admin',
-    key: 'schain:multisig_wallet',
-    address: addresses.SCHAIN_MULTISIG_WALLET_ADDRESS,
-    name: 'MultisigWallet',
-  },
-  MARIONETTE: {
-    type: 'admin',
-    key: 'schain:marionette',
-    address: addresses.SCHAIN_MARIONETTE_ADDRESS,
-    name: 'Marionette',
-  },
-  CONTEXT: {
-    type: 'admin',
-    key: 'schain:context',
-    address: addresses.SCHAIN_CONTEXT_ADDRESS,
-    name: 'Context',
-  },
-  ETHERBASE: {
-    type: 'admin',
-    key: 'schain:etherbase',
-    address: addresses.SCHAIN_ETHERBASE_ADDRESS,
-    name: 'Etherbase',
-  },
-  TOKEN_MANAGER_ETH: {
-    type: 'ima:bridge',
-    key: 'schain:tokenmanagereth',
-    address: addresses.TOKEN_MANAGER_ETH_ADDRESS,
-    name: 'TokenManagerEth',
-  },
-  TOKEN_MANAGER_ERC20: {
-    type: 'ima:bridge',
-    key: 'schain:tokenmanager20',
-    address: addresses.TOKEN_MANAGER_ERC20_ADDRESS,
-    name: 'TokenManagerERC20',
-  },
-  TOKEN_MANAGER_ERC721: {
-    type: 'ima:bridge',
-    key: 'schain:tokenmanager721',
-    address: addresses.TOKEN_MANAGER_ERC721_ADDRESS,
-    name: 'TokenManagerERC721',
-  },
-  TOKEN_MANAGER_ERC1155: {
-    type: 'ima:bridge',
-    key: 'schain:tokenmanager1155',
-    address: addresses.TOKEN_MANAGER_ERC1155_ADDRESS,
-    name: 'TokenManagerERC1155',
-  },
-  TOKEN_MANAGER_LINKER: {
-    type: 'ima:bridge',
-    key: 'schain:tokenmanagerlinker',
-    address: addresses.TOKEN_MANAGER_LINKER_ADDRESS,
-    name: 'TokenManagerLinker',
-  },
-} as const satisfies ContractManifest;
-
-export const getChainMetadataUrl = (networkType: NetworkType) => {
-  const { path, baseUrl } = REGISTRY[NETWORK.SKALE];
-  return `${baseUrl}/${path}/metadata/${networkType}/chains.json`;
 };
 
 /**
  * @todo bring associated chain metadata if needed (icons etc)
+ * more suitable for runtime
  * https://github.com/skalenetwork/skale-network/blob/master/metadata/mainnet/chains.json
  */

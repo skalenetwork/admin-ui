@@ -1,8 +1,8 @@
 import { Chain } from '@wagmi/core';
+import { NETWORK } from '../constants';
+import { nativeCurrency } from '../manifest';
 
 export const EXPLORER_NAME = 'SKALE Explorer';
-
-import { nativeCurrency, NETWORK } from './manifest';
 
 function makeDefaultRpcUrls<T extends string>(key: T): Chain['rpcUrls'] {
   return {
@@ -27,7 +27,7 @@ function makeDefaultBlockExplorers<T extends string>(
   };
 }
 
-const MULTICALL_ADDRESS = '0x';
+export const MULTICALL_ADDRESS = '0x' as const;
 
 const contracts = {
   multicall3: {

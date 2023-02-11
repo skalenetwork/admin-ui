@@ -1,5 +1,5 @@
 import Card from '@/components/Card/Card';
-import { TOKEN_STANDARD } from '@/features/network/manifest';
+import { TOKEN_STANDARD } from '@/features/network/constants';
 import { Link, useParams } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
 

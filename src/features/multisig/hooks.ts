@@ -5,16 +5,12 @@
 
 import { addresses } from '@/features/network';
 import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
-import { useContractApi } from '@/features/network/hooks';
-
-import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
+import { useContractApi, useTypedContract } from '@/features/network/hooks';
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
-
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { useBalance, useContract } from 'wagmi';
-
-import { Address } from '@wagmi/core';
+import { useBalance } from 'wagmi';
 import { scope } from './lib';
 
 const multisigContract = {
@@ -27,19 +23,13 @@ export function useMultisig({
 }: { address?: Address } = {}) {
   const defaultParams = { cacheTime: Infinity };
 
-  const contract = useContract({
-    address: addresses.SCHAIN_MULTISIG_WALLET_ADDRESS,
-    abi: MultisigWalletABI,
+  const contract = useTypedContract({
+    id: 'MULTISIG_WALLET',
   });
 
-  const { connected, api, chainId, signer } = useContractApi((params) => {
-    return new MultisigWallet({
-      ...params,
-      address,
-    });
+  const { connected, api, chainId, signer } = useContractApi({
+    id: 'MULTISIG_WALLET',
   });
-
-  api?.contract;
 
   const queryKey = useCallback(
     (key: any[]) => {

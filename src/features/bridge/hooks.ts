@@ -1,9 +1,10 @@
+import { TOKEN_STANDARD } from '@/features/network/constants';
 import {
   useAbi,
   useExplorer,
   useTypedContract,
 } from '@/features/network/hooks';
-import { ConnectionStatus, TOKEN_STANDARD } from '@/features/network/manifest';
+import { ConnectionStatus } from '@/features/network/types';
 import { ethers } from 'ethers';
 import {
   useContractRead,
@@ -31,7 +32,7 @@ export function useTokenManager<T extends TokenStandard>({
 
 export function useTokenManagerLinker() {
   return useTypedContract({
-    id: 'TOKEN_MANAGER_ERC20' as const,
+    id: 'TOKEN_MANAGER_LINKER' as const,
   });
 }
 

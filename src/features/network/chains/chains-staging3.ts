@@ -1,10 +1,8 @@
+// candidate for '@skaleproject/constants/lib/chains'
 import { Chain } from '@wagmi/core';
-
-// @later reduce to '@skaleproject/constants/lib/chains'
-
+import { NETWORK } from '../constants';
+import { nativeCurrency } from '../manifest';
 export const EXPLORER_NAME = 'SKALE Explorer';
-
-import { nativeCurrency, NETWORK } from './manifest';
 
 function makeDefaultRpcUrls<T extends string>(key: T): Chain['rpcUrls'] {
   return {

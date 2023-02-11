@@ -31,6 +31,16 @@ To build a flying car that actually flies:
 
 Features are an implementation detail of the application-level usability of the network capabilities.
 
+## Network feature
+
+A groundwork extensively supporting typescript interfaces across network building blocks.
+
+Core contracts are assigned IDs which are keys to:
+
+- Typed ABIs
+- 1st derivative wrappers (APIs)
+- Roles
+
 # :crystal_ball: Screens
 
 In current micro-mono hybrid architecture, screens are HOC compositions of stateless `elements`.
