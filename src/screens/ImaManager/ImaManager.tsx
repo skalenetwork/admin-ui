@@ -2,7 +2,6 @@ import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useChainConnect, useHistory } from '@/features/bridge';
-import { chains } from '@/features/network';
 import { TOKEN_STANDARD } from '@/features/network/constants';
 import { ConnectionStatus } from '@/features/network/types';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
@@ -14,6 +13,12 @@ import { Link } from 'react-router-dom';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
+
+const supported = [
+  TOKEN_STANDARD.ERC20,
+  TOKEN_STANDARD.ERC721,
+  TOKEN_STANDARD.ERC1155,
+] as const;
 
 const TransactionItem = ({
   id,
@@ -47,7 +52,7 @@ const TransactionItem = ({
 const standards = Object.values(TOKEN_STANDARD);
 
 const SelectedPeerChainItem = ({
-  name,
+  name = '',
   alertKey,
   toggleAlert,
   className = '',
@@ -59,12 +64,6 @@ const SelectedPeerChainItem = ({
   const { status: connectionStatus } = useChainConnect({
     chainName: name,
   });
-
-  // mocking subdata of useChainConnections
-  const supported = [
-    TOKEN_STANDARD.ERC20.name,
-    TOKEN_STANDARD.ETH.name,
-  ] as const;
 
   const [standardName, setStandardName] = useState('');
 
@@ -78,6 +77,14 @@ const SelectedPeerChainItem = ({
     }
   }, [alertKey]);
 
+  // const contractId =
+  //   selectedStandard &&
+  //   (`TOKEN_MANAGER_${selectedStandard?.name.toUpperCase()}` as const);
+
+  // const { api } = useContractApi({
+  //   id: contractId as 'TOKEN_MANAGER_ERC20',
+  // });
+
   return (
     <motion.div
       className={tw(
@@ -88,112 +95,118 @@ const SelectedPeerChainItem = ({
       initial={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
     >
-      <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
-      <div className="flex flex-grow items-center">
-        {connectionStatus === 'target' ? (
-          <button className="btn btn-outline m-auto w-2/3 rounded-full">
-            Accept request
-          </button>
-        ) : (
-          <>
-            <span className="font-medium">Mapped Tokens: </span>
-            <Dialog
-              title={`${selectedStandard?.label} Tokens ( )`}
-              description={''}
-              trigger={
-                <button className="">
-                  {supported.map((name) => (
-                    <a
-                      className="px-2"
-                      onClick={(e) => {
-                        setStandardName(name);
-                      }}
-                    >
-                      <span className="text-[var(--blue10)]">
-                        {standards.find((s) => s.name === name)?.label}
-                      </span>{' '}
-                      <span className="text-[var(--green10)]">()</span>
-                    </a>
-                  ))}
-                </button>
-              }
-              open={alertKey === name}
-              onOpenChange={(open) => {
-                toggleAlert(`${name}`)(open);
-              }}
-              activeStep={1}
-              steps={[
-                {
-                  onSubmit: (e) => {
-                    e.preventDefault();
-                  },
-                  actionElement: ({ className }) => (
-                    <Link
-                      className={`${className}`}
-                      to={`token_map/${name}?standard=${selectedStandard?.name}`}
-                    >
-                      Add new {selectedStandard?.label} token
-                    </Link>
-                  ),
-                  cancelElement: () => <></>,
-                  content: (
-                    <div>
-                      <p>
-                        List of mapped {selectedStandard?.label} tokens with{' '}
-                        <span className="font-semibold">{name}</span> chain:
-                      </p>
-                      <Card
-                        className="max-h-36 p-0"
-                        bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
-                        heading={
-                          <p className="font-medium text-[var(--primary)]">
-                            Origin: {chain?.name}
+      {!name ? (
+        <></>
+      ) : (
+        <>
+          <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
+          <div className="flex flex-grow items-center">
+            {connectionStatus === 'target' ? (
+              <button className="btn btn-outline m-auto w-2/3 rounded-full">
+                Accept request
+              </button>
+            ) : (
+              <>
+                <span className="font-medium">Mapped Tokens: </span>
+                <Dialog
+                  title={`${selectedStandard?.label} Tokens ( )`}
+                  description={''}
+                  trigger={
+                    <button className="">
+                      {supported.map(({ name }) => (
+                        <a
+                          className="px-2"
+                          onClick={(e) => {
+                            setStandardName(name);
+                          }}
+                        >
+                          <span className="text-[var(--blue10)]">
+                            {standards.find((s) => s.name === name)?.label}
+                          </span>{' '}
+                          <span className="text-[var(--green10)]">()</span>
+                        </a>
+                      ))}
+                    </button>
+                  }
+                  open={alertKey === name}
+                  onOpenChange={(open) => {
+                    toggleAlert(`${name}`)(open);
+                  }}
+                  activeStep={1}
+                  steps={[
+                    {
+                      onSubmit: (e) => {
+                        e.preventDefault();
+                      },
+                      actionElement: ({ className }) => (
+                        <Link
+                          className={`${className}`}
+                          to={`token_map/${name}?standard=${selectedStandard?.name}`}
+                        >
+                          Add new {selectedStandard?.label} token
+                        </Link>
+                      ),
+                      cancelElement: () => <></>,
+                      content: (
+                        <div>
+                          <p>
+                            List of mapped {selectedStandard?.label} tokens with{' '}
+                            <span className="font-semibold">{name}</span> chain:
                           </p>
-                        }
-                      >
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                      </Card>
-                      <Card
-                        className="max-h-36 p-0"
-                        bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
-                        heading={
-                          <p className="font-medium text-[var(--primary)]">
-                            Target: {name}
-                          </p>
-                        }
-                      >
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                        <NiceAddress
-                          address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                          copyable
-                        />
-                      </Card>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-          </>
-        )}
-      </div>
+                          <Card
+                            className="max-h-36 p-0"
+                            bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
+                            heading={
+                              <p className="font-medium text-[var(--primary)]">
+                                Origin: {chain?.name}
+                              </p>
+                            }
+                          >
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                          </Card>
+                          <Card
+                            className="max-h-36 p-0"
+                            bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
+                            heading={
+                              <p className="font-medium text-[var(--primary)]">
+                                Target: {name}
+                              </p>
+                            }
+                          >
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                            <NiceAddress
+                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
+                              copyable
+                            />
+                          </Card>
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
+              </>
+            )}
+          </div>
+        </>
+      )}
     </motion.div>
   );
 };
@@ -316,7 +329,9 @@ const PeerChainItem = ({
   const { status: connectionStatus } = useChainConnect({
     chainName: name,
   });
-  return (
+  return connectionStatus === 'none' ? (
+    <></>
+  ) : (
     <button
       onClick={() => onSelect?.()}
       className={tw`group flex justify-between
@@ -336,9 +351,9 @@ const PeerChainItem = ({
       <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
       <div className="flex gap-4">
         <div className="text-sm">
-          <p>ERC20</p>
-          <p>ERC721</p>
-          <p>ERC1155</p>
+          {supported.map(({ label }) => (
+            <p>{label}</p>
+          ))}
         </div>
         <div
           className={`flex items-center justify-center transition-all
@@ -353,9 +368,10 @@ const PeerChainItem = ({
 
 export default function ImaManager() {
   const [alertKey, setAlertKey] = useState('');
-  const [selectedChain, setSelectedChain] = useState(
-    Object.values(chains.staging)[0].name,
-  );
+
+  const { chains } = useNetwork();
+
+  const [selectedChain, setSelectedChain] = useState();
 
   const { events } = useHistory();
 
@@ -367,6 +383,10 @@ export default function ImaManager() {
     },
     [alertKey],
   );
+
+  // useEffect(() => {
+  //   peerSChains?.[0]?.chainName && setSelectedChain(peerSChains[0].chainName);
+  // }, [peerSChains?.[0]?.chainName]);
 
   return (
     <div className="grid spaced h-full w-full grid-rows-2 !gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
@@ -383,7 +403,7 @@ export default function ImaManager() {
       >
         <div className="grid spaced h-full grid-flow-col grid-cols-2">
           <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
-            {['ethereum', ...Object.keys(chains.staging)].map((name) => (
+            {chains.map(({ name }) => (
               <PeerChainItem
                 name={name}
                 tokenList={[]}

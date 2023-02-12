@@ -16,7 +16,7 @@ import { withErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 type Props<T extends FieldValues> = PropsWithChildren<{
   className?: string;
   name: keyof T;
-  label: string;
+  label?: string;
   placeholder?: string;
   control: (props: ControllerRenderProps) => JSX.Element;
 }> &
@@ -56,9 +56,11 @@ function Field<T extends FieldValues>({
   return (
     <>
       <fieldset className={`m-0 w-full ${className}`}>
-        <label>
-          {label} {rest.required && ' *'}
-        </label>
+        {label && (
+          <label>
+            {label} {rest.required && ' *'}
+          </label>
+        )}
         <Controller
           name={name}
           rules={{ ...rest }}

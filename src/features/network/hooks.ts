@@ -11,20 +11,23 @@ import {
   useProvider,
   useSigner,
 } from 'wagmi';
-import { ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
+import { ABI, ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
 import { build, CONTRACT } from './manifest';
 
 const { chainMetadataUrl } = build;
 
+const MODULES = [
+  'account',
+  'stats',
+  'transaction',
+  'logs',
+  'block',
+  'token',
+  'contract',
+] as const;
+
 type ExplorerProps = {
-  module:
-    | 'account'
-    | 'stats'
-    | 'transaction'
-    | 'logs'
-    | 'block'
-    | 'token'
-    | 'contract';
+  module: (typeof MODULES)[number];
   action: 'listaccounts' | 'getLogs' | string;
   args?: {
     [key: string]: string;
@@ -86,7 +89,11 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
   id,
 }: {
   id: T;
-}) {
+}): {
+  address?: (typeof CONTRACT)[T]['address'];
+  abi?: (typeof ABI)[T];
+  contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
+} {
   const { address } = CONTRACT[id];
   const abi = useAbi({
     id,
@@ -101,7 +108,6 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
     address,
     abi,
     contract,
-    api: contract?.callStatic,
   };
 }
 
@@ -126,7 +132,7 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
   const api =
-    connected && chain && signer && provider
+    connected && chain && signer && provider && id
       ? getApi(id, {
           chain,
           provider,

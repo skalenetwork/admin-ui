@@ -7,11 +7,11 @@
 import { ABI } from '@/features/network/abi/abi';
 import { CONTRACT } from '@/features/network/contract';
 import { Provider } from '@ethersproject/providers';
-// import { TokenManagerERC1155 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC1155';
 import { TokenManagerERC20 } from '@skalenetwork/ima-js/build/contracts/schain/TokenManagerERC20';
-// import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC721';
-// import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
-// import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
+import { TokenManagerERC1155 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC1155';
+import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC721';
+import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
+import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
 import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
 import { Signer, Wallet } from 'ethers';
@@ -69,37 +69,45 @@ export const API = {
     TokenManagerERC20,
     ({ address, abi, chain }) => [{ eth: {} }, address, abi],
   ),
-  // TOKEN_MANAGER_ERC721: buildApi(
-  //   TokenManagerERC721,
-  //   ({ address, abi, chain }) => [{ eth: {} }, address, abi],
-  // ),
-  // TOKEN_MANAGER_ERC1155: buildApi(
-  //   TokenManagerERC1155,
-  //   ({ address, abi, chain }) => [{ eth: {} }, address, abi],
-  // ),
-  // TOKEN_MANAGER_ETH: buildApi(TokenManagerEth, ({ address, abi, chain }) => [
-  //   { eth: {} },
-  //   address,
-  //   abi,
-  // ]),
-  // TOKEN_MANAGER_LINKER: buildApi(
-  //   TokenManagerLinker,
-  //   ({ address, abi, chain }) => [{ eth: {} }, address, abi],
-  // ),
+  TOKEN_MANAGER_ERC721: buildApi(
+    TokenManagerERC721,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
+  TOKEN_MANAGER_ERC1155: buildApi(
+    TokenManagerERC1155,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
+  TOKEN_MANAGER_ETH: buildApi(TokenManagerEth, ({ address, abi, chain }) => [
+    { eth: {} },
+    address,
+    abi,
+  ]),
+  TOKEN_MANAGER_LINKER: buildApi(
+    TokenManagerLinker,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
 } as const;
 
 export function getApi<I extends keyof typeof API>(
   contractId: I,
   { chain, provider, signer }: Pick<ArgProps, 'chain' | 'provider' | 'signer'>,
 ) {
-  const abi = ABI[contractId];
-  const { address } = CONTRACT[contractId];
-  const props = {
-    abi,
-    address,
-    chain,
-    provider,
-    signer,
-  };
-  return API[contractId](props) as ReturnType<(typeof API)[I]>;
+  const abi = contractId ? ABI[contractId] : undefined;
+  const contract = contractId ? CONTRACT[contractId] : undefined;
+  if (!(contract ?? abi)) {
+    throw `getApi: id=${contractId} is invalid`;
+  }
+  try {
+    const { address } = contract;
+    const props = {
+      abi,
+      address,
+      chain,
+      provider,
+      signer,
+    };
+    return API[contractId](props) as ReturnType<(typeof API)[I]>;
+  } catch (e) {
+    throw 'getApi: ' + e;
+  }
 }

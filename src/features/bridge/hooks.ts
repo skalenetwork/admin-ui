@@ -83,7 +83,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
  * @param param0
  */
 export function useChainConnect({ chainName }: { chainName: string }) {
-  const { address, abi, api } = useTypedContract({
+  const { address, abi } = useTypedContract({
     id: 'TOKEN_MANAGER_LINKER',
   });
 
@@ -156,7 +156,7 @@ export function useHistory() {
   });
   const iface = abi && new ethers.utils.Interface(abi);
 
-  const { address, api, contract } = useTypedContract({
+  const { address } = useTypedContract({
     id: 'TOKEN_MANAGER_ERC20',
   });
 
@@ -197,12 +197,7 @@ export function useHistory() {
         };
       });
 
-  // console.log(
-  //   'use history',
-  //   CONTRACT.TOKEN_MANAGER_ERC20.address,
-  //   response,
-  //   events,
-  // );
+  false && console.log('bridge:useHistory', address, events);
 
   return {
     events,

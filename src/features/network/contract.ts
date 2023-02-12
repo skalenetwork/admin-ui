@@ -12,6 +12,23 @@ export type ContractManifest = {
   };
 };
 
+const CONTRACT_INACTIVE = {
+  CONTEXT: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:context',
+    address: ADDRESS.SCHAIN_CONTEXT_ADDRESS,
+    name: 'Context',
+  },
+  ETHERBASE: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:etherbase',
+    address: ADDRESS.SCHAIN_ETHERBASE_ADDRESS,
+    name: 'Etherbase',
+  },
+};
+
 export const CONTRACT = {
   CONFIG_CONTROLLER: {
     network: NETWORK.SKALE,
@@ -34,20 +51,6 @@ export const CONTRACT = {
     address: ADDRESS.SCHAIN_MARIONETTE_ADDRESS,
     name: 'Marionette',
   },
-  // CONTEXT: {
-  //   network: NETWORK.SKALE,
-  //   type: 'sudo',
-  //   key: 'schain:context',
-  //   address: ADDRESS.SCHAIN_CONTEXT_ADDRESS,
-  //   name: 'Context',
-  // },
-  // ETHERBASE: {
-  //   network: NETWORK.SKALE,
-  //   type: 'sudo',
-  //   key: 'schain:etherbase',
-  //   address: ADDRESS.SCHAIN_ETHERBASE_ADDRESS,
-  //   name: 'Etherbase',
-  // },
   TOKEN_MANAGER_ETH: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',

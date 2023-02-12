@@ -1,12 +1,16 @@
 import { CheckIcon } from '@radix-ui/react-icons';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useEffectOnce } from 'react-use';
 import { tw } from 'twind';
 
 type Step = {
   id: string;
   label: string;
-  content: React.ReactNode;
+  content: (props: {
+    stepNext: () => void;
+    stepPrev: () => void;
+  }) => JSX.Element | React.ReactNode;
 };
 
 type Trigger = Pick<Step, 'id' | 'label'> & {
@@ -87,9 +91,29 @@ export default function Stepper({
   trigger = StepperTrigger,
 }: Props) {
   const [activeId, setActiveId] = useState('');
+
+  // replace with a comparative effect if steps
+  // are async or to change dynamically
+  useEffectOnce(() => {
+    steps?.length && setActiveId(steps[0].id);
+  });
+
   const activeIndex = useMemo(() => {
     return steps.findIndex((s) => s.id === activeId);
   }, [activeId, steps]);
+
+  const stepNext = useCallback(() => {
+    console.log(activeIndex, activeId);
+    if (activeIndex < steps.length) {
+      setActiveId(steps[activeIndex + 1].id);
+    }
+  }, [activeIndex, steps]);
+
+  const stepPrev = useCallback(() => {
+    if (activeIndex > 0) {
+      setActiveId(steps[activeIndex - 1].id);
+    }
+  }, [activeIndex, steps]);
 
   return (
     <TabsPrimitive.Root
@@ -113,7 +137,10 @@ export default function Stepper({
       <div>
         {steps.map(({ id, content }) => (
           <TabsPrimitive.Content value={id} asChild>
-            {content}
+            {content({
+              stepNext,
+              stepPrev,
+            })}
           </TabsPrimitive.Content>
         ))}
       </div>
