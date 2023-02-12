@@ -15,7 +15,7 @@ import {
   ExtractAbiFunctionNames,
 } from 'abitype';
 import { ConfigControllerABI } from './abi-configcontroller';
-// import mainnetImaUnion from './abi-ima-mainnet.union';
+import mainnetImaUnion from './abi-ima-mainnet.union';
 import schainImaUnion from './abi-ima.union';
 import { MarionetteABI } from './abi-marionette';
 import { MultisigWalletABI } from './abi-multisigwallet';
@@ -66,11 +66,11 @@ export const ABI = {
   TOKEN_MANAGER_ETH: schainImaUnion['token_manager_eth_abi'],
   TOKEN_MANAGER_LINKER: schainImaUnion['token_manager_linker_abi'],
   COMMUNITY_LOCKER: schainImaUnion['community_locker_abi'],
-  // DEPOSIT_BOX_ETH: mainnetImaUnion['deposit_box_eth_abi'],
-  // DEPOSIT_BOX_ERC20: mainnetImaUnion['deposit_box_erc20_abi'],
-  // DEPOSIT_BOX_ERC721: mainnetImaUnion['deposit_box_erc721_abi'],
-  // DEPOSIT_BOX_ERC1155: mainnetImaUnion['deposit_box_erc1155_abi'],
-  // LINKER: mainnetImaUnion['linker_abi'],
+  DEPOSIT_BOX_ETH: mainnetImaUnion['deposit_box_eth_abi'],
+  DEPOSIT_BOX_ERC20: mainnetImaUnion['deposit_box_erc20_abi'],
+  DEPOSIT_BOX_ERC721: mainnetImaUnion['deposit_box_erc721_abi'],
+  DEPOSIT_BOX_ERC1155: mainnetImaUnion['deposit_box_erc1155_abi'],
+  LINKER: mainnetImaUnion['linker_abi'],
 } as const satisfies {
   [key in keyof typeof CONTRACT]: RelaxedAbi;
 };

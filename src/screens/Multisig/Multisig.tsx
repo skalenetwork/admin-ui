@@ -282,10 +282,11 @@ export default function Multisig() {
                   alertKey={alertKey}
                   toggleAlert={toggleAlert}
                   onSubmit={(data) => {
-                    alert(
-                      `to: ${data.contractAddress}\ndata: ${data.encoded}\nopts: {${data.nonce},${data.gasAmount}}`,
-                    );
-                    false && submitTransaction.mutateAsync(data);
+                    false &&
+                      alert(
+                        `to: ${data.contractAddress}\ndata: ${data.encoded}\nopts: {${data.nonce},${data.gasAmount}}`,
+                      );
+                    submitTransaction.mutateAsync(data);
                   }}
                 />
               )}
