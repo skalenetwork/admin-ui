@@ -58,8 +58,6 @@ TokenManagerLinker<`origin`>.connectSChain(target.name)
 ...
 ```
 
-> What for other than schain (ethereum main or etc) (is it `Twin`?), if same, then what is `schainName` value?
-
 ## IMA-js internal web3 usage
 
 to maybe ponyfill from ethers provider (ahead of `ima-js/tree/feature/move-to-ethers-js/src`)

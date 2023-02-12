@@ -1,17 +1,19 @@
+/**
+ * @namespace Analytics
+ * @module AnalyticsHooks
+ */
+
 import { useIsFetching, useQueries } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
 import { TimedBlocks } from './core/block';
 
 export function useAnalytics() {}
-
 /**
- *
+ * Get measures for block history over defined period
+ * @param param0
  * @returns
  */
-
-// getBlockTransactionCountByNumber
-
 export function useBlockHistory({
   time,
   includeLatest,

@@ -9,8 +9,11 @@ type Props = {};
 export default function RoleList({}: Props) {
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>
-      {Object.values(CONTRACT).map((contract) => (
-        <div className="my-2 min-w-[300px] rounded-lg bg-[var(--gray3)] p-4">
+      {Object.values(CONTRACT).map((contract, index) => (
+        <div
+          className="my-2 min-w-[300px] rounded-lg bg-[var(--gray3)] p-4"
+          key={index}
+        >
           <p className="font-semibold">{contract.name}</p>
           <div className="flex flex-row">
             Role Name{' '}

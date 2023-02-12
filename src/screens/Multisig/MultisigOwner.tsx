@@ -1,5 +1,6 @@
 import { NiceAddress } from '@/elements/NiceAddress';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { motion } from 'framer-motion';
 
 export function MultisigOwner({
   name,
@@ -11,7 +12,11 @@ export function MultisigOwner({
   showControls?: boolean;
 }) {
   return (
-    <div className="flex w-full items-center gap-8 py-2">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex w-full items-center gap-8 py-2"
+    >
       <NiceAddress
         address={address}
         label={name || address.slice(0, 4)}
@@ -25,6 +30,6 @@ export function MultisigOwner({
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -5,7 +5,11 @@ import { useChainConnect, useHistory } from '@/features/bridge';
 import { TOKEN_STANDARD } from '@/features/network/constants';
 import { ConnectionStatus } from '@/features/network/types';
 import { ExclamationCircleIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import { ArrowRightIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import {
+  ArrowRightIcon,
+  CaretLeftIcon,
+  ChevronRightIcon,
+} from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -89,14 +93,23 @@ const SelectedPeerChainItem = ({
     <motion.div
       className={tw(
         className,
-        connectionStatus === 'target' ? '!bg-[var(--color-highlighted)]' : '',
+        !name
+          ? '!bg-[var(--slate)]'
+          : connectionStatus === 'target'
+          ? '!bg-[var(--color-highlighted)]'
+          : '',
       )}
       key={name}
       initial={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
     >
       {!name ? (
-        <></>
+        <>
+          <div className="flex flex-grow items-center justify-center text-[var(--gray10)] text-sm">
+            <CaretLeftIcon className="h-5" /> Select a peer chain to view
+            details and map tokens
+          </div>
+        </>
       ) : (
         <>
           <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
@@ -115,6 +128,7 @@ const SelectedPeerChainItem = ({
                     <button className="">
                       {supported.map(({ name }) => (
                         <a
+                          key={name}
                           className="px-2"
                           onClick={(e) => {
                             setStandardName(name);
@@ -166,14 +180,6 @@ const SelectedPeerChainItem = ({
                               address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
                               copyable
                             />
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
                           </Card>
                           <Card
                             className="max-h-36 p-0"
@@ -184,14 +190,6 @@ const SelectedPeerChainItem = ({
                               </p>
                             }
                           >
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
                             <NiceAddress
                               address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
                               copyable
@@ -352,7 +350,7 @@ const PeerChainItem = ({
       <div className="flex gap-4">
         <div className="text-sm">
           {supported.map(({ label }) => (
-            <p>{label}</p>
+            <p key={label}>{label}</p>
           ))}
         </div>
         <div
@@ -405,6 +403,7 @@ export default function ImaManager() {
           <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
             {chains.map(({ name }) => (
               <PeerChainItem
+                key={name}
                 name={name}
                 tokenList={[]}
                 selected={selectedChain === name}
@@ -429,8 +428,9 @@ export default function ImaManager() {
         bodyClass="scrollbar flex flex-col gap-3"
       >
         {events && events.length ? (
-          events.map((event) => (
+          events.map((event, index) => (
             <TransactionItem
+              key={index}
               actionText={event.label}
               timestamp={event.timestamp}
             />

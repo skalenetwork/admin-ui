@@ -10,14 +10,6 @@ export default function ImaConnectChain() {
   const { chains, chain: originChain } = useNetwork();
   const [selectedChainName, setSelectedChainName] = useState('');
 
-  const allSChains = [...chains.map((chain) => chain.name)].map((chainName) => {
-    return {
-      chainName,
-      chainId: chains.find((c) => c.name === chainName)?.id,
-      ...useChainConnect({ chainName }),
-    };
-  });
-
   const chain = useChainConnect({
     chainName: selectedChainName,
   });
@@ -56,6 +48,7 @@ export default function ImaConnectChain() {
             ) : (
               <>
                 <ToggleGroup.Item
+                  key={someChain.id}
                   className="
               flex-[1_0_21%] h-[calc(25%-1rem)] relative flex flex-col justify-center items-center p-4
               text-center text-sm border rounded-lg cursor-pointer hover:bg-[var(--gray1)]

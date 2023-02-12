@@ -89,8 +89,8 @@ export function useChainConnect({ chainName }: { chainName: string }) {
 
   const targetChain = chains.find((chain) => chain.name === chainName);
 
-  const { data, isLoading } = useContractReads({
-    enabled: !!(targetChain && originChain),
+  const { data } = useContractReads({
+    enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
     contracts: [
       {
         address,
@@ -108,8 +108,10 @@ export function useChainConnect({ chainName }: { chainName: string }) {
     ],
   });
 
-  const originConnected = data?.[0];
-  const targetConnected = data?.[1];
+  const originConnected =
+    chainName.toLowerCase() === 'ethereum' ? true : data?.[0];
+  const targetConnected =
+    chainName.toLowerCase() === 'ethereum' ? true : data?.[1];
 
   const { config: connectConfig } = usePrepareContractWrite({
     address,
@@ -124,23 +126,22 @@ export function useChainConnect({ chainName }: { chainName: string }) {
 
   const connect = useContractWrite(connectConfig);
 
-  const status: ConnectionStatus = isLoading
-    ? 'none'
-    : originConnected === true && targetConnected === true
-    ? 'full'
-    : originConnected === true
-    ? 'origin'
-    : targetConnected === true
-    ? 'target'
-    : 'none';
+  const status: ConnectionStatus =
+    originConnected === true && targetConnected === true
+      ? 'full'
+      : originConnected === true
+      ? 'origin'
+      : targetConnected === true
+      ? 'target'
+      : 'none';
 
-  false &&
-    console.log(
-      originChain?.name,
-      targetChain?.name,
-      originConnected,
-      targetConnected,
-    );
+  // false &&
+  console.log(
+    originChain?.name,
+    targetChain?.name,
+    originConnected,
+    targetConnected,
+  );
 
   return {
     connect,

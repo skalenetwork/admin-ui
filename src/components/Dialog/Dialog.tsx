@@ -102,6 +102,7 @@ const Dialog = ({
                   index,
                 ) => (
                   <form
+                    key={index}
                     onSubmit={onSubmit}
                     acceptCharset="utf-8"
                     className={tw(

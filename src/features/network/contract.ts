@@ -13,6 +13,20 @@ export type ContractManifest = {
 };
 
 const CONTRACT_INACTIVE = {
+  MESSAGE_PROXY_MAINNET: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:message',
+    key: 'foreign:message_proxy',
+    address: ADDRESS.MESSAGE_PROXY_MAINNET_ADDRESS,
+    name: 'MessageProxyForMainnet', // to confirm
+  },
+  MESSAGE_PROXY_SCHAIN: {
+    network: NETWORK.SKALE,
+    type: 'ima:message',
+    key: 'schain:message_proxy',
+    address: ADDRESS.MESSAGE_PROXY_FOR_SCHAIN_ADDRESS,
+    name: 'MessageProxyForSchain', // to confirm
+  },
   CONTEXT: {
     network: NETWORK.SKALE,
     type: 'sudo',
@@ -29,6 +43,13 @@ const CONTRACT_INACTIVE = {
   },
 };
 
+/**
+ * CONTRACT Manifest
+ * @description The most primitive contract registry, various properties allow
+ * @type ContractManifest: {
+ * network:
+ * }
+ */
 export const CONTRACT = {
   CONFIG_CONTROLLER: {
     network: NETWORK.SKALE,
@@ -51,40 +72,93 @@ export const CONTRACT = {
     address: ADDRESS.SCHAIN_MARIONETTE_ADDRESS,
     name: 'Marionette',
   },
+  COMMUNITY_POOL: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:community:pool',
+    address: ADDRESS.COMMUNITY_POOL_ADDRESS,
+    name: 'CommunityPool',
+  },
+  COMMUNITY_LOCKER: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:community:locker',
+    address: ADDRESS.COMMUNITY_LOCKER_ADDRESS,
+    name: 'CommunityLocker',
+  },
   TOKEN_MANAGER_ETH: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
-    key: 'schain:tokenmanagereth',
+    key: 'schain:tokenmanager:eth',
     address: ADDRESS.TOKEN_MANAGER_ETH_ADDRESS,
     name: 'TokenManagerEth',
   },
   TOKEN_MANAGER_ERC20: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
-    key: 'schain:tokenmanager20',
+    key: 'schain:tokenmanager:erc20',
     address: ADDRESS.TOKEN_MANAGER_ERC20_ADDRESS,
     name: 'TokenManagerERC20',
   },
   TOKEN_MANAGER_ERC721: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
-    key: 'schain:tokenmanager721',
+    key: 'schain:tokenmanager:erc721',
     address: ADDRESS.TOKEN_MANAGER_ERC721_ADDRESS,
     name: 'TokenManagerERC721',
   },
   TOKEN_MANAGER_ERC1155: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
-    key: 'schain:tokenmanager1155',
+    key: 'schain:tokenmanager:erc1155',
     address: ADDRESS.TOKEN_MANAGER_ERC1155_ADDRESS,
     name: 'TokenManagerERC1155',
   },
   TOKEN_MANAGER_LINKER: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
-    key: 'schain:tokenmanagerlinker',
+    key: 'schain:tokenmanager:linker',
     address: ADDRESS.TOKEN_MANAGER_LINKER_ADDRESS,
     name: 'TokenManagerLinker',
+  },
+  DEPOSIT_BOX_ETH: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:depositbox:eth',
+    address: ADDRESS.DEPOSIT_BOX_ETH_ADDRESS,
+    name: 'DepositBoxEth',
+  },
+  DEPOSIT_BOX_ERC20: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:depositbox:erc20',
+    address: ADDRESS.DEPOSIT_BOX_ERC20_ADDRESS,
+    name: 'DepositBoxERC20',
+  },
+  DEPOSIT_BOX_ERC721: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:depositbox:erc721',
+    address: ADDRESS.DEPOSIT_BOX_ERC721_ADDRESS,
+    name: 'DepositBoxERC721',
+  },
+  DEPOSIT_BOX_ERC721_WITH_METADATA: {
+    network: NETWORK.ETHEREUM,
+    address: ADDRESS.DEPOSIT_BOX_ERC721_WITH_METADATA_ADDRESS,
+  },
+  DEPOSIT_BOX_ERC1155: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:depositbox:erc1155',
+    address: ADDRESS.DEPOSIT_BOX_ERC1155_ADDRESS,
+    name: 'DepositBoxERC1155',
+  },
+  LINKER: {
+    network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:linker',
+    address: ADDRESS.LINKER_ADDRESS,
+    name: 'Linker',
   },
 } as const satisfies ContractManifest;
 

@@ -1,6 +1,6 @@
 /**
- * For PR to @skaleproject/constants/lib/addresses/predeployed
- * exports are modified to be as TS constants
+ * @module ConstantAddress
+ * @description Network-wide preset addresses exported as constant types
  */
 
 export { ZERO_ADDRESS } from '@skaleproject/constants/lib/addresses/constants';
@@ -91,3 +91,27 @@ export const TOKEN_MANAGER_ERC721_WITH_METADATA_ADDRESS =
 
 export const TOKEN_MANAGER_ERC721_WITH_METADATA_IMPLEMENTATION_ADDRESS =
   '0xd2AAA00Ad2000000000000000000000000000000' as const;
+
+export const MESSAGE_PROXY_MAINNET_ADDRESS =
+  '0x656fb12abab353FB1875a4e3Dc4D70179CB85BA4' as const;
+
+export const LINKER_ADDRESS =
+  '0xEa870bEF8cc1Ca6871AE960266ea0fDbCF06371d' as const;
+
+export const COMMUNITY_POOL_ADDRESS =
+  '0xb2BadB7f28075CB2C8BDBd730204750Db4C03f98' as const;
+
+export const DEPOSIT_BOX_ETH_ADDRESS =
+  '0x9910cF6ba22915C5afCe8b682f7c09d1c001FA59' as const;
+
+export const DEPOSIT_BOX_ERC20_ADDRESS =
+  '0xb3bf0c62f0924e5C8fdae9815355eA98Fba33C8E' as const;
+
+export const DEPOSIT_BOX_ERC721_ADDRESS =
+  '0x98937f91885dcCfF8082623a157296AA161a9917' as const;
+
+export const DEPOSIT_BOX_ERC1155_ADDRESS =
+  '0xa0EF1521f56641F9E0E43c46E0F6B20715E454c8' as const;
+
+export const DEPOSIT_BOX_ERC721_WITH_METADATA_ADDRESS =
+  '0x4B85DD7d995D6ae445292939d7ebfabD7Cd088dA' as const;

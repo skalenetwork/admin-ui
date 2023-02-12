@@ -452,12 +452,14 @@ export function FlowAddNewTransaction({
                         {form[0].getValues('contractMethod')}
                       </span>
                     </div>
-                    {(form[0].getValues('parameters') || []).map((param) => (
-                      <div>
-                        <p className="text-[var(--gray10)]">{param.name}</p>
-                        <span className="font-mono">"{param.value}"</span>
-                      </div>
-                    ))}
+                    {(form[0].getValues('parameters') || []).map(
+                      (param, index) => (
+                        <div key={index}>
+                          <p className="text-[var(--gray10)]">{param.name}</p>
+                          <span className="font-mono">"{param.value}"</span>
+                        </div>
+                      ),
+                    )}
                   </>
                 ) : (
                   <></>

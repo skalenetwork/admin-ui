@@ -165,7 +165,9 @@ export function FlowAddNewOwner({
                   control={() => (
                     <select>
                       {owners.map((o, index) => (
-                        <option value={index + 1}>{index + 1}</option>
+                        <option key={index} value={index + 1}>
+                          {index + 1}
+                        </option>
                       ))}
                     </select>
                   )}

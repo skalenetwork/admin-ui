@@ -8,6 +8,8 @@ import { NiceAddress } from '@/elements/NiceAddress';
 import { useMultisig } from '@/features/multisig/hooks';
 import { addresses } from '@/features/network';
 
+import Prelay from '@/screens/Prelay';
+import { DiscIcon, SewingPinIcon } from '@radix-ui/react-icons';
 import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
 import {
   DataOut as NewTransaction,
@@ -242,21 +244,27 @@ export default function Multisig() {
               </div>
             }
           >
-            {!connected
-              ? 'Not Available'
-              : !owners
-              ? '...'
-              : owners.isError
-              ? 'Failed to retrieve owners'
-              : owners.data
-              ? owners.data.map((address, i) => (
-                  <MultisigOwner
-                    address={address}
-                    key={address}
-                    showControls={true}
-                  />
-                ))
-              : 'Loading'}
+            {!connected ? (
+              'Not Available'
+            ) : !owners ? (
+              '...'
+            ) : owners.isFetching ? (
+              <Prelay>
+                <SewingPinIcon /> Finding the owners... just a moment!
+              </Prelay>
+            ) : owners.isError ? (
+              'Failed to retrieve owners'
+            ) : owners.data ? (
+              owners.data.map((address, i) => (
+                <MultisigOwner
+                  key={address}
+                  address={address}
+                  showControls={true}
+                />
+              ))
+            ) : (
+              'Loading'
+            )}
           </Card>
         </div>
       </div>
@@ -292,17 +300,21 @@ export default function Multisig() {
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
-              {!connected
-                ? 'Not Available'
-                : !pendingTrxIds
-                ? '...'
-                : pendingTrxIds.isError
-                ? 'Failed to retrieve queue'
-                : pendingTrxIds.data
-                ? pendingTrxIds.data.map((id, i) => (
-                    <EventSummary key={id} id={id} />
-                  ))
-                : 'Loading'}
+              {!connected ? (
+                <Prelay>Not supported by the network.</Prelay>
+              ) : !pendingTrxIds ? (
+                <Prelay>...</Prelay>
+              ) : pendingTrxIds.isError ? (
+                <Prelay>Failed to retrieve queue</Prelay>
+              ) : pendingTrxIds.data ? (
+                pendingTrxIds.data.map((id, i) => (
+                  <EventSummary key={id} id={id} />
+                ))
+              ) : (
+                <Prelay>
+                  <DiscIcon />
+                </Prelay>
+              )}
             </div>
           </Card>
           <Card

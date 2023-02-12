@@ -47,6 +47,7 @@ export function useMultisig({
   const countsQueries = [
     {
       // ...defaultParams,
+      enabled: countsEnabled,
       queryKey: queryKey(['countTotalTrx']),
       queryFn: () =>
         api
@@ -55,10 +56,10 @@ export function useMultisig({
             executed: true,
           })
           .then((val) => val.toNumber()),
-      enabled: countsEnabled,
     },
     {
       // ...defaultParams,
+      enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countPendingTrx']),
       queryFn: () =>
@@ -68,10 +69,10 @@ export function useMultisig({
             executed: false,
           })
           .then((val) => val.toNumber()),
-      enabled: countsEnabled,
     },
     {
       // ...defaultParams,
+      enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countExecutedTrx']),
       queryFn: () =>
@@ -81,14 +82,13 @@ export function useMultisig({
             executed: true,
           })
           .then((val) => val.toNumber()),
-      enabled: countsEnabled,
     },
     {
       // ...defaultParams,
+      enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countReqConfirms']),
       queryFn: () => api?.getRequired(),
-      enabled: countsEnabled,
     },
   ];
 
@@ -114,8 +114,8 @@ export function useMultisig({
   });
 
   const pendingTrxIds = useQuery({
-    queryKey: queryKey(['pendingTrxIds']),
     enabled: !!(api && counts['countPendingTrx']?.data),
+    queryKey: queryKey(['pendingTrxIds']),
     initialData: () => [],
     queryFn: () =>
       api
@@ -131,8 +131,8 @@ export function useMultisig({
   });
 
   const executedTrxIds = useQuery({
-    queryKey: queryKey(['executedTrxIds']),
     enabled: !!(api && counts.countExecutedTrx.data),
+    queryKey: queryKey(['executedTrxIds']),
     initialData: () => [],
     queryFn: () =>
       api
@@ -147,19 +147,19 @@ export function useMultisig({
         : [],
   });
 
-  const pendingTrxs = useQueries({
-    queries: !pendingTrxIds.data
-      ? []
-      : pendingTrxIds.data.map((trx) => ({
-          queryKey: queryKey(['pendingTrxIds', trx]),
-          enabled: !!(api && trx),
-          initialData: () => [],
-          queryFn: () =>
-            api?.getTransaction({
-              transactionId: ethers.BigNumber.from(trx),
-            }),
-        })),
-  });
+  // const pendingTrxs = useQueries({
+  //   queries: !pendingTrxIds.data
+  //     ? []
+  //     : pendingTrxIds.data.map((trx) => ({
+  //       enabled: !!(api && trx),
+  //         queryKey: queryKey(['pendingTrxIds', trx]),
+  //         initialData: () => [],
+  //         queryFn: () =>
+  //           api?.getTransaction({
+  //             transactionId: ethers.BigNumber.from(trx),
+  //           }),
+  //       })),
+  // });
 
   return {
     api,

@@ -1,14 +1,16 @@
 /**
- * Pending ima-js node decoupling
- * OR
- * Pending skale.js/ima implementations
+ * @module ContractAPI
  */
 
 import { ABI } from '@/features/network/abi/abi';
 import { CONTRACT } from '@/features/network/contract';
 import { Provider } from '@ethersproject/providers';
-import { TokenManagerERC20 } from '@skalenetwork/ima-js/build/contracts/schain/TokenManagerERC20';
+import { DepositBoxERC1155 } from '@skalenetwork/ima-js/src/contracts/mainnet/DepositBoxERC1155';
+import { DepositBoxERC20 } from '@skalenetwork/ima-js/src/contracts/mainnet/DepositBoxERC20';
+import { DepositBoxERC721 } from '@skalenetwork/ima-js/src/contracts/mainnet/DepositBoxERC721';
+import { DepositBoxEth } from '@skalenetwork/ima-js/src/contracts/mainnet/DepositBoxEth';
 import { TokenManagerERC1155 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC1155';
+import { TokenManagerERC20 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC20';
 import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerERC721';
 import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
@@ -16,11 +18,6 @@ import { ConfigController } from '@skaleproject/config-controller/lib/contract';
 import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
 import { Signer, Wallet } from 'ethers';
 import { Address, Chain } from 'wagmi';
-
-/**
- * Somewhat leaky abstraction
- * necessary for seamless contextual hooks
- */
 
 type Class<T, U> = new (...args: U[]) => T;
 
@@ -32,6 +29,13 @@ type ArgProps = {
   abi: any;
 };
 
+/**
+ * Utility class instantiator
+ * @description Allows type forwarding of class and mapping of general chain context
+ * @param ApiClass
+ * @param args
+ * @returns
+ */
 function buildApi<R, U>(
   ApiClass: Class<R, U>,
   args: (params: ArgProps) => ConstructorParameters<Class<R, U>>,
@@ -86,8 +90,37 @@ export const API = {
     TokenManagerLinker,
     ({ address, abi, chain }) => [{ eth: {} }, address, abi],
   ),
+  DEPOSIT_BOX_ETH: buildApi(DepositBoxEth, ({ address, abi, chain }) => [
+    { eth: {} },
+    address,
+    abi,
+  ]),
+  DEPOSIT_BOX_ERC20: buildApi(DepositBoxERC20, ({ address, abi, chain }) => [
+    { eth: {} },
+    address,
+    abi,
+  ]),
+  DEPOSIT_BOX_ERC721: buildApi(DepositBoxERC721, ({ address, abi, chain }) => [
+    { eth: {} },
+    address,
+    abi,
+  ]),
+  DEPOSIT_BOX_ERC721_WITH_METADATA: buildApi(
+    DepositBoxERC721,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
+  DEPOSIT_BOX_ERC1155: buildApi(
+    DepositBoxERC1155,
+    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+  ),
 } as const;
 
+/**
+ * By Contract ID, gracefully get API instance
+ * @param contractId Unique Contract ID
+ * @param context chain, provider, signer
+ * @returns
+ */
 export function getApi<I extends keyof typeof API>(
   contractId: I,
   { chain, provider, signer }: Pick<ArgProps, 'chain' | 'provider' | 'signer'>,

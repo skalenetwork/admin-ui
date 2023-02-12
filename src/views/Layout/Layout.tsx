@@ -66,7 +66,7 @@ export default function Layout() {
         px-8 py-1 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
-        <p className="flex items-center justify-center gap-2 pl-16">
+        <div className="flex items-center justify-center gap-2 pl-16">
           {connected ? (
             <>
               <span
@@ -83,8 +83,8 @@ export default function Layout() {
           ) : (
             <></>
           )}
-        </p>
-        <p className="ml-auto flex items-center justify-between gap-4">
+        </div>
+        <div className="ml-auto flex items-center justify-between gap-4">
           {chain ? (
             <>
               {' '}
@@ -93,11 +93,11 @@ export default function Layout() {
               <span>Type: Staging</span>
             </>
           ) : (
-            <p className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               {' '}
               <span className="h-2 w-2 rounded-full bg-[var(--gray8)]"></span>{' '}
               Not Connected
-            </p>
+            </div>
           )}
           <div className="cursor-pointer">
             <RoleList />
@@ -108,7 +108,7 @@ export default function Layout() {
           >
             <FlagIcon className="h-5" />
           </button>
-        </p>
+        </div>
       </footer>
     </>
   );

@@ -13,7 +13,7 @@ const SingleConfig = ({
   title: string;
   status: boolean;
   tokenStandard: (typeof standards)[number]['name'];
-  onClick: () => void;
+  onClick?: () => void;
 }) => {
   const { isEnabled, toggle, isLoading } = useToggleAutodeploy({
     standard: tokenStandard.toUpperCase(),
@@ -62,13 +62,10 @@ export default function ImaAutodeploy() {
         <div className="flex flex-col gap-4 py-4">
           {standards.map((standard) => (
             <SingleConfig
-              key={standard}
+              key={standard.name}
               title={`${standard.label} Token Manager`}
               status={true}
               tokenStandard={standard.name}
-              onClick={() => {
-                toggle;
-              }}
             />
           ))}
         </div>

@@ -87,6 +87,7 @@ export default function ImaMapToken() {
                   <div className="flex flex-col h-32 overflow-auto ">
                     {[...availableTokens].map((token) => (
                       <button
+                        key={token.address}
                         className={tw(
                           'p-2 rounded-lg transition-all delay-75 mx-2',
                           token.address === form1.watch('originContractAddress')
