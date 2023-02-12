@@ -19,15 +19,17 @@ export default function ImaMapToken() {
 
   const targetIsMainnet = chainName === 'ethereum';
 
-  const { data, isSuccess } = useExplorer({
-    module: 'contract',
-    action: 'listcontracts',
-    args: {
-      page: '1',
-      offset: '100',
-      filter: 'verified',
+  const [{ data, isSuccess }] = useExplorer([
+    {
+      module: 'contract',
+      action: 'listcontracts',
+      args: {
+        page: '1',
+        offset: '100',
+        filter: 'verified',
+      },
     },
-  });
+  ]);
 
   const availableTokens: { address: string; name: string }[] =
     isSuccess && data?.result

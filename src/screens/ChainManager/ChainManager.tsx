@@ -327,7 +327,7 @@ export default function ChainManager() {
         <div data-id="chain_metadata" data-s="1">
           <WidgetManageMetadata />
         </div>
-        <div data-id="to_autodeploy" data-s="1">
+        <div data-id="to_autodeploy" data-s="2">
           <Card full heading="Set Auto Deployment in IMA">
             <div className="flex h-full flex-col justify-between">
               <p className="text-[var(--slate9)]">

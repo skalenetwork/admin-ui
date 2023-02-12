@@ -1,6 +1,5 @@
 import {
   context as analyticsContext,
-  useAnalytics,
   useBlockHistory,
 } from '@/features/analytics';
 import { useMemo } from 'react';
@@ -9,7 +8,6 @@ import Card from '@/components/Card/Card';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 
 // @ts-ignore
-import { useExplorer } from '@/features/network/hooks';
 import { AxisOptions, Chart } from 'react-charts';
 import { useTheme } from '../../hooks';
 
@@ -41,11 +39,7 @@ function FormattedMetric({
 }
 
 export function ChainAnalytics() {
-  useAnalytics();
-  const { data: accounts } = useExplorer({
-    module: 'account',
-    action: 'listaccounts',
-  });
+  const countAccounts = 0;
 
   const dayStart = useMemo(() => Date.now() - (Date.now() % 86400000), []);
 
@@ -95,13 +89,16 @@ export function ChainAnalytics() {
             <Card full heading="Active users">
               <div className="flex h-full flex-col">
                 <div className="flex flex-col gap-2">
-                  <FormattedMetric amount={tx} label="Total user count" />
                   <FormattedMetric
-                    amount={tx / 12}
+                    amount={countAccounts}
+                    label="Total user count"
+                  />
+                  <FormattedMetric
+                    amount={Math.floor(countAccounts / 30)}
                     label="Users last 30 days"
                   />
                   <FormattedMetric
-                    amount={tx / 12 / 4}
+                    amount={Math.floor(countAccounts / 4)}
                     label="Users last 7 days"
                   />
                 </div>

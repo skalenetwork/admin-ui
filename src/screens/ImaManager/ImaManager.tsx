@@ -4,7 +4,7 @@ import { NiceAddress } from '@/elements/NiceAddress';
 import { useChainConnect, useHistory } from '@/features/bridge';
 import { TOKEN_STANDARD } from '@/features/network/constants';
 import { ConnectionStatus } from '@/features/network/types';
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ExclamationCircleIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { ArrowRightIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
@@ -28,7 +28,7 @@ const TransactionItem = ({
 }: {
   id?: string;
   actionText: string;
-  author: string;
+  author?: string;
   timestamp?: number;
 }) => {
   const elapsed = humanizeDuration(
@@ -42,7 +42,7 @@ const TransactionItem = ({
     >
       <div>
         {id ? id + ' - ' : ''}
-        {actionText} by {author}
+        {actionText} {author ? 'by ' + { author } : ''}
       </div>
       <div className="text-sm text-[var(--gray10)]">About {elapsed} ago</div>
     </div>
@@ -373,7 +373,7 @@ export default function ImaManager() {
 
   const [selectedChain, setSelectedChain] = useState();
 
-  const { events } = useHistory();
+  const { events } = useHistory({});
 
   const toggleAlert = useCallback(
     (toKey: string = '') => {
@@ -428,14 +428,19 @@ export default function ImaManager() {
         heading="Recent transactions"
         bodyClass="scrollbar flex flex-col gap-3"
       >
-        {events &&
+        {events && events.length ? (
           events.map((event) => (
             <TransactionItem
               actionText={event.label}
-              author="_____"
               timestamp={event.timestamp}
             />
-          ))}
+          ))
+        ) : (
+          <div className="flex justify-center items-center h-full text-[var(--gray10)]">
+            <FunnelIcon className="h-5" />
+            &emsp;No IMA transactions yet!
+          </div>
+        )}
       </Card>
       {/* <div data-id="main"></div>
       <div data-id="collapse"></div> */}

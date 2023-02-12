@@ -1,7 +1,7 @@
 import { API, getApi } from '@/features/network/api';
 import { NETWORK } from '@/features/network/constants';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import {
   Address,
@@ -39,18 +39,25 @@ type ExplorerProps = {
  * @param param0
  * @returns
  */
-export function useExplorer({ module, action, args }: ExplorerProps) {
+export function useExplorer(requests: ExplorerProps[]) {
   const { chain } = useNetwork();
   const baseUrl = chain?.blockExplorers?.default.url;
-  const queryString = new URLSearchParams(args).toString();
-  const url =
-    baseUrl +
-    `api?module=${module}&action=${action}${
-      queryString ? '&' + queryString : ''
-    }`;
-  return useQuery({
-    queryKey: [chain?.id, module, action, args],
-    queryFn: () => fetch(url).then((res) => res.json()),
+
+  const queries = requests.map((request: ExplorerProps) => {
+    const { module, action, args } = request;
+    const queryString = new URLSearchParams(args).toString();
+    const url =
+      baseUrl +
+      `api?module=${module}&action=${action}${
+        queryString ? '&' + queryString : ''
+      }`;
+    return {
+      queryKey: [chain?.id, module, action, args],
+      queryFn: () => fetch(url).then((res) => res.json()),
+    };
+  });
+  return useQueries({
+    queries,
   });
 }
 

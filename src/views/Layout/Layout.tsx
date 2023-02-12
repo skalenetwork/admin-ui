@@ -9,6 +9,7 @@ import { FcdIcon, GithubIcon, MtmIcon } from '@/components/Icons/Icons';
 import RoleList from '@/elements/RoleList/RoleList';
 import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
 import { useConfigController } from '@/features/interim/hooks';
+import { FlagIcon } from '@heroicons/react/24/solid';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
 
@@ -102,10 +103,10 @@ export default function Layout() {
             <RoleList />
           </div>
           <button
-            className="btn btn-outline"
+            className={`btn btn-outline ${!inspectMode ? 'opacity-50' : ''}`}
             onClick={(e) => setInspectMode(!inspectMode)}
           >
-            {inspectMode ? 'Hide' : 'Show'} Flags
+            <FlagIcon className="h-5" />
           </button>
         </p>
       </footer>
