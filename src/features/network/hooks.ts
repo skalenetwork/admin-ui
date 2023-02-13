@@ -104,6 +104,7 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
   contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
 } {
   const { address } = CONTRACT[id];
+  const { data: signer } = useSigner();
   const abi = useAbi({
     id,
   });
@@ -111,6 +112,7 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
   const contract = useContract({
     address,
     abi,
+    signerOrProvider: signer,
   });
 
   return {

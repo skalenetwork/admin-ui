@@ -99,8 +99,6 @@ export default function Multisig() {
     executedTrxIds,
   } = data;
 
-  useMultisig();
-
   const addOwner = useMutation({
     mutationKey: ['multisig', 'addOwner', chainId],
     mutationFn:
@@ -117,12 +115,18 @@ export default function Multisig() {
     mutationFn:
       multisigApi &&
       ((payload: NewTransaction) => {
-        // prepare tx here from multisig.lib
-        return multisigApi.submitTransaction({
-          destination: multisigApi.contract.address,
+        console.log(payload);
+        const args = {
+          destination: multisigApi.contract.address as Address,
           value: ethers.BigNumber.from(0),
-          data: payload.hexData,
-        });
+          data: payload.encoded as `0x${string}`,
+        };
+        // prepare tx here from multisig.lib
+        return contract.contract?.callStatic.submitTransaction(
+          args.destination,
+          args.value,
+          args.data,
+        );
       }),
   });
 
