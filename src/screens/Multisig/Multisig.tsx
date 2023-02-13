@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
-import { Address, useMutation } from 'wagmi';
+import { Address, useMutation, useNetwork } from 'wagmi';
 
 import Card from '@/components/Card/Card';
 import Select from '@/components/Select/Select';
@@ -8,6 +8,9 @@ import { NiceAddress } from '@/elements/NiceAddress';
 import { useMultisig } from '@/features/multisig/hooks';
 import { addresses } from '@/features/network';
 
+import { PeopleIcon } from '@/components/Icons/Icons';
+import { NETWORK } from '@/features/network/constants';
+import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
 import { DiscIcon } from '@radix-ui/react-icons';
@@ -73,6 +76,8 @@ export default function Multisig() {
   ];
   const activeWalletAddress = signerWallets[0];
 
+  const { chain } = useNetwork();
+
   const {
     api: multisigApi,
     connected,
@@ -134,9 +139,19 @@ export default function Multisig() {
 
   return (
     <div
-      className="grid spaced h-full w-full grid-cols-[7fr_3fr] grid-rows-[50px_auto]"
+      className="relative grid spaced h-full w-full grid-cols-[7fr_3fr] grid-rows-[50px_auto]"
       style={{ gridTemplateRows: '50px 1fr', gridTemplateColumns: '7fr 3fr' }}
     >
+      {chain?.network !== NETWORK.SKALE ? (
+        <NotSupported theme="blur">
+          <PeopleIcon className="mr-4" />
+          &emsp;
+          <strong>Multisig Wallets</strong> on SChain allow multi-party accounts
+          to perform on-chain actions.
+        </NotSupported>
+      ) : (
+        <></>
+      )}
       <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
         <div className="flex h-full w-full items-center gap-2">
           <WalletSelect

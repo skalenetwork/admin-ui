@@ -83,7 +83,7 @@ export const WidgetConfigFcd = ({
     : isLoading
     ? 'pending'
     : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
-  console.log(status);
+
   return (
     <Card
       full

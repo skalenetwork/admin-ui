@@ -21,6 +21,7 @@ import Dialog from '@/components/Dialog/Dialog';
 import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
+import { getAbi } from '@/features/network/abi/abi';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
 const { CONTRACT } = manifest;
@@ -125,7 +126,9 @@ export function FlowAddNewTransaction({
     try {
       let abi: Abi = JSON.parse(infoForm.contractABI);
       return (
-        abi.filter((item) => item.type === 'function') as AbiFunction[]
+        abi.filter(
+          (item) => item.type === 'function' && item.stateMutability !== 'view',
+        ) as AbiFunction[]
       ).map((definition: AbiFunction) => {
         let formattedParams = [];
         let canonicalParams = [];
@@ -164,12 +167,22 @@ export function FlowAddNewTransaction({
    */
   useEffect(() => {
     if (!contractAddress) return;
-    const found = Object.values(CONTRACT).find(
-      (contract) => contract.address === contractAddress,
+    const contractId = Object.keys(CONTRACT).find(
+      (id) => CONTRACT[id].address === contractAddress,
     );
-    if (found?.name) {
-      form[0].setValue('contractABI', predeployedAbis[found.name] || '');
-      form[0].trigger('contractABI');
+    if (contractId) {
+      try {
+        const abi = getAbi({ id: contractId });
+        const serializedAbi = JSON.stringify(abi);
+        form[0].setValue('contractABI', serializedAbi);
+        form[0].trigger('contractABI');
+      } catch (e) {
+        console.error(
+          'SubmitTransaction: ABI not available for',
+          contractId,
+          e,
+        );
+      }
     }
   }, [contractAddress]);
 

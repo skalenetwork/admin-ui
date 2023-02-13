@@ -8,6 +8,10 @@
     border-color: var(--gray6);
   }
 
+  code {
+    @apply rounded-lg border py-1 px-2 align-middle font-mono text-sm;
+  }
+
   h1 {
     @apply py-4 text-3xl font-medium;
   }

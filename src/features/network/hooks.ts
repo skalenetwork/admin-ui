@@ -2,6 +2,8 @@ import { API, getApi } from '@/features/network/api';
 import { NETWORK } from '@/features/network/constants';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { getContract } from '@wagmi/core';
+import { Wallet } from 'ethers';
 import { useEffect } from 'react';
 import {
   Address,
@@ -116,6 +118,56 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
     abi,
     contract,
   };
+}
+
+/**
+ * Use wagmi:useContractWrites compatible typed interfaces for any network supported contract by preset ID
+ * @description Fetches a list of contracts, for a single, prefer useTypedContract
+ * @param param0
+ * @returns
+ */
+export function useTypedContracts<T extends ContractManifestIdAbi>({
+  id,
+}: {
+  id: T[];
+}): {
+  contractId: T;
+  address?: (typeof CONTRACT)[T]['address'];
+  abi?: (typeof ABI)[T];
+  contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
+}[] {
+  const { data: signer } = useSigner();
+
+  return id
+    ? id.map((contractId, index) => {
+        const { address } = CONTRACT[contractId];
+
+        let abi, contract;
+
+        try {
+          abi = getAbi({
+            id: contractId,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+
+        contract =
+          abi &&
+          getContract({
+            address,
+            abi,
+            signer: signer as Wallet,
+          });
+
+        return {
+          contractId,
+          address,
+          abi,
+          contract,
+        };
+      })
+    : [];
 }
 
 /**

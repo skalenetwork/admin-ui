@@ -63,7 +63,7 @@ export const CONTRACT = {
     type: 'sudo',
     key: 'schain:multisig_wallet',
     address: ADDRESS.SCHAIN_MULTISIG_WALLET_ADDRESS,
-    name: 'MultisigWallet',
+    name: 'MultiSigWallet',
   },
   MARIONETTE: {
     network: NETWORK.SKALE,
@@ -144,7 +144,10 @@ export const CONTRACT = {
   },
   DEPOSIT_BOX_ERC721_WITH_METADATA: {
     network: NETWORK.ETHEREUM,
+    type: 'ima:bridge',
+    key: 'foreign:depositbox:erc721_with_metadata',
     address: ADDRESS.DEPOSIT_BOX_ERC721_WITH_METADATA_ADDRESS,
+    name: 'DepositBoxERC721',
   },
   DEPOSIT_BOX_ERC1155: {
     network: NETWORK.ETHEREUM,

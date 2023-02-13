@@ -1,5 +1,7 @@
 import Card from '@/components/Card/Card';
 import { useChainConnect } from '@/features/bridge';
+import { NETWORK } from '@/features/network/constants';
+import NotSupported from '@/screens/NotSupported';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useEffect, useState } from 'react';
@@ -27,7 +29,12 @@ export default function ImaConnectChain() {
     chain?.connect?.write?.();
   };
 
-  return (
+  return originChain?.network !== NETWORK.SKALE ? (
+    <NotSupported>
+      <strong>Interchain Connections:</strong> Connect from one Schain to
+      another.
+    </NotSupported>
+  ) : (
     <div className="grid grid-rows-[1fr_max-content] h-full rounded-lg bg-[var(--white)] p-2">
       <Card full heading="Connect chains">
         <ToggleGroup.Root

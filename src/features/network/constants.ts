@@ -4,6 +4,8 @@
  * it has implicit foreign context, then it is a candidate for manifest
  * */
 
+export const ACRONYMS = ['IMA', 'ETH', 'MTM', 'FCD', 'ERC'];
+
 /**
  * EVM-based networks
  */

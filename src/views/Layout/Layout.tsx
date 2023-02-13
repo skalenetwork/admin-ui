@@ -99,9 +99,11 @@ export default function Layout() {
               Not Connected
             </div>
           )}
-          <div className="cursor-pointer">
-            <RoleList />
-          </div>
+          {connected && (
+            <div className="cursor-pointer">
+              <RoleList />
+            </div>
+          )}
           <button
             className={`btn btn-outline ${!inspectMode ? 'opacity-50' : ''}`}
             onClick={(e) => setInspectMode(!inspectMode)}

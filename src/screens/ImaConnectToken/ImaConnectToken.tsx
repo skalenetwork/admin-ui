@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
 
 export default function ImaConnectToken() {
-  const { chains } = useNetwork();
+  const { chain, chains } = useNetwork();
   const { chainName } = useParams();
   return (
     <Card

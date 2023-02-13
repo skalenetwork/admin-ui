@@ -1,5 +1,15 @@
 import { utils } from 'ethers';
 
+export function snakeToSentenceCase(
+  snakeCase: string,
+  excludes: string[] = [],
+) {
+  return snakeCase
+    .split('_')
+    .map((r) => (excludes.includes(r) ? r : r[0] + r.slice(1).toLowerCase()))
+    .join(' ');
+}
+
 export function toSentenceCase(anyCamelCase: string) {
   if (anyCamelCase) {
     const result = anyCamelCase
