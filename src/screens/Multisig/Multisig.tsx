@@ -9,7 +9,8 @@ import { useMultisig } from '@/features/multisig/hooks';
 import { addresses } from '@/features/network';
 
 import Prelay from '@/screens/Prelay';
-import { DiscIcon, SewingPinIcon } from '@radix-ui/react-icons';
+import { BoltIcon } from '@heroicons/react/24/outline';
+import { DiscIcon } from '@radix-ui/react-icons';
 import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
 import {
   DataOut as NewTransaction,
@@ -250,7 +251,10 @@ export default function Multisig() {
               '...'
             ) : owners.isFetching ? (
               <Prelay>
-                <SewingPinIcon /> Finding the owners... just a moment!
+                <span className="animate-bounce px-2">
+                  <BoltIcon className="h-5" />
+                </span>{' '}
+                Finding the owners... just a moment!
               </Prelay>
             ) : owners.isError ? (
               'Failed to retrieve owners'

@@ -5,6 +5,7 @@ import { NiceAddress } from '@/elements/NiceAddress';
 import * as addresses from '@/features/network/address';
 import { useExplorer } from '@/features/network/hooks';
 import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
+import Prelay from '@/screens/Prelay';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { tw } from 'twind';
@@ -19,7 +20,7 @@ export default function ImaMapToken() {
 
   const targetIsMainnet = chainName === 'ethereum';
 
-  const [{ data, isSuccess }] = useExplorer([
+  const [originTokens] = useExplorer([
     {
       module: 'contract',
       action: 'listcontracts',
@@ -31,9 +32,9 @@ export default function ImaMapToken() {
     },
   ]);
 
-  const availableTokens: { address: string; name: string }[] =
-    isSuccess && data?.result
-      ? data.result
+  const originTokensFiltered: { address: string; name: string }[] =
+    originTokens.isSuccess && originTokens?.data?.result
+      ? originTokens.data.result
           .filter(
             (c: { Address: string }) =>
               !wildcardAddresses.includes(c.Address.toLowerCase()),
@@ -43,8 +44,6 @@ export default function ImaMapToken() {
             name: c.ContractName,
           }))
       : [];
-
-  console.log(availableTokens);
 
   // const { api } = useContractApi({
   //   id: 'TOKEN_MANAGER_LINKER',
@@ -85,29 +84,37 @@ export default function ImaMapToken() {
                     Available tokens on origin:
                   </p>
                   <div className="flex flex-col h-32 overflow-auto ">
-                    {[...availableTokens].map((token) => (
-                      <button
-                        key={token.address}
-                        className={tw(
-                          'p-2 rounded-lg transition-all delay-75 mx-2',
-                          token.address === form1.watch('originContractAddress')
-                            ? 'bg-[var(--slate1)]'
-                            : 'hover:bg-[var(--slate)]',
-                        )}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          form1.setValue(
-                            'originContractAddress',
-                            token.address,
-                          );
-                        }}
-                      >
-                        <NiceAddress
-                          address={token.address}
-                          label={token.name}
-                        />
-                      </button>
-                    ))}
+                    {originTokens.isFetching || originTokens.isLoading ? (
+                      <Prelay>
+                        <span className="animate-bounce px-2">ʕ￫ᴥ￩ʔ</span>{' '}
+                        Holdon... Bera fetching alot of tokens!
+                      </Prelay>
+                    ) : (
+                      [...originTokensFiltered].map((token) => (
+                        <button
+                          key={token.address}
+                          className={tw(
+                            'p-2 rounded-lg transition-all delay-75 mx-2',
+                            token.address ===
+                              form1.watch('originContractAddress')
+                              ? 'bg-[var(--slate1)]'
+                              : 'hover:bg-[var(--slate)]',
+                          )}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            form1.setValue(
+                              'originContractAddress',
+                              token.address,
+                            );
+                          }}
+                        >
+                          <NiceAddress
+                            address={token.address}
+                            label={token.name}
+                          />
+                        </button>
+                      ))
+                    )}
                   </div>
                   <div className="text-center py-4 flex flex-row justify-center items-center gap-4">
                     <div className="bg-[var(--gray8)] w-1/6 h-[1px]"></div>

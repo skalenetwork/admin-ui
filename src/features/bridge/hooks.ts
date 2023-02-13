@@ -135,13 +135,13 @@ export function useChainConnect({ chainName }: { chainName: string }) {
       ? 'target'
       : 'none';
 
-  // false &&
-  console.log(
-    originChain?.name,
-    targetChain?.name,
-    originConnected,
-    targetConnected,
-  );
+  false &&
+    console.log(
+      originChain?.name,
+      targetChain?.name,
+      originConnected,
+      targetConnected,
+    );
 
   return {
     connect,
