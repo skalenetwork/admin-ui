@@ -1,6 +1,9 @@
 import { NiceAddress } from '@/elements/NiceAddress';
+import { useTypedContract } from '@/features/network/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 export function MultisigOwner({
   name,
@@ -8,9 +11,21 @@ export function MultisigOwner({
   showControls = false,
 }: {
   name?: string;
-  address: string;
+  address: Address;
   showControls?: boolean;
 }) {
+  const { abi, address: contractAddress } = useTypedContract({
+    id: 'MULTISIG_WALLET',
+  });
+
+  const { config: deleteOwner } = usePrepareContractWrite({
+    abi,
+    address: contractAddress,
+    functionName: 'removeOwner',
+    args: [address],
+  });
+  const { writeAsync } = useContractWrite(deleteOwner);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -25,9 +40,21 @@ export function MultisigOwner({
       />
       {showControls && (
         <div className="ml-auto">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-[var(--red3)]">
-            <TrashIcon className="h-6 w-6 cursor-pointer rounded-full text-[var(--red10)]" />
-          </button>
+          {writeAsync && (
+            <button
+              className="flex h-10 w-10 items-center justify-center
+           rounded-full transition-all hover:bg-[var(--red3)]"
+              onClick={() => {
+                toast.promise(writeAsync?.(), {
+                  pending: `Removing owner ${address}`,
+                  success: `Owner removed ${address}`,
+                  error: `Failed to remove owner ${address}`,
+                });
+              }}
+            >
+              <TrashIcon className="h-6 w-6 cursor-pointer rounded-full text-[var(--red10)]" />
+            </button>
+          )}
         </div>
       )}
     </motion.div>

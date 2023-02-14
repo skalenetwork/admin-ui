@@ -37,7 +37,7 @@ export function useTokenManagerLinker() {
 export function useToggleAutodeploy<T extends TokenStandard>({
   standard,
 }: TokenTypeProps<T>) {
-  const { address, abi, api, contract } = useTokenManager({
+  const { address, abi } = useTokenManager({
     standard: 'ERC20',
   });
 
@@ -204,8 +204,6 @@ export function useHistory({
   const events = [...eventTuple[0], ...eventTuple[1], ...eventTuple[2]].sort(
     (a, b) => b.timestamp - a.timestamp,
   );
-
-  console.log('bridge:useHistory', events);
 
   return {
     events,

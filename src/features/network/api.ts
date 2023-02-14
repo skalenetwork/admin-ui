@@ -135,6 +135,7 @@ export function getApi<I extends keyof typeof API>(
     throw `getApi: id=${contractId} is invalid`;
   }
   try {
+    // @ts-ignore
     const { address } = contract;
     const props = {
       abi,

@@ -103,7 +103,6 @@ export default function Stepper({
   }, [activeId, steps]);
 
   const stepNext = useCallback(() => {
-    console.log(activeIndex, activeId);
     if (activeIndex < steps.length) {
       setActiveId(steps[activeIndex + 1].id);
     }

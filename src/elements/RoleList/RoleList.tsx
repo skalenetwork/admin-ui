@@ -5,17 +5,10 @@ import { useTypedContracts } from '@/features/network/hooks';
 import { CONTRACT } from '@/features/network/manifest';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useQueries } from '@tanstack/react-query';
-import { ethers } from 'ethers';
 import { useAccount } from 'wagmi';
 import { snakeToSentenceCase } from '../../utils';
 
 type Props = {};
-
-const role = (roleString: string) => {
-  const hash = ethers.utils.id(roleString);
-  console.log(roleString, hash);
-  return hash;
-};
 
 export default function RoleList({}: Props) {
   const contracts = useTypedContracts({
@@ -66,8 +59,6 @@ export default function RoleList({}: Props) {
       };
     }),
   });
-
-  console.log('kia hai', allContractsWithRoles);
 
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>

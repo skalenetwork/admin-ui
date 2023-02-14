@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
-import { Address, useMutation, useNetwork } from 'wagmi';
+import { Address, useNetwork } from 'wagmi';
 
 import Card from '@/components/Card/Card';
 import Select from '@/components/Select/Select';
@@ -11,20 +11,20 @@ import { addresses } from '@/features/network';
 import { PeopleIcon } from '@/components/Icons/Icons';
 import { NETWORK } from '@/features/network/constants';
 import { CONTRACT } from '@/features/network/contract';
+import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
 import { Cross2Icon, DiscIcon } from '@radix-ui/react-icons';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import humanizeDuration from 'humanize-duration';
+import { toast } from 'react-toastify';
 import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
 import {
   DataOut as NewTransaction,
   FlowAddNewTransaction,
 } from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
-import { MultisigOwner } from './MultisigOwner';
-
 export function EventSummary({
   id,
   events = [],
@@ -57,7 +57,8 @@ export function EventSummary({
 
   const elapsed = block
     ? humanizeDuration(
-        (Number(block.timestamp) - Math.floor(new Date() / 1000)) * 1000,
+        (Number(block.timestamp) - Math.floor(new Date().getTime() / 1000)) *
+          1000,
         { largest: 1 },
       )
     : 0;
@@ -310,7 +311,11 @@ export default function Multisig() {
                     toggleAlert={toggleAlert}
                     owners={owners?.data || []}
                     onSubmit={(data) => {
-                      false && addOwner.mutateAsync(data);
+                      toast.promise(addOwner.mutateAsync(data), {
+                        pending: `Adding owner - ${data.ownerName}`,
+                        success: `Added owner - ${data.ownerName}`,
+                        error: `Failed to add owner - ${data.ownerName}`,
+                      });
                     }}
                   />
                 )}
@@ -362,7 +367,18 @@ export default function Multisig() {
                       alert(
                         `to: ${data.contractAddress}\ndata: ${data.encoded}\nopts: {${data.nonce},${data.gasAmount}}`,
                       );
-                    submitTransaction.mutateAsync(data);
+                    toast.promise(submitTransaction.mutateAsync(data), {
+                      pending: {
+                        render: ({ data }) => `Submitting transaction`,
+                      },
+                      success: {
+                        render: ({ data }) =>
+                          `Transaction submitted ${data?.hash}`,
+                      },
+                      error: {
+                        render: ({ data }) => `Transaction failed to submit`,
+                      },
+                    });
                   }}
                 />
               )}
@@ -372,7 +388,7 @@ export default function Multisig() {
         >
           <Card
             lean
-            heading={`Queue ( ${pendingTrxIds?.data.length} )`}
+            heading={`Queue ( ${pendingTrxIds?.data?.length} )`}
             className="h-1/2 bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
@@ -388,10 +404,14 @@ export default function Multisig() {
                   <EventSummary
                     key={id}
                     id={id}
-                    events={events.filter(
-                      (event) =>
-                        event?.args?.['transactionId']?.toNumber() === id,
-                    )}
+                    events={
+                      !events
+                        ? []
+                        : events.filter(
+                            (event) =>
+                              event?.args?.['transactionId']?.toNumber() === id,
+                          )
+                    }
                   />
                 ))
               ) : (
@@ -403,7 +423,7 @@ export default function Multisig() {
           </Card>
           <Card
             lean
-            heading={`History ( ${executedTrxIds?.data.length} )`}
+            heading={`History ( ${executedTrxIds?.data?.length} )`}
             className="h-1/2 bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
@@ -419,10 +439,15 @@ export default function Multisig() {
                     <EventSummary
                       key={id}
                       id={id}
-                      events={events.filter(
-                        (event) =>
-                          event?.args?.['transactionId']?.toNumber() === id,
-                      )}
+                      events={
+                        !events
+                          ? []
+                          : events.filter(
+                              (event) =>
+                                event?.args?.['transactionId']?.toNumber() ===
+                                id,
+                            )
+                      }
                     />
                   ))
                 : 'Loading'}

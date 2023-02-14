@@ -262,7 +262,10 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
       : undefined;
 
   useEffect(() => {
-    address && api?.setSigner?.({ signer });
+    try {
+      // @ts-ignore
+      address && api?.setSigner?.({ signer });
+    } catch (e) {}
   }, [address, api]);
 
   return { connected, chainId: chain?.id, signer, api };

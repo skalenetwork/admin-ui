@@ -5,8 +5,6 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 
-import Layout from '@/views/Layout/Layout';
-
 import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
 import ChainManager from '@/screens/ChainManager/ChainManager';
 import ImaAutodeploy from '@/screens/ImaAutodeploy/ImaAutodeploy';
@@ -16,7 +14,10 @@ import ImaManager from '@/screens/ImaManager/ImaManager';
 import ImaMapToken from '@/screens/ImaMapToken/ImaMapToken';
 import Multisig from '@/screens/Multisig/Multisig';
 import RoleAssigner from '@/screens/RoleAssigner/RoleAssigner';
+import Layout from '@/views/Layout/Layout';
 import Support from '@/views/Support/Support';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 <Link to="ima_manager">IMA Manager</Link>;
 
@@ -85,6 +86,7 @@ export default function App() {
   return (
     <div id="app">
       <RouterProvider router={router} />
+      <ToastContainer position="bottom-right" />
     </div>
   );
 }

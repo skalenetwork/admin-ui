@@ -15,7 +15,7 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
-import { useBalance } from 'wagmi';
+import { useBalance, useContractRead } from 'wagmi';
 import { scope } from './lib';
 
 const multisigContract = {
@@ -111,15 +111,21 @@ export function useMultisig({
 
   // Derviatives
 
-  const owners = useQuery({
-    ...defaultParams,
-    enabled: Boolean(api),
-    queryKey: queryKey(['getOwners']),
-    initialData: () => [],
-    queryFn: () => {
-      return api?.getOwners();
-    },
+  const owners = useContractRead({
+    address: contract.address,
+    abi: contract.abi,
+    functionName: 'getOwners',
   });
+
+  // useQuery({
+  //   ...defaultParams,
+  //   enabled: Boolean(api),
+  //   queryKey: queryKey(['getOwners']),
+  //   initialData: () => [],
+  //   queryFn: () => {
+  //     return api?.getOwners();
+  //   },
+  // });
 
   const pendingTrxIds = useQuery({
     ...defaultParams,

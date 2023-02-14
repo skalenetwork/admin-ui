@@ -22,6 +22,7 @@ import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { getAbi } from '@/features/network/abi/abi';
+import { AlertProps } from '@/screens/types';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
 const { CONTRACT } = manifest;
@@ -486,7 +487,7 @@ export function FlowAddNewTransaction({
                     readOnly
                     className="scrollbar w-full bg-[var(--gray1)] p-2 font-mono text-[var(--black)]"
                   >
-                    {form[0].getValues('encoded')}
+                    {form[0].watch('encoded')}
                   </textarea>
                 </div>
                 <div>
