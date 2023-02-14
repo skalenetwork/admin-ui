@@ -5,7 +5,7 @@ import Popover from '@/components/Popover/Popover';
 import { ACRONYMS } from '@/features/network/constants';
 import { useTypedContracts } from '@/features/network/hooks';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
-import { useAccount, useContractReads } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { snakeToSentenceCase } from '../../utils';
 
 type Props = {};
@@ -31,23 +31,16 @@ export default function RoleList({}: Props) {
         .map((fragment) => fragment.name),
     }));
 
-  useContractReads({
-    contracts: [
-      {
-        abi: contractRoles[0].abi,
-        address: CONTRACT[contractRoles[0].contractId],
-        functionName: 'hasRole',
-        args: [contractRoles[0].roles[0], account.address],
-      },
-    ],
-  });
-
-  function snakeToCamelCase(
-    role: string,
-    arg1: string[],
-  ): import('react').ReactNode {
-    throw new Error('Function not implemented.');
-  }
+  // useContractReads({
+  //   contracts: [
+  //     {
+  //       abi: contractRoles[0].abi,
+  //       address: CONTRACT[contractRoles[0].contractId],
+  //       functionName: 'hasRole',
+  //       args: [contractRoles[0].roles[0], account.address],
+  //     },
+  //   ],
+  // });
 
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>
@@ -57,8 +50,8 @@ export default function RoleList({}: Props) {
           key={index}
         >
           <p className="font-semibold">{contractName}</p>
-          {roles.map((role: string) => (
-            <div className="flex flex-row">
+          {roles.map((role: string, index) => (
+            <div className="flex flex-row" key={index}>
               {snakeToSentenceCase(role, ACRONYMS)}{' '}
               <div className="ml-auto">
                 <CheckIcon className="text-[var(--green11)]" />

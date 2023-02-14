@@ -40,11 +40,11 @@ type AbiFunctionParams<
 };
 /// END
 
-export type ContractManifestId = keyof typeof CONTRACT;
+export type ContractId = keyof typeof CONTRACT;
 
 export type GetAbiProps<T> = { id: T };
 
-export type ContractName<K extends ContractManifestId> = Lowercase<
+export type ContractName<K extends ContractId> = Lowercase<
   (typeof CONTRACT)[K]['name']
 >;
 
@@ -53,8 +53,9 @@ type RelaxedAbi = Readonly<
 >;
 
 /**
- * @description If not satisfied it means some ABIs are missing
- * @todo For strict ABI checking, change RelaxedAbi to Abi type
+ * @description Must be satisfied to ensure feature / type availability in dev and runtime
+ * Full coverage of CONTRACTS can be enabled by removing ? in satisfies type
+ * Not satisfied on removing RelaxedAbi will show invalid ABIs
  */
 export const ABI = {
   CONFIG_CONTROLLER: ConfigControllerABI,
@@ -71,20 +72,19 @@ export const ABI = {
   DEPOSIT_BOX_ERC721: mainnetImaUnion['deposit_box_erc721_abi'],
   DEPOSIT_BOX_ERC1155: mainnetImaUnion['deposit_box_erc1155_abi'],
   LINKER: mainnetImaUnion['linker_abi'],
+  DEPOSIT_BOX_ERC721_WITH_METADATA: [],
 } as const satisfies {
-  [key in keyof typeof CONTRACT]: RelaxedAbi;
+  [key in keyof typeof CONTRACT as keyof typeof CONTRACT]?: Abi | RelaxedAbi;
 };
 
-export type ContractManifestIdAbi = keyof typeof ABI;
+export type ContractIdWithAbi = keyof typeof ABI;
 
 /**
  * Get ABI based on app-level contract identifier ex: CONFIG_CONTROLLER
  * @param param0
  * @returns
  */
-export function getAbi<T extends ContractManifestIdAbi>({
-  id,
-}: GetAbiProps<T>) {
+export function getAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
   return ABI[id];
 }
 
@@ -95,7 +95,7 @@ export function getAbi<T extends ContractManifestIdAbi>({
  * @returns
  */
 false &&
-  function importAbi<T extends ContractManifestId>({ id }: GetAbiProps<T>) {
+  function importAbi<T extends ContractId>({ id }: GetAbiProps<T>) {
     const lowerName = CONTRACT[id].name.toLocaleLowerCase() as ContractName<T>;
     const path = `./abi-${lowerName}` as const;
     // will require a default export from abi-*.ts when used

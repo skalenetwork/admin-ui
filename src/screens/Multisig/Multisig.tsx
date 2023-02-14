@@ -10,10 +10,13 @@ import { addresses } from '@/features/network';
 
 import { PeopleIcon } from '@/components/Icons/Icons';
 import { NETWORK } from '@/features/network/constants';
+import { CONTRACT } from '@/features/network/contract';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { DiscIcon } from '@radix-ui/react-icons';
+import { Cross2Icon, DiscIcon } from '@radix-ui/react-icons';
+import { useQuery } from '@tanstack/react-query';
+import humanizeDuration from 'humanize-duration';
 import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
 import {
   DataOut as NewTransaction,
@@ -22,21 +25,68 @@ import {
 import { FlowAddNewWallet } from './FlowAddNewWallet';
 import { MultisigOwner } from './MultisigOwner';
 
-export function EventSummary({ id }: { id: any }) {
+export function EventSummary({
+  id,
+  events = [],
+}: {
+  id: any;
+  events: ethers.Event[];
+}) {
+  const countConfirmations = events.filter(
+    (e) => e.event === 'Confirmation',
+  ).length;
+  const submitEvent = events.find((e) => e.event === 'Submission');
+  const failed = events.some((e) => e.event === 'ExecutionFailure');
+  const executed = events.some((e) => e.event === 'Execution');
+
+  const { data: transaction } = useQuery({
+    enabled: Boolean(!executed && submitEvent),
+    queryKey: ['transaction', submitEvent?.transactionHash],
+    queryFn: () => {
+      return submitEvent?.getTransaction();
+    },
+  });
+
+  const { data: block } = useQuery({
+    enabled: Boolean(submitEvent),
+    queryKey: ['block', submitEvent?.blockNumber],
+    queryFn: () => {
+      return submitEvent?.getBlock();
+    },
+  });
+
+  const elapsed = block
+    ? humanizeDuration(
+        (Number(block.timestamp) - Math.floor(new Date() / 1000)) * 1000,
+        { largest: 1 },
+      )
+    : 0;
+
   return (
     <Card
       lean
       heading={
-        <h5>
-          {id} - Contract interaction {'<>'}
-          <br></br>
+        <div>
+          <h5 className="flex items-center justify-between">
+            <span>
+              {id} -{' '}
+              {transaction
+                ? transaction.data.slice(264, 264 + 10)
+                : 'Contract Interacion <>'}{' '}
+            </span>
+            {failed ? (
+              <Cross2Icon className="align-middle text-[var(--red10)]" />
+            ) : (
+              ''
+            )}
+          </h5>
           <span className="text-sm text-[var(--gray10)]">
-            About 8 hours ago
+            About {elapsed} ago
           </span>
-        </h5>
+        </div>
       }
     >
-      <p className="text-sm">Needs Confirmation (1 out of 3)</p>
+      <p className="text-sm">{countConfirmations} Confirmations</p>
     </Card>
   );
 }
@@ -76,9 +126,12 @@ export default function Multisig() {
   ];
   const activeWalletAddress = signerWallets[0];
 
+  const contractKey = CONTRACT['MULTISIG_WALLET'].key;
+
   const { chain } = useNetwork();
 
   const {
+    queryKey,
     api: multisigApi,
     connected,
     chainId,
@@ -97,10 +150,11 @@ export default function Multisig() {
     countReqConfirms,
     pendingTrxIds,
     executedTrxIds,
+    events,
   } = data;
 
   const addOwner = useMutation({
-    mutationKey: ['multisig', 'addOwner', chainId],
+    mutationKey: queryKey([contractKey, 'addOwner']),
     mutationFn:
       multisigApi &&
       ((payload: NewOwner) => {
@@ -111,11 +165,10 @@ export default function Multisig() {
   });
 
   const submitTransaction = useMutation({
-    mutationKey: ['multisig', 'submitTransaction', chainId],
+    mutationKey: queryKey([contractKey, 'submitTransaction']),
     mutationFn:
       multisigApi &&
       ((payload: NewTransaction) => {
-        console.log(payload);
         const args = {
           destination: multisigApi.contract.address as Address,
           value: ethers.BigNumber.from(0),
@@ -332,7 +385,14 @@ export default function Multisig() {
                 <Prelay>Failed to retrieve queue</Prelay>
               ) : pendingTrxIds.data ? (
                 pendingTrxIds.data.map((id, i) => (
-                  <EventSummary key={id} id={id} />
+                  <EventSummary
+                    key={id}
+                    id={id}
+                    events={events.filter(
+                      (event) =>
+                        event?.args?.['transactionId']?.toNumber() === id,
+                    )}
+                  />
                 ))
               ) : (
                 <Prelay>
@@ -356,7 +416,14 @@ export default function Multisig() {
                 ? 'Failed to retrieve history'
                 : executedTrxIds.data
                 ? executedTrxIds.data.map((id, i) => (
-                    <EventSummary key={id} id={id} />
+                    <EventSummary
+                      key={id}
+                      id={id}
+                      events={events.filter(
+                        (event) =>
+                          event?.args?.['transactionId']?.toNumber() === id,
+                      )}
+                    />
                   ))
                 : 'Loading'}
             </div>

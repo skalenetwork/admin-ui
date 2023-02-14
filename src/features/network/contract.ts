@@ -1,16 +1,30 @@
+/**
+ * CONTRACT Manifest
+ * @description The most primitive contract registry, various properties allow any kind of generative types, SDKs, and scopes for query management
+ */
+
 import * as ADDRESS from '@/features/network/address';
 import { NETWORK } from '@/features/network/constants';
-import { ContractType } from '@/features/network/types';
 
-export type ContractManifest = {
-  [key: string]: {
-    network: (typeof NETWORK)[keyof typeof NETWORK];
-    type: ContractType;
-    key: string;
-    name: string;
-    address: `0x${string}`;
-  };
+type SwapKeyValue<
+  T extends Record<string, S>,
+  S extends { address: string },
+> = {
+  [K in keyof T as T[K]['address']]: K;
 };
+
+namespace ContractManifestBase {
+  export type ContractType = 'sudo' | 'ima:bridge' | 'ima:message' | 'storage';
+  export type Item = {
+    [key: string]: {
+      network: (typeof NETWORK)[keyof typeof NETWORK];
+      type: ContractType;
+      key: string;
+      name: string;
+      address: `0x${string}`;
+    };
+  };
+}
 
 const CONTRACT_INACTIVE = {
   MESSAGE_PROXY_MAINNET: {
@@ -41,15 +55,8 @@ const CONTRACT_INACTIVE = {
     address: ADDRESS.SCHAIN_ETHERBASE_ADDRESS,
     name: 'Etherbase',
   },
-};
+} satisfies ContractManifestBase.Item;
 
-/**
- * CONTRACT Manifest
- * @description The most primitive contract registry, various properties allow
- * @type ContractManifest: {
- * network:
- * }
- */
 export const CONTRACT = {
   CONFIG_CONTROLLER: {
     network: NETWORK.SKALE,
@@ -57,7 +64,7 @@ export const CONTRACT = {
     key: 'schain:config_controller',
     address: ADDRESS.SCHAIN_CONFIG_CONTROLLER_ADDRESS,
     name: 'ConfigController',
-  },
+  } as const,
   MULTISIG_WALLET: {
     network: NETWORK.SKALE,
     type: 'sudo',
@@ -163,6 +170,28 @@ export const CONTRACT = {
     address: ADDRESS.LINKER_ADDRESS,
     name: 'Linker',
   },
-} as const satisfies ContractManifest;
+} satisfies ContractManifestBase.Item;
 
-export type ContractId = keyof typeof CONTRACT;
+export type ContractManifest = typeof CONTRACT;
+
+export type ContractId = keyof ContractManifest;
+
+export type ContractDetailList = ContractManifest[ContractId];
+
+export type ContractDetail<TContractId extends ContractId> =
+  ContractManifest[TContractId];
+
+export type ContractDetailField = keyof ContractDetailList;
+
+// @todo implement object swap
+type ExtractContractId<
+  T extends ContractDetailField,
+  U extends ContractDetailList[T],
+  //@ts-ignore
+> = SwapKeyValue<U, ContractManifest, ContractDetailList>[U];
+
+export type ContractIdByAddress<T extends ContractDetailList['address']> =
+  SwapKeyValue<ContractManifest, ContractManifest[ContractId]>[T];
+
+// export type ContractDetailsByAddress<TAddress extends ContractList['address']> =
+//   ContractManifest[ContractId];

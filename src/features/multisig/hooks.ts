@@ -5,7 +5,12 @@
 
 import { addresses } from '@/features/network';
 import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
-import { useContractApi, useTypedContract } from '@/features/network/hooks';
+import { CONTRACT } from '@/features/network/contract';
+import {
+  useContractApi,
+  useEvents,
+  useTypedContract,
+} from '@/features/network/hooks';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
@@ -21,7 +26,7 @@ const multisigContract = {
 export function useMultisig({
   address = multisigContract.address,
 }: { address?: Address } = {}) {
-  const defaultParams = { cacheTime: Infinity };
+  const defaultParams = { staleTime: 60 * 5 };
 
   const contract = useTypedContract({
     id: 'MULTISIG_WALLET',
@@ -42,11 +47,11 @@ export function useMultisig({
 
   const balance = useBalance({ address: address });
 
-  const countsEnabled = !!(api && contract);
+  const countsEnabled = Boolean(api && contract);
 
   const countsQueries = [
     {
-      // ...defaultParams,
+      ...defaultParams,
       enabled: countsEnabled,
       queryKey: queryKey(['countTotalTrx']),
       queryFn: () =>
@@ -58,7 +63,7 @@ export function useMultisig({
           .then((val) => val.toNumber()),
     },
     {
-      // ...defaultParams,
+      ...defaultParams,
       enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countPendingTrx']),
@@ -71,7 +76,7 @@ export function useMultisig({
           .then((val) => val.toNumber()),
     },
     {
-      // ...defaultParams,
+      ...defaultParams,
       enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countExecutedTrx']),
@@ -84,7 +89,7 @@ export function useMultisig({
           .then((val) => val.toNumber()),
     },
     {
-      // ...defaultParams,
+      ...defaultParams,
       enabled: countsEnabled,
       initialData: 0,
       queryKey: queryKey(['countReqConfirms']),
@@ -107,31 +112,35 @@ export function useMultisig({
   // Derviatives
 
   const owners = useQuery({
-    enabled: !!api,
+    ...defaultParams,
+    enabled: Boolean(api),
+    queryKey: queryKey(['getOwners']),
     initialData: () => [],
-    queryFn: () => (api ? api.getOwners() : []),
-    refetchOnMount: true,
+    queryFn: () => {
+      return api?.getOwners();
+    },
   });
 
   const pendingTrxIds = useQuery({
-    enabled: !!(api && counts['countPendingTrx']?.data),
+    ...defaultParams,
+    enabled: Boolean(api && counts['countPendingTrx']?.data),
     queryKey: queryKey(['pendingTrxIds']),
     initialData: () => [],
-    queryFn: () =>
-      api
-        ? api
-            .getTransactionIds({
-              from: ethers.BigNumber.from(0),
-              to: ethers.BigNumber.from(counts['countPendingTrx'].data),
-              pending: true,
-              executed: false,
-            })
-            .then((val) => val.map((v) => v.toNumber()))
-        : [],
+    queryFn: () => {
+      return api
+        ?.getTransactionIds({
+          from: ethers.BigNumber.from(0),
+          to: ethers.BigNumber.from(counts['countPendingTrx'].data),
+          pending: true,
+          executed: false,
+        })
+        .then((trxIds) => trxIds.map((trxId) => trxId.toNumber()));
+    },
   });
 
   const executedTrxIds = useQuery({
-    enabled: !!(api && counts.countExecutedTrx.data),
+    ...defaultParams,
+    enabled: Boolean(api && counts.countExecutedTrx.data),
     queryKey: queryKey(['executedTrxIds']),
     initialData: () => [],
     queryFn: () =>
@@ -147,11 +156,24 @@ export function useMultisig({
         : [],
   });
 
+  const { pastEvents } = useEvents({
+    address: CONTRACT['MULTISIG_WALLET'].address,
+    fromBlock: 0,
+    toBlock: 'latest',
+    eventNames: ['Submission', 'Execution', 'ExecutionFailure', 'Confirmation'],
+  });
+
+  const events = pastEvents
+    .map((x) => x.data)
+    .reduce((prevEvents, currEvents) => {
+      return (prevEvents || []).concat(currEvents || []);
+    });
+
   // const pendingTrxs = useQueries({
   //   queries: !pendingTrxIds.data
   //     ? []
   //     : pendingTrxIds.data.map((trx) => ({
-  //       enabled: !!(api && trx),
+  //         enabled: Boolean(api && trx),
   //         queryKey: queryKey(['pendingTrxIds', trx]),
   //         initialData: () => [],
   //         queryFn: () =>
@@ -162,6 +184,7 @@ export function useMultisig({
   // });
 
   return {
+    queryKey,
     api,
     connected,
     chainId,
@@ -172,6 +195,7 @@ export function useMultisig({
       owners,
       pendingTrxIds,
       executedTrxIds,
+      events,
     },
   };
 }

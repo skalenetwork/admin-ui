@@ -10,8 +10,17 @@ import RoleList from '@/elements/RoleList/RoleList';
 import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
 import { useConfigController } from '@/features/interim/hooks';
 import { FlagIcon } from '@heroicons/react/24/solid';
+import { useIsFetching } from '@tanstack/react-query';
+import { useAsyncFn } from 'react-use';
 import { tw } from 'twind';
-import { useNetwork } from 'wagmi';
+import { useNetwork, useQueryClient } from 'wagmi';
+
+const useWatchMutations = () => {
+  const queryClient = useQueryClient();
+  const value = useAsyncFn(async () => {
+    return await queryClient.isMutating();
+  }, [queryClient]);
+};
 
 export default function Layout() {
   const [inspectMode, setInspectMode] = useState(false);
@@ -26,6 +35,8 @@ export default function Layout() {
   const { chain } = useNetwork();
   const { flags, connected } = useConfigController();
 
+  const fetchingCount = useIsFetching();
+
   return (
     <>
       <header className="grid grid-cols-[20vw_1fr_max-content] grid-flow-col w-full border-b-2 border-b-[var(--gray3)] bg-[var(--white)] py-2 px-6 text-[var(--black)]">
@@ -37,6 +48,7 @@ export default function Layout() {
           <RouterCrumb />
         </div>
         <div className="flex items-center gap-4">
+          <div className="font-mono text-sm">{fetchingCount || ''}</div>
           <div className="font-mono">
             <ConnectKitButton />
           </div>

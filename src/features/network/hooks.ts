@@ -3,8 +3,9 @@ import { NETWORK } from '@/features/network/constants';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { getContract } from '@wagmi/core';
+import { Abi, ExtractAbiEventNames } from 'abitype';
 import { Wallet } from 'ethers';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Address,
   useAccount,
@@ -13,7 +14,8 @@ import {
   useProvider,
   useSigner,
 } from 'wagmi';
-import { ABI, ContractManifestIdAbi, getAbi, GetAbiProps } from './abi/abi';
+import { ABI, ContractIdWithAbi, getAbi, GetAbiProps } from './abi/abi';
+import type { ContractDetailList, ContractIdByAddress } from './contract';
 import { build, CONTRACT } from './manifest';
 
 const { chainMetadataUrl } = build;
@@ -63,6 +65,63 @@ export function useExplorer(requests: ExplorerProps[]) {
   });
 }
 
+export function useEvents<
+  TAddress extends ContractDetailList['address'],
+  TContractId extends ContractIdByAddress<TAddress>,
+  TAbi extends (typeof ABI)[TContractId],
+>({
+  address,
+  fromBlock,
+  toBlock,
+  blockHash,
+  eventNames,
+}: {
+  address: TAddress;
+  fromBlock?: number | 'string';
+  toBlock?: number | 'string';
+  blockHash?: string;
+  eventNames: TAddress extends ContractDetailList['address']
+    ? TAbi extends Abi
+      ? ExtractAbiEventNames<TAbi>[]
+      : string[]
+    : string[];
+}) {
+  const contractId = build.contractIdFromAddress(address);
+  const { contract } = useTypedContract({ id: contractId });
+  const abi = getAbi({
+    id: contractId,
+  });
+
+  const [streamEvents, setStreamEvents] = useState([]);
+
+  const pastEvents = useQueries({
+    queries: eventNames.map((eventName) => {
+      return {
+        enabled: Boolean(contract && contract.provider),
+        queryKey: ['logs', address, eventName],
+        queryFn: () => {
+          if (!contract) return [];
+          const filter = contract.filters[eventName]();
+          return contract?.queryFilter(filter, fromBlock, toBlock);
+        },
+      };
+    }),
+  });
+
+  // eventNames.map((eventName) => {
+  //   const filter = contract?.filters[eventName]();
+  //   contract?.on({ ...filter, fromBlock, toBlock }, (event) => {
+  //     console.log(events);
+  //     setStreamEvents((events) => [...events, event]);
+  //   });
+  // });
+
+  return {
+    pastEvents,
+    streamEvents,
+  };
+}
+
 export function useRoles({ address }: { address: Address }) {}
 
 export function useChainMetadata({
@@ -79,9 +138,7 @@ export function useChainMetadata({
   return { data, isError };
 }
 
-export function useAbi<T extends ContractManifestIdAbi>({
-  id,
-}: GetAbiProps<T>) {
+export function useAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
   const { data } = useQuery({
     queryKey: ['*', 'abi', id],
     queryFn: () => getAbi({ id }),
@@ -94,7 +151,7 @@ export function useAbi<T extends ContractManifestIdAbi>({
  * @param param0
  * @returns
  */
-export function useTypedContract<T extends ContractManifestIdAbi>({
+export function useTypedContract<T extends ContractIdWithAbi>({
   id,
 }: {
   id: T;
@@ -128,7 +185,7 @@ export function useTypedContract<T extends ContractManifestIdAbi>({
  * @param param0
  * @returns
  */
-export function useTypedContracts<T extends ContractManifestIdAbi>({
+export function useTypedContracts<T extends ContractIdWithAbi>({
   id,
 }: {
   id: T[];

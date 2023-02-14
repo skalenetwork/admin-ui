@@ -4,7 +4,7 @@ import { PropsWithChildren } from 'react';
 export default function Prelay({
   children,
   className = '',
-}: { className: string } & PropsWithChildren) {
+}: { className?: string } & PropsWithChildren) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

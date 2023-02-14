@@ -53,7 +53,7 @@ export const API = {
       {
         address,
         abi,
-        rpcUrl: chain.rpcUrls[0]?.default?.http[0],
+        rpcUrl: chain.rpcUrls?.default?.http[0],
         signer: signer as Wallet,
       },
     ],
@@ -64,7 +64,7 @@ export const API = {
       {
         address,
         abi,
-        rpcUrl: chain.rpcUrls[0]?.default?.http[0],
+        rpcUrl: chain.rpcUrls?.default?.http[0],
         signer: signer as Wallet,
       },
     ],
@@ -113,7 +113,11 @@ export const API = {
     DepositBoxERC1155,
     ({ address, abi, chain }) => [{ eth: {} }, address, abi],
   ),
-} as const;
+} satisfies {
+  [key in keyof typeof CONTRACT & keyof typeof ABI]?: ReturnType<
+    typeof buildApi
+  >;
+};
 
 /**
  * By Contract ID, gracefully get API instance

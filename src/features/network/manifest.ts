@@ -5,11 +5,15 @@
  */
 
 import { ABI } from '@/features/network/abi/abi';
-import { CONTRACT, ContractId } from '@/features/network/contract';
+import {
+  CONTRACT,
+  ContractDetailList,
+  ContractId,
+  ContractIdByAddress,
+} from '@/features/network/contract';
 import { NetworkType } from '@/features/network/types';
 import { Address } from 'abitype';
 import { NETWORK } from './constants';
-
 export { CONTRACT } from './contract';
 export type { ContractId } from './contract';
 
@@ -37,6 +41,13 @@ export const build = {
       address: CONTRACT[contractId].address,
       abi: ABI[contractId],
     };
+  },
+  contractIdFromAddress<TAddress extends ContractDetailList['address']>(
+    address: TAddress,
+  ): ContractIdByAddress<TAddress> {
+    return Object.keys(CONTRACT).find(
+      (key) => CONTRACT[key].address === address,
+    ) as ContractIdByAddress<TAddress>;
   },
 };
 
