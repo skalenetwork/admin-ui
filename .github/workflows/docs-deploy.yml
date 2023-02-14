@@ -1,0 +1,49 @@
+name: Docs Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      infuraId:
+        description: "Infura ID"
+        required: false
+      fortmaticKey:
+        description: "Fortmatic Key"
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "18.12.1"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: |
+          yarn install
+      - name: Build
+        run: |
+          yarn typedoc
+      - uses: actions/upload-artifact@v3
+        with:
+          name: skale-admin-ui
+          path: docs/
+          if-no-files-found: error
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
