@@ -4,8 +4,7 @@ import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { getContract } from '@wagmi/core';
 import { Abi, ExtractAbiEventNames } from 'abitype';
-import { Wallet } from 'ethers';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Address,
   useAccount,
@@ -195,38 +194,42 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
   abi?: (typeof ABI)[T];
   contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
 }[] {
-  const { data: signer } = useSigner();
+  const provider = useProvider();
 
-  return id
-    ? id.map((contractId, index) => {
-        const { address } = CONTRACT[contractId];
+  return useMemo(
+    () =>
+      id
+        ? id.map((contractId, index) => {
+            const { address } = CONTRACT[contractId];
 
-        let abi, contract;
+            let abi, contract;
 
-        try {
-          abi = getAbi({
-            id: contractId,
-          });
-        } catch (e) {
-          console.error(e);
-        }
+            try {
+              abi = getAbi({
+                id: contractId,
+              });
+            } catch (e) {
+              console.error(e);
+            }
 
-        contract =
-          abi &&
-          getContract({
-            address,
-            abi,
-            signer: signer as Wallet,
-          });
+            contract =
+              abi &&
+              getContract({
+                address,
+                abi,
+                signerOrProvider: provider,
+              });
 
-        return {
-          contractId,
-          address,
-          abi,
-          contract,
-        };
-      })
-    : [];
+            return {
+              contractId,
+              address,
+              abi,
+              contract,
+            };
+          })
+        : [],
+    [provider],
+  );
 }
 
 /**
