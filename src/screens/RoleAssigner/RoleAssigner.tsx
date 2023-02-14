@@ -1,8 +1,11 @@
 import Field from '@/elements/Field/Field';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 
+import { CrownIcon } from '@/components/Icons/Icons';
 import { addresses } from '@/features/network';
+import { NETWORK } from '@/features/network/constants';
+import NotSupported from '@/screens/NotSupported';
 
 type FormData = {
   contractAddress: string;
@@ -21,8 +24,23 @@ export default function RoleAssigner() {
     } as FormData,
   });
   const { address } = useAccount();
+  const { chain } = useNetwork();
+
   return (
-    <div className="h-full w-full rounded-lg bg-[var(--white)] p-6" data-s="-1">
+    <div
+      className="h-full w-full rounded-lg bg-[var(--white)] p-6 relative"
+      data-s="-1"
+    >
+      {chain?.network !== NETWORK.SKALE ? (
+        <NotSupported theme="blur">
+          <CrownIcon className="mr-4" />
+          &emsp;
+          <strong>Assign Roles</strong> to users for various SKALE SChain
+          operations.
+        </NotSupported>
+      ) : (
+        <></>
+      )}
       <div className="py-2">
         <p>Please fill in all inputs to assign role:</p>
         <small className="text-gray-500">

@@ -76,8 +76,8 @@ export function useEvents<
   eventNames,
 }: {
   address: TAddress;
-  fromBlock?: number | 'string';
-  toBlock?: number | 'string';
+  fromBlock?: number | string;
+  toBlock?: number | string;
   blockHash?: string;
   eventNames: TAddress extends ContractDetailList['address']
     ? TAbi extends Abi
@@ -252,14 +252,15 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
 
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
-  const api =
-    connected && chain && signer && provider && id
+  const api = useMemo(() => {
+    return connected && chain && signer && provider && id
       ? getApi(id, {
           chain,
           provider,
           signer,
         })
       : undefined;
+  }, [id, connected, chain?.id, signer, provider]);
 
   useEffect(() => {
     try {

@@ -10,7 +10,7 @@ export default function Prelay({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`flex h-full justify-center items-center text-sm ${className}`}
+      className={`flex h-full justify-center items-center text-sm rounded-lg border ${className}`}
     >
       {children}
     </motion.div>

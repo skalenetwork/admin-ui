@@ -159,9 +159,7 @@ export default function Multisig() {
     mutationFn:
       multisigApi &&
       ((payload: NewOwner) => {
-        return multisigApi.addOwner({
-          address: payload.ownerAddress,
-        });
+        return contract.contract?.addOwner(payload.ownerAddress as Address);
       }),
   });
 
@@ -176,7 +174,7 @@ export default function Multisig() {
           data: payload.encoded as `0x${string}`,
         };
         // prepare tx here from multisig.lib
-        return contract.contract?.callStatic.submitTransaction(
+        return contract.contract?.submitTransaction(
           args.destination,
           args.value,
           args.data,

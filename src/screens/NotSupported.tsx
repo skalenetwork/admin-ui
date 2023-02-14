@@ -19,7 +19,7 @@ export default function NotSupported({
         theme === 'solid'
           ? 'bg-[var(--white)]'
           : theme === 'blur'
-          ? '!absolute top-0 bottom-0 w-full h-full z-[110000] backdrop-blur-xl border-[var(--whiteA5)]'
+          ? '!absolute left-0 right-0 top-0 bottom-0 w-full h-full z-[110000] backdrop-blur-xl border-[var(--whiteA5)]'
           : '',
       )}
     >

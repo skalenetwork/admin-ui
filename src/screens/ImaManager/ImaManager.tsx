@@ -3,6 +3,7 @@ import Dialog from '@/components/Dialog/Dialog';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useChainConnect, useHistory } from '@/features/bridge';
 import { TOKEN_STANDARD } from '@/features/network/constants';
+import Prelay from '@/screens/Prelay';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import {
   ArrowRightIcon,
@@ -263,7 +264,7 @@ const PeerChainItem = ({
 export default function ImaManager() {
   const [alertKey, setAlertKey] = useState('');
 
-  const { chains } = useNetwork();
+  const { chain, chains } = useNetwork();
 
   const [selectedChain, setSelectedChain] = useState();
 
@@ -297,15 +298,19 @@ export default function ImaManager() {
       >
         <div className="grid spaced h-full grid-flow-col grid-cols-2">
           <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
-            {chains.map(({ name }) => (
-              <PeerChainItem
-                key={name}
-                name={name}
-                tokenList={[]}
-                selected={selectedChain === name}
-                onSelect={() => setSelectedChain(name)}
-              />
-            ))}
+            {!chains?.length ? (
+              <Prelay>. . .</Prelay>
+            ) : (
+              chains.map(({ name }) => (
+                <PeerChainItem
+                  key={name}
+                  name={name}
+                  tokenList={[]}
+                  selected={selectedChain === name}
+                  onSelect={() => setSelectedChain(name)}
+                />
+              ))
+            )}
           </div>
           <div>
             <SelectedPeerChainItem
@@ -332,10 +337,10 @@ export default function ImaManager() {
             />
           ))
         ) : (
-          <div className="flex justify-center items-center h-full text-[var(--gray10)]">
+          <Prelay>
             <FunnelIcon className="h-5" />
             &emsp;No IMA transactions yet!
-          </div>
+          </Prelay>
         )}
       </Card>
       {/* <div data-id="main"></div>
