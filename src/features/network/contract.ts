@@ -171,7 +171,7 @@ export const CONTRACT = {
     address: ADDRESS.LINKER_ADDRESS,
     name: 'Linker',
   },
-} satisfies ContractManifestBase.Item;
+} as const satisfies ContractManifestBase.Item;
 
 export type ContractManifest = typeof CONTRACT;
 

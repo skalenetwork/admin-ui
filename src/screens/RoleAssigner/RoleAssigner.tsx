@@ -1,6 +1,7 @@
 import Field from '@/elements/Field/Field';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
+  Address,
   useAccount,
   useContractWrite,
   useNetwork,
@@ -8,25 +9,25 @@ import {
   useQuery,
 } from 'wagmi';
 
+import rolesMetadata from '../../metadata/roles.json';
+
 import { CrownIcon } from '@/components/Icons/Icons';
 import { addresses } from '@/features/network';
 import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 
-import { ContractDetailList } from '@/features/network/contract';
+import { ContractDetailList, ContractId } from '@/features/network/contract';
 import { useTypedContract } from '@/features/network/hooks';
 import { build, CONTRACT } from '@/features/network/manifest';
 
 import { getAbi } from '@/features/network/abi/abi';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 type FormData = {
   contractAddress: ContractDetailList['address'];
   role: string;
   assigneeAddress: string;
 };
-
-const EXCLUDE_LIST = {};
 
 const contractsWithRoles = Object.entries(CONTRACT).map((id, details) => {
   try {
@@ -73,9 +74,19 @@ export default function RoleAssigner() {
     enabled: !!role,
     queryKey: [selectedContractId, 'role', role],
     queryFn: () => {
-      return contract?.[role]();
+      return contract?.[role]() as Address;
     },
   });
+
+  useEffect(() => {
+    form.setValue('role', roles[0]);
+    form.trigger('role');
+  }, [contractAddress]);
+
+  const roleDescription = useMemo(() => {
+    const foundRole = rolesMetadata.find((item) => item.name === role);
+    return foundRole ? foundRole.description : '';
+  }, [role, contractAddress]);
 
   const { config } = usePrepareContractWrite({
     abi,
@@ -102,6 +113,7 @@ export default function RoleAssigner() {
       )}
       <div className="py-2">
         <p>Please fill in all inputs to assign role:</p>
+        <small>@todo: two column fields</small>
       </div>
       <div className="grid grid-cols-2">
         <div>
@@ -116,10 +128,18 @@ export default function RoleAssigner() {
                 label="Contract"
                 control={() => (
                   <select>
-                    {Object.values(CONTRACT)
-                      .filter()
-                      .map((contract) => (
-                        <option value={contract.address}>
+                    {Object.entries(CONTRACT)
+                      .filter(([id, contract]) => {
+                        return (
+                          !(
+                            contract.type === 'ima:bridge' &&
+                            contract.network === NETWORK.ETHEREUM
+                          ) &&
+                          !(['COMMUNITY_POOL'] as ContractId[]).includes(id)
+                        );
+                      })
+                      .map(([id, contract], index) => (
+                        <option value={contract.address} key={index}>
                           {contract.name}
                         </option>
                       ))}
@@ -138,9 +158,13 @@ export default function RoleAssigner() {
                     ))}
                   </select>
                 )}
-                required="Contract is required"
+                required="Role is required"
                 placeholder="Choose a role"
-              />
+              >
+                <small className="text-[var(--gray10)]">
+                  {roleDescription}
+                </small>
+              </Field>
               <Field<FormData>
                 name="assigneeAddress"
                 label="Assignee"
