@@ -10,13 +10,14 @@ import {
 
 import { CrownIcon } from '@/components/Icons/Icons';
 import { addresses } from '@/features/network';
-import { NETWORK } from '@/features/network/constants';
+import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 
 import { ContractDetailList } from '@/features/network/contract';
 import { useTypedContract } from '@/features/network/hooks';
 import { build, CONTRACT } from '@/features/network/manifest';
 
+import { getAbi } from '@/features/network/abi/abi';
 import { useMemo } from 'react';
 
 type FormData = {
@@ -24,6 +25,16 @@ type FormData = {
   role: string;
   assigneeAddress: string;
 };
+
+const EXCLUDE_LIST = {};
+
+const contractsWithRoles = Object.entries(CONTRACT).map((id, details) => {
+  try {
+    const abi = getAbi({ id });
+  } catch (e) {
+    return;
+  }
+});
 
 export default function RoleAssigner() {
   const form = useForm({
@@ -105,9 +116,13 @@ export default function RoleAssigner() {
                 label="Contract"
                 control={() => (
                   <select>
-                    {Object.values(CONTRACT).map((contract) => (
-                      <option value={contract.address}>{contract.name}</option>
-                    ))}
+                    {Object.values(CONTRACT)
+                      .filter()
+                      .map((contract) => (
+                        <option value={contract.address}>
+                          {contract.name}
+                        </option>
+                      ))}
                   </select>
                 )}
                 required="Contract is required"

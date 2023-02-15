@@ -13,7 +13,7 @@ import {
 } from '@/features/network/contract';
 import { NetworkType } from '@/features/network/types';
 import { Address } from 'abitype';
-import { NETWORK } from './constants';
+import { NETWORK } from './literals';
 export { CONTRACT } from './contract';
 export type { ContractId } from './contract';
 
@@ -49,6 +49,7 @@ export const build = {
       (key) => CONTRACT[key].address === address,
     ) as ContractIdByAddress<TAddress>;
   },
+  contractEntries(): [ContractId, ContractDetailList] {},
 };
 
 /**

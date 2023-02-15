@@ -1,6 +1,6 @@
 // candidate for '@skaleproject/constants/lib/chains'
 import { Chain } from '@wagmi/core';
-import { NETWORK } from '../constants';
+import { NETWORK } from '../literals';
 import { nativeCurrency } from '../manifest';
 export const EXPLORER_NAME = 'SKALE Explorer';
 

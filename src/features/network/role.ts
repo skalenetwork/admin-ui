@@ -1,0 +1,4 @@
+/**
+ * @namespace Network
+ * @module ManifestRole
+ */

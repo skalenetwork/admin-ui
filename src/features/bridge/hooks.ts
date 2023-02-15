@@ -1,7 +1,13 @@
+/**
+ * @namespace Bridge
+ * @module BridgeHooks
+ * @description Hooks for asset bridging, connecting chains, and related configuration
+ */
+
 import { ABI } from '@/features/network/abi/abi';
-import { NETWORK, TOKEN_STANDARD } from '@/features/network/constants';
 import { CONTRACT } from '@/features/network/contract';
 import { useExplorer, useTypedContract } from '@/features/network/hooks';
+import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { ethers } from 'ethers';
 import {

@@ -1,5 +1,11 @@
+/**
+ * @namespace Network
+ * @module NetworkHooks
+ * @description Low-level hooks for using network contracts, roles, explorers etc.
+ */
+
 import { API, getApi } from '@/features/network/api';
-import { NETWORK } from '@/features/network/constants';
+import { NETWORK } from '@/features/network/literals';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { getContract } from '@wagmi/core';

@@ -1,3 +1,8 @@
+/**
+ * @namespace Config
+ * @module ConfigHooks
+ */
+
 import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
 import { useContractApi } from '@/features/network/hooks';
 import { SCHAIN_CONFIG_CONTROLLER_ADDRESS } from '@skaleproject/constants/lib/addresses/predeployed';

@@ -1,5 +1,6 @@
 /**
- * predeployed: MultiSigWallet
+ * @namespace Multisig
+ * @module MultisigHooks
  * https://github.com/skalenetwork/multisigwallet-predeployed/blob/develop/contracts/MultiSigWallet.sol
  */
 
@@ -16,7 +17,7 @@ import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
 import { useBalance, useContractRead } from 'wagmi';
-import { scope } from './lib';
+import { scope } from './core';
 
 const multisigContract = {
   address: `${addresses.SCHAIN_MULTISIG_WALLET_ADDRESS}` as `0x${string}`,

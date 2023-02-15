@@ -1,0 +1,58 @@
+[
+  {
+    "name": "ARBITER_ROLE",
+    "description": "Initiate arbitration of a specific IMA transfer by delaying the transfer for a time defined by the SKALE Chain owner."
+  },
+  {
+    "name": "PAUSABLE_ROLE",
+    "description": "Pause a specific connected IMA bridge until the SKALE Chain owner resumes the bridge."
+  },
+  {
+    "name": "CONSTANT_SETTER_ROLE",
+    "description": "Sets new gas limits for MessageProxy outgoing messages (default is 1M gas) and sets CommunityLocker new rate limit for exit messages (default is 5 minutes per exit message)."
+  },
+  {
+    "name": "DEFAULT_ADMIN_ROLE",
+    "description": "The default admin role is the administrative role of all other roles in the contract and is needed to provide other roles to an address."
+  },
+  {
+    "name": "DEPLOYER_ROLE",
+    "description": "Deployer Role allows Ethereum Address to deploy smart contracts onto a SKALE Chain when Free Contract Deployment is disabled. Smart Contracts bypass the need for this role."
+  },
+  {
+    "name": "DEPLOYER_ADMIN_ROLE",
+    "description": "Free Contract Deployment can be enabled or disabled by a user with this role"
+  },
+  {
+    "name": "ETHER_MANAGER_ROLE",
+    "description": "Can retrieve or distribute sFUEL from Etherbase."
+  },
+  {
+    "name": "ALLOCATOR_ROLE",
+    "description": "On-chain File Storage space can be reserved by a user with this role"
+  },
+  {
+    "name": "IMA_ROLE",
+    "description": "Calls postMessage in Marionette. (WARNING: SHOULD NOT BE REASSIGNED)"
+  },
+  {
+    "name": "PUPPETEER_ROLE",
+    "description": "Call execute, postMessage, and sendEth in Marionette,  Usually assigned to a Multisig. (WARNING: SHOULD NOT BE ASSIGNED)"
+  },
+  {
+    "name": "EXTRA_CONTRACT_REGISTRAR_ROLE",
+    "description": "Add and remove extra SKALE Chain contracts to the IMA Bridge."
+  },
+  {
+    "name": "MTM_ADMIN_ROLE",
+    "description": "Multi Transaction (MTM) mode can be enabled or disabled by a user with this role"
+  },
+  {
+    "name": "REGISTRAR_ROLE",
+    "description": "Add or remove token manager contracts and connect or remove other SKALE Chains."
+  },
+  {
+    "name": "AUTOMATIC_DEPLOY_ROLE",
+    "description": "Enable and disable IMA bridge automatic deployment."
+  }
+]

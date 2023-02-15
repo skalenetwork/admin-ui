@@ -1,6 +1,6 @@
 import Card from '@/components/Card/Card';
 import { useToggleAutodeploy } from '@/features/bridge/hooks';
-import { TOKEN_STANDARD } from '@/features/network/constants';
+import { TOKEN_STANDARD } from '@/features/network/literals';
 
 const standards = Object.values(TOKEN_STANDARD);
 

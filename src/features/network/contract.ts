@@ -1,10 +1,11 @@
 /**
- * CONTRACT Manifest
+ * @namespace Network
+ * @module ManifestContract
  * @description The most primitive contract registry, various properties allow any kind of generative types, SDKs, and scopes for query management
  */
 
 import * as ADDRESS from '@/features/network/address';
-import { NETWORK } from '@/features/network/constants';
+import { NETWORK } from '@/features/network/literals';
 
 type SwapKeyValue<
   T extends Record<string, S>,

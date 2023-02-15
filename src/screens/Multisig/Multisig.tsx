@@ -9,8 +9,8 @@ import { useMultisig } from '@/features/multisig/hooks';
 import { addresses } from '@/features/network';
 
 import { PeopleIcon } from '@/components/Icons/Icons';
-import { NETWORK } from '@/features/network/constants';
 import { CONTRACT } from '@/features/network/contract';
+import { NETWORK } from '@/features/network/literals';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';

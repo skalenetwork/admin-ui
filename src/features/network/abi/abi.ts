@@ -3,44 +3,13 @@
  * @description Constant ABIs are the strongest future candidate for a transpile target
  */
 
-import { CONTRACT } from '@/features/network/contract';
-import { getContract, Provider } from '@wagmi/core';
-import {
-  Abi,
-  AbiError,
-  AbiEvent,
-  AbiFunction,
-  AbiStateMutability,
-  ExtractAbiFunction,
-  ExtractAbiFunctionNames,
-} from 'abitype';
+import { CONTRACT, ContractId } from '@/features/network/contract';
+import { Abi, AbiError, AbiEvent, AbiFunction } from 'abitype';
 import { ConfigControllerABI } from './abi-configcontroller';
 import mainnetImaUnion from './abi-ima-mainnet.union';
 import schainImaUnion from './abi-ima.union';
 import { MarionetteABI } from './abi-marionette';
 import { MultisigWalletABI } from './abi-multisigwallet';
-
-/**
- * @todo type(s) for autogen wrapper with named parameters around ethers contract functions
- * constructibe with abitype
- **/
-/// BEGIN
-type AbiFunctionInputNames<
-  I extends Abi,
-  F extends ExtractAbiFunctionNames<I, AbiStateMutability>,
-> = ExtractAbiFunction<I, F>['inputs'];
-
-type AbiFunctionParams<
-  I extends Abi,
-  F extends ExtractAbiFunctionNames<I, AbiStateMutability>,
-> = {
-  [Input in AbiFunctionInputNames<I, F>[number] as Input['name'] extends string
-    ? Input['name']
-    : '']: Input['type'];
-};
-/// END
-
-export type ContractId = keyof typeof CONTRACT;
 
 export type GetAbiProps<T> = { id: T };
 
@@ -72,9 +41,8 @@ export const ABI = {
   DEPOSIT_BOX_ERC721: mainnetImaUnion['deposit_box_erc721_abi'],
   DEPOSIT_BOX_ERC1155: mainnetImaUnion['deposit_box_erc1155_abi'],
   LINKER: mainnetImaUnion['linker_abi'],
-  DEPOSIT_BOX_ERC721_WITH_METADATA: [],
 } as const satisfies {
-  [key in keyof typeof CONTRACT as keyof typeof CONTRACT]?: Abi | RelaxedAbi;
+  [key in ContractId as ContractId]?: Abi | RelaxedAbi;
 };
 
 export type ContractIdWithAbi = keyof typeof ABI;
@@ -84,7 +52,7 @@ export type ContractIdWithAbi = keyof typeof ABI;
  * @param param0
  * @returns
  */
-export function getAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
+export function getAbi<T extends ContractId>({ id }: GetAbiProps<T>) {
   return ABI[id];
 }
 
@@ -102,27 +70,3 @@ false &&
     /* @vite-ignore */
     return import(path).then((x) => x.default);
   };
-
-/**
- * Create contract with methods
- * @todo implement around stubbornness of AbiType, use AbiFunctionParams
- */
-export function createContractWithMethods({
-  address,
-  abi,
-  provider,
-}: {
-  address: string;
-  abi: Abi;
-  provider: Provider;
-}) {
-  const functions = abi.filter((a) => a.type === 'function');
-
-  const contract = getContract({
-    address,
-    abi,
-    signerOrProvider: provider,
-  });
-
-  contract.methods = {};
-}

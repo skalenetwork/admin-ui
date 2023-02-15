@@ -1,4 +1,4 @@
-import { NETWORK } from '@/features/network/constants';
+import { NETWORK } from '@/features/network/literals';
 import Prelay from '@/screens/Prelay';
 import { InformationCircleIcon, PowerIcon } from '@heroicons/react/24/outline';
 import { PropsWithChildren } from 'react';

@@ -1,6 +1,6 @@
 <div align="center" style="background: black; color: white; padding: 20px 0; border-radius: 5px;">
 <h2 style="color: white;">
-<img valign="middle" src="public/logo.png" alt="skale" width="48" /><br>
+<img valign="middle" src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/public/logo.png" alt="skale" width="48" /><br>
 SKALE Chain — Admin UI
 </h2>
 <span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">DEVELOPER GUIDE</span>
@@ -15,7 +15,7 @@ yarn dev
 
 # Prelude
 
-<img src="./public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
+<img src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
 
 To build a flying car that actually flies:
 
@@ -29,17 +29,58 @@ To build a flying car that actually flies:
 
 # :package: Features
 
-Features are an implementation detail of the application-level usability of the network capabilities.
+Features are an implementation detail of the _app-level usability_ of the network capabilities. All features expose vanilla-ts, as well as react hooks that function within a provided `wagmi`+`react-query` context (built-in caching).
+
+Following is the architecture breakdown of the founding feature.
 
 ## Network feature
 
+`@/features/network`
+
 A groundwork extensively supporting typescript interfaces across network building blocks.
 
-Core contracts are assigned IDs which are keys to:
+- Use typed contracts
+- Use utility APIs on top of contracts
+- Use convenience hooks
 
-- Typed ABIs
-- 1st derivative wrappers (APIs)
-- Roles
+Network feature builds a configuration layer into it, with interfaces that may be extended as needed, though persisting a base structure and scope.
+
+### Configuration: Constants
+
+None-to-slow-changing data
+
+- **`address.ts`** All unique preset addresses
+- **`chains/*.ts`** Recognized SChains using a standard `Chain` type, IDed by `chainName`.
+
+### Configuration: Manifests
+
+Slow-to-medium-changing data
+
+Manifests are typed exports and currently hand-compiled. These should evolve to be compile-targets of releases made within `skalenetwork/*`.
+
+First class TypeScript support allows dynamic typing from ABIs enabling TS compatibility with core packages like `ethers` and `abitype`.
+
+- **`manifest.ts`** Re-export of manifests and utility methods
+
+- **`contract.ts`** Entry point of all manifests with indexed contracts (origin of `ContractId`) and relevant types
+
+- **`abi/abi.ts`** Re-export of individual ABIs `abi/abi-*`, indexed by `ContractId`
+
+- **`api.ts`** Re-export of standard initiators for individual APIs imported from various ecosystem libraries.
+
+### Configuration: Registry
+
+Medium-to-fast changing data
+
+Registry points to files published externally to feature scope, from any source. It dynamically fetches source data in runtime, produces the parsed object and exposes predefined types for it.
+
+Presently registered metadata includes:
+
+- chainlists
+- `skalenetwork`: chain metadata
+- `admin-ui`: `metadata/roles.json`
+
+> Note: All configuration is scalable to allow a versioned design, which will make up for a more diligent network feature.
 
 # :crystal_ball: Screens
 

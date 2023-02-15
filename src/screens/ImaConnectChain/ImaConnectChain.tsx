@@ -1,6 +1,6 @@
 import Card from '@/components/Card/Card';
 import { useChainConnect } from '@/features/bridge';
-import { NETWORK } from '@/features/network/constants';
+import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';

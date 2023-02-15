@@ -2,7 +2,7 @@ import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useChainConnect, useHistory } from '@/features/bridge';
-import { TOKEN_STANDARD } from '@/features/network/constants';
+import { TOKEN_STANDARD } from '@/features/network/literals';
 import Prelay from '@/screens/Prelay';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import {

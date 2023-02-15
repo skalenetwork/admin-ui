@@ -1,7 +1,7 @@
 import { RoleIcon } from '@/components/Icons/Icons';
 import Popover from '@/components/Popover/Popover';
-import { ACRONYMS } from '@/features/network/constants';
 import { useTypedContracts } from '@/features/network/hooks';
+import { ACRONYMS } from '@/features/network/literals';
 import { CONTRACT } from '@/features/network/manifest';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useQueries } from '@tanstack/react-query';
