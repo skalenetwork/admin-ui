@@ -64,9 +64,11 @@ First class TypeScript support allows dynamic typing from ABIs enabling TS compa
 
 - **`contract.ts`** Entry point of all manifests with indexed contracts (origin of `ContractId`) and relevant types
 
-- **`abi/abi.ts`** Re-export of individual ABIs `abi/abi-*`, indexed by `ContractId`
+- **`abi/abi.ts`** Re-export of individual ABIs `abi/abi-*.ts`, indexed by `ContractId`
 
-- **`api.ts`** Re-export of standard initiators for individual APIs imported from various ecosystem libraries.
+- **`api.ts`** Re-export of standard initiators for individual APIs imported from various ecosystem libraries, indexed by `ContractId`
+
+> Why redistribute JSON ABIs as .ts files? We need the narrowest `Abi` type, producible by a `const` assertion. TS currently doesn't _(want to)_ support JSON `as const` https://github.com/microsoft/TypeScript/issues/32063
 
 ### Configuration: Registry
 
