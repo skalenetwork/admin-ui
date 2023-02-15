@@ -16,6 +16,7 @@
   },
   "scripts": {
     "typedoc": "typedoc --out docs --entryPointStrategy expand src/features/*** --skipErrorChecking --plugin typedoc-theme-hierarchy --theme hierarchy",
+    "compile:chains": "npx ts-node --project ./scripts/tsconfig.scripts.json --transpileOnly ./scripts/compile-chains.ts",
     "dev": "vite",
     "build:app": "cross-env NODE_ENV=production vite build --mode production",
     "build:app:staging": "vite build --mode production",

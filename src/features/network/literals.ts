@@ -1,7 +1,6 @@
 /**
- * constants are meant to be pan-chain literals
- * if a mapping starts growing from { key, label }
- * it has implicit foreign context, then it is a candidate for manifest
+ * literals are constants that map to pan-chain strings
+ * if a mapping starts growing from { key, label }, then it is a candidate for manifest
  * */
 
 export const ACRONYMS = ['IMA', 'ETH', 'MTM', 'FCD', 'ERC'];
@@ -12,6 +11,14 @@ export const ACRONYMS = ['IMA', 'ETH', 'MTM', 'FCD', 'ERC'];
 export const NETWORK = {
   ETHEREUM: 'ethereum',
   SKALE: 'skale',
+} as const;
+
+export const CURRENCY = {
+  SKALE: {
+    decimals: 18,
+    name: 'SKALE',
+    symbol: 'SKL',
+  },
 } as const;
 
 /**

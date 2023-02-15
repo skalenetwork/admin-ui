@@ -30,6 +30,9 @@
       "@/types": ["./src/types/index"]
     }
   },
+  "ts-node": {
+    "esm": true
+  },
   "include": ["src"],
   "references": [
     {

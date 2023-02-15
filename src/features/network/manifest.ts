@@ -1,5 +1,6 @@
 /**
- * @module
+ * @namespace Network
+ * @module Manifest
  * Manifest for SKLAE version 3 - Scopes all possible slow-to-never-changing defaults
  * IMA: https://github.com/skalenetwork/IMA/tree/develop/proxy/contracts
  */
@@ -16,20 +17,6 @@ import { Address } from 'abitype';
 import { NETWORK } from './literals';
 export { CONTRACT } from './contract';
 export type { ContractId } from './contract';
-
-export const nativeCurrency = {
-  decimals: 18,
-  name: 'SKALE',
-  symbol: 'SKL',
-};
-
-export const OFFCHAIN = {
-  chainlist: {},
-  [NETWORK.SKALE]: {
-    baseUrl: 'https://raw.githubusercontent.com',
-    path: 'skalenetwork/skale-network/master',
-  },
-};
 
 export const build = {
   chainMetadataUrl(networkType: NetworkType) {

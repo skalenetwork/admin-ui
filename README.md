@@ -27,6 +27,16 @@ To build a flying car that actually flies:
 
 <br clear="both">
 
+# Exposed Packages
+
+Following are being built along-side `admin-ui` app specifically for re-usability across ecosystem.
+
+- `src/features`
+- `src/screens`
+- `src/components`: Reusable common components on SKALE's design system, built with headless accessible libraries
+- `src/elements`: JSX UI Elements (ideally framework-agnostic)
+- `src/types`
+
 # :package: Features
 
 Features are an implementation detail of the _app-level usability_ of the network capabilities. All features expose vanilla-ts, as well as react hooks that function within a provided `wagmi`+`react-query` context (built-in caching).
@@ -79,7 +89,7 @@ Registry points to files published externally to feature scope, from any source.
 Presently registered metadata includes:
 
 - chainlists
-- `skalenetwork`: chain metadata
+- `skale-network`: `metadata/mainnet/chains.json`
 - `admin-ui`: `metadata/roles.json`
 
 > Note: All configuration is scalable to allow a versioned design, which will make up for a more diligent network feature.
@@ -94,6 +104,10 @@ This directly enables:
 
 1. Portability of client-agnostic stateful features, and submodules.
 2. Portability of stateful screens (react).
+
+---
+
+// EXAMPLE SECTION TO BE REVISED
 
 ## Use via screens @ react
 
@@ -155,15 +169,7 @@ function View() {
 import { useBlockHistory, useWalletHistory } from '@/features/analytics';
 ```
 
-# Exposed Packages
-
-Following are being built along-side `admin-ui` app specifically for re-usability across ecosystem.
-
-- `src/features`
-- `src/screens`
-- `src/components`: Reusable common components on SKALE's design system, built with headless accessible libraries
-- `src/elements`: JSX UI Elements (ideally framework-agnostic)
-- `src/types`
+---
 
 # Concept: Managing access control
 
