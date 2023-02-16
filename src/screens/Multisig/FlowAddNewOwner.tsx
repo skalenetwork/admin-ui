@@ -100,7 +100,7 @@ export function FlowAddNewOwner({
           content: (
             <FormProvider {...form[0]}>
               <div>
-                <p className="font-medium">
+                <p className="font-medium mb-4">
                   Add new owner to the active Multisig
                 </p>
                 <Field

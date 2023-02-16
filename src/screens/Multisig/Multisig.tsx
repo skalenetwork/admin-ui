@@ -234,7 +234,7 @@ export default function Multisig() {
         <div data-id="wallet_balance" data-s="2">
           <Card full heading="Wallet Balance" bodyClass="flex items-center">
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {balance?.data?.decimals} Sfuel
+              {balance?.data?.decimals} {balance?.data?.symbol}
             </p>
           </Card>
         </div>

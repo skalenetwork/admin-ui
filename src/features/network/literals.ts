@@ -16,8 +16,8 @@ export const NETWORK = {
 export const CURRENCY = {
   SKALE: {
     decimals: 18,
-    name: 'SKALE',
-    symbol: 'SKL',
+    name: 'SFuel',
+    symbol: 'sFUEL',
   },
 } as const;
 

@@ -10,7 +10,7 @@ export const staging = {
     id: 476158412,
     name: 'staging-legal-crazy-castor',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -31,13 +31,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-legal-crazy-castor.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-purple-arctic-talitha': {
     id: 465227634,
     name: 'staging-purple-arctic-talitha',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -58,13 +59,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-purple-arctic-talitha.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-generous-flowery-elnath': {
     id: 1801222967,
     name: 'staging-generous-flowery-elnath',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -85,13 +87,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-generous-flowery-elnath.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-faint-slimy-achird': {
     id: 503129905,
     name: 'staging-faint-slimy-achird',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -112,13 +115,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-faint-slimy-achird.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-perfect-parallel-gacrux': {
     id: 1370526269,
     name: 'staging-perfect-parallel-gacrux',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -139,13 +143,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-perfect-parallel-gacrux.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-severe-violet-wezen': {
     id: 1287568050,
     name: 'staging-severe-violet-wezen',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -166,13 +171,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-severe-violet-wezen.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-utter-unripe-menkar': {
     id: 344106930,
     name: 'staging-utter-unripe-menkar',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -193,13 +199,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-utter-unripe-menkar.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-aware-chief-gianfar': {
     id: 1517929550,
     name: 'staging-aware-chief-gianfar',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -220,13 +227,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-aware-chief-gianfar.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-awesome-grave-subra': {
     id: 271642831,
     name: 'staging-awesome-grave-subra',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -247,13 +255,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-awesome-grave-subra.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-famous-winding-tyl': {
     id: 1594672658,
     name: 'staging-famous-winding-tyl',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -274,13 +283,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-famous-winding-tyl.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-lost-likely-aludra': {
     id: 876757986,
     name: 'staging-lost-likely-aludra',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -301,13 +311,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-lost-likely-aludra.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-woozy-frizzy-merga': {
     id: 206279074,
     name: 'staging-woozy-frizzy-merga',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -328,13 +339,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-woozy-frizzy-merga.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-weepy-fitting-caph': {
     id: 1019122823,
     name: 'staging-weepy-fitting-caph',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -355,13 +367,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-weepy-fitting-caph.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-costly-stale-albali': {
     id: 1277340369,
     name: 'staging-costly-stale-albali',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -382,13 +395,14 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-costly-stale-albali.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
   },
   'staging-fast-active-bellatrix': {
     id: 1351057110,
     name: 'staging-fast-active-bellatrix',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -409,7 +423,92 @@ export const staging = {
         name: 'SKALE Explorer',
         url: 'https://staging-fast-active-bellatrix.explorer.staging-v3.skalenodes.com/'
       }
-    }
+    },
+    testnet: true
+  },
+  'staging-numb-spotted-albaldah': {
+    id: 742822768,
+    name: 'staging-numb-spotted-albaldah',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-numb-spotted-albaldah'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-spotted-albaldah'
+        ]
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-numb-spotted-albaldah'
+        ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://staging-numb-spotted-albaldah.explorer.staging-v3.skalenodes.com/'
+      }
+    },
+    testnet: true
+  },
+  'staging-obvious-pointed-asellus-australis': {
+    id: 1812724103,
+    name: 'staging-obvious-pointed-asellus-australis',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-obvious-pointed-asellus-australis'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-obvious-pointed-asellus-australis'
+        ]
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-obvious-pointed-asellus-australis'
+        ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://staging-obvious-pointed-asellus-australis.explorer.staging-v3.skalenodes.com/'
+      }
+    },
+    testnet: true
+  },
+  'staging-offbeat-scornful-alderamin': {
+    id: 1006197582,
+    name: 'staging-offbeat-scornful-alderamin',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-offbeat-scornful-alderamin'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-offbeat-scornful-alderamin'
+        ]
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-offbeat-scornful-alderamin'
+        ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://staging-offbeat-scornful-alderamin.explorer.staging-v3.skalenodes.com/'
+      }
+    },
+    testnet: true
   }
 } satisfies { [key: string]: Chain }
   

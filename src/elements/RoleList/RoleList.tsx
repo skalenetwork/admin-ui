@@ -1,7 +1,7 @@
 import { RoleIcon } from '@/components/Icons/Icons';
 import Popover from '@/components/Popover/Popover';
 import { useTypedContracts } from '@/features/network/hooks';
-import { ACRONYMS } from '@/features/network/literals';
+import { ACRONYMS, NETWORK } from '@/features/network/literals';
 import { CONTRACT } from '@/features/network/manifest';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useQueries } from '@tanstack/react-query';
@@ -18,7 +18,10 @@ export default function RoleList({}: Props) {
   const account = useAccount();
 
   const contractsWithRoles = contracts
-    .filter((contract) => contract.abi)
+    .filter(
+      (contract) =>
+        contract.abi && CONTRACT[contract.contractId].network === NETWORK.SKALE,
+    )
     .map(({ contract, abi, contractId }) => ({
       contract,
       abi,
@@ -31,25 +34,28 @@ export default function RoleList({}: Props) {
         .map((fragment) => fragment.name),
     }));
 
+  console.log('contractsWithRoles', contractsWithRoles);
+
+  // better be broken down, improve queryKey
   const allContractsWithRoles = useQueries({
-    queries: contractsWithRoles.map((group) => {
+    queries: contractsWithRoles.map((details) => {
       return {
-        enabled: Boolean(group.contract),
-        queryKey: [],
+        enabled: Boolean(details.contract),
+        queryKey: ['allContractsWithRoles', details.contractId],
         queryFn: async () => {
           // tuple
           const roles: [string, any] = await Promise.all(
-            group.roles.map((role: string) =>
+            details.roles.map((role: string) =>
               Promise.all([
                 role,
-                group.contract?.[role]().then((roleHash: string) =>
-                  group.contract?.hasRole(roleHash, account.address),
+                details.contract?.[role]().then((roleHash: string) =>
+                  details.contract?.hasRole(roleHash, account.address),
                 ),
               ]),
             ),
           );
           return {
-            ...group,
+            ...details,
             roles: roles.map((role) => ({
               name: role[0],
               isOfSigner: role[1],
@@ -59,6 +65,8 @@ export default function RoleList({}: Props) {
       };
     }),
   });
+
+  console.log('allContractsWithRoles', allContractsWithRoles);
 
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>

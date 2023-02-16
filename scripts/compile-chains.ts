@@ -30,8 +30,12 @@ async function compileChains(networkType, path) {
 
   const rpcSubdomain = networkType === 'staging' ? 'staging-v3' : 'mainnet';
 
-  let data = await fetch(`https://${rpcSubdomain}.${HOST}/${JSON_FILE_PATH}`);
-  data = await data.json();
+  // let metadata: ChainManifestItem[] = await fetch(
+  //   build.chainMetadataUrl(networkType),
+  // ).then((res) => res.json());
+  let data = await fetch(
+    `https://${rpcSubdomain}.${HOST}/${JSON_FILE_PATH}`,
+  ).then((res) => res.json());
 
   let chains = {};
 
@@ -65,6 +69,7 @@ async function compileChains(networkType, path) {
         nativeCurrency: CURRENCY.SKALE,
         rpcUrls,
         blockExplorers,
+        testnet: networkType === 'staging',
       } satisfies Chain;
       console.log(`[${networkType}]`, 'Compiled', [name, id]);
     } catch (e) {

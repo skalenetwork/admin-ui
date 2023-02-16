@@ -10,7 +10,7 @@ export const mainnet = {
     id: 32429474,
     name: 'round-hasty-alsafi',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/round-hasty-alsafi' ],
@@ -25,13 +25,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://round-hasty-alsafi.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'affectionate-immediate-pollux': {
     id: 1026062157,
     name: 'affectionate-immediate-pollux',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -52,13 +53,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://affectionate-immediate-pollux.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'gargantuan-wealthy-zosma': {
     id: 1931951519,
     name: 'gargantuan-wealthy-zosma',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -79,13 +81,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://gargantuan-wealthy-zosma.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'portly-passionate-sirius': {
     id: 393362594,
     name: 'portly-passionate-sirius',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -106,13 +109,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://portly-passionate-sirius.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'harsh-alsuhail': {
     id: 2747885419106851,
     name: 'harsh-alsuhail',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/harsh-alsuhail' ],
@@ -125,13 +129,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://harsh-alsuhail.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'haunting-devoted-deneb': {
     id: 1032942172,
     name: 'haunting-devoted-deneb',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/haunting-devoted-deneb' ],
@@ -148,13 +153,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://haunting-devoted-deneb.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'plain-rotanev': {
     id: 1622321144269118,
     name: 'plain-rotanev',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/plain-rotanev' ],
@@ -167,13 +173,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://plain-rotanev.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'parallel-stormy-spica': {
     id: 1350216234,
     name: 'parallel-stormy-spica',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/parallel-stormy-spica' ],
@@ -190,13 +197,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://parallel-stormy-spica.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'fit-betelgeuse': {
     id: 836542336838601,
     name: 'fit-betelgeuse',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/fit-betelgeuse' ],
@@ -209,13 +217,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://fit-betelgeuse.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'wan-red-ain': {
     id: 1273227453,
     name: 'wan-red-ain',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/wan-red-ain' ],
@@ -228,13 +237,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'turbulent-unique-scheat': {
     id: 278611351,
     name: 'turbulent-unique-scheat',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/turbulent-unique-scheat' ],
@@ -251,13 +261,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://turbulent-unique-scheat.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'adorable-quaint-bellatrix': {
     id: 1909534317,
     name: 'adorable-quaint-bellatrix',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -278,13 +289,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://adorable-quaint-bellatrix.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'wary-teeming-mizar': {
     id: 1494040293,
     name: 'wary-teeming-mizar',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/wary-teeming-mizar' ],
@@ -299,13 +311,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://wary-teeming-mizar.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'light-vast-diphda': {
     id: 2139927552,
     name: 'light-vast-diphda',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/light-vast-diphda' ],
@@ -320,13 +333,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://light-vast-diphda.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'green-giddy-denebola': {
     id: 1482601649,
     name: 'green-giddy-denebola',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/green-giddy-denebola' ],
@@ -341,13 +355,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://green-giddy-denebola.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'elated-tan-skat': {
     id: 2046399126,
     name: 'elated-tan-skat',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/elated-tan-skat' ],
@@ -360,13 +375,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://elated-tan-skat.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'honorable-steel-rasalhague': {
     id: 1564830818,
     name: 'honorable-steel-rasalhague',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
@@ -387,13 +403,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://honorable-steel-rasalhague.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'frayed-decent-antares': {
     id: 391845894,
     name: 'frayed-decent-antares',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/frayed-decent-antares' ],
@@ -410,13 +427,14 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://frayed-decent-antares.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   },
   'curly-red-alterf': {
     id: 535219706,
     name: 'curly-red-alterf',
     network: 'skale',
-    nativeCurrency: { decimals: 18, name: 'SKALE', symbol: 'SKL' },
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [ 'https://mainnet.skalenodes.com/v1/curly-red-alterf' ],
@@ -431,7 +449,8 @@ export const mainnet = {
         name: 'SKALE Explorer',
         url: 'https://curly-red-alterf.explorer.mainnet.skalenodes.com/'
       }
-    }
+    },
+    testnet: false
   }
 } satisfies { [key: string]: Chain }
   

@@ -1,3 +1,5 @@
+const env = import.meta.env;
+
 import SideNavigation from '@/views/SideNavigation/SideNavigation';
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
@@ -10,6 +12,11 @@ import RoleList from '@/elements/RoleList/RoleList';
 import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
 import { useConfigController } from '@/features/interim/hooks';
 import { FlagIcon } from '@heroicons/react/24/solid';
+import {
+  CaretDownIcon,
+  CaretRightIcon,
+  GlobeIcon,
+} from '@radix-ui/react-icons';
 import { useIsFetching } from '@tanstack/react-query';
 import { useAsyncFn } from 'react-use';
 import { tw } from 'twind';
@@ -48,8 +55,7 @@ export default function Layout() {
           <RouterCrumb />
         </div>
         <div className="flex items-center gap-4">
-          <div className="font-mono text-sm">{fetchingCount || ''}</div>
-          <div className="font-mono">
+          <div className="">
             <ConnectKitButton />
           </div>
           <a
@@ -74,8 +80,8 @@ export default function Layout() {
 
       <footer
         className="
-        flex h-min items-center bg-[var(--bg-color-footer)]
-        px-8 py-1 text-sm text-[var(--color-footer)]"
+        flex h-12 items-center bg-[var(--bg-color-footer)]
+        px-8 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
         <div className="flex items-center justify-center gap-2 pl-16">
@@ -96,13 +102,29 @@ export default function Layout() {
             <></>
           )}
         </div>
+        <div className="text-xs opacity-50 w-6 text-center flex-grow">
+          {fetchingCount > 0 && (
+            <>
+              <CaretDownIcon /> {fetchingCount}
+            </>
+          )}
+        </div>
         <div className="ml-auto flex items-center justify-between gap-4">
           {chain ? (
             <>
-              {' '}
-              <span>Chain: {chain?.name}</span>
-              <span>ID: {chain?.id}</span>
-              <span>Type: Staging</span>
+              <p>
+                <GlobeIcon />
+                {chain?.testnet ? ' Testnet' : ' Mainnet'}
+              </p>
+              <span className="opacity-75">
+                <CaretRightIcon />
+              </span>
+              <p>
+                <span className="font-medium">Chain:</span> {chain?.name}
+              </p>
+              <p>
+                <span className="font-medium">ID:</span> {chain?.id}
+              </p>
             </>
           ) : (
             <div className="flex items-center gap-2">
@@ -116,12 +138,14 @@ export default function Layout() {
               <RoleList />
             </div>
           )}
-          <button
-            className={`btn btn-outline ${!inspectMode ? 'opacity-50' : ''}`}
-            onClick={(e) => setInspectMode(!inspectMode)}
-          >
-            <FlagIcon className="h-5" />
-          </button>
+          {env.DEV && (
+            <button
+              className={`btn btn-outline ${!inspectMode ? 'opacity-50' : ''}`}
+              onClick={(e) => setInspectMode(!inspectMode)}
+            >
+              <FlagIcon className="h-5" />
+            </button>
+          )}
         </div>
       </footer>
     </>

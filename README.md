@@ -234,6 +234,15 @@ AddressableMember[] ⊆ filter(type:function && output*.type:address)`
 
 `AddressibleMember` is a single or multi-address getter, which becomes candidate for `RoleDetail.owners[]`, `RoleDetail.granters[]` and `RoleDetail.grantees[]`. Each set could have further conditions, demanding an ACL tree, manually maintained or statically generated from contracts (modifier analysis).
 
+# @next
+
+`@/features/icm`
+
+Among features, ICM (inter-chain messaging) is a domain that would horizontally complete `@/features`.
+
+Diagram highlighting typical cross-chain interaction. On the contrary, arbitrary message passing is more suitable for `icm` whereas `multsig` could be one of the consumers of `icm` when supporting foreign multisigs.
+![](./public/icm.png)
+
 # Links
 
 ## Consumables

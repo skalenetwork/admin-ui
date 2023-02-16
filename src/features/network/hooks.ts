@@ -8,19 +8,24 @@ import { API, getApi } from '@/features/network/api';
 import { NETWORK } from '@/features/network/literals';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { getContract } from '@wagmi/core';
+import { getContract, getProvider } from '@wagmi/core';
 import { Abi, ExtractAbiEventNames } from 'abitype';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Address,
   useAccount,
+  useChainId,
   useContract,
   useNetwork,
   useProvider,
   useSigner,
 } from 'wagmi';
 import { ABI, ContractIdWithAbi, getAbi, GetAbiProps } from './abi/abi';
-import type { ContractDetailList, ContractIdByAddress } from './contract';
+import type {
+  ContractDetailList,
+  ContractId,
+  ContractIdByAddress,
+} from './contract';
 import { build, CONTRACT } from './manifest';
 
 const { chainMetadataUrl } = build;
@@ -151,6 +156,14 @@ export function useAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
   return data;
 }
 
+export function useContractProvider<T extends ContractId>({ id }: { id: T }) {
+  const connectedChainId = useChainId();
+  const { network } = CONTRACT[id];
+  return useProvider({
+    chainId: network === NETWORK.SKALE ? connectedChainId : 1,
+  });
+}
+
 /**
  * Use wagmi:useContractWrites compatible typed interfaces for any network supported contract by preset ID
  * @param param0
@@ -166,15 +179,16 @@ export function useTypedContract<T extends ContractIdWithAbi>({
   contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
 } {
   const { address } = CONTRACT[id];
-  const { data: signer } = useSigner();
   const abi = useAbi({
     id,
   });
 
+  const provider = useContractProvider({ id });
+
   const contract = useContract({
     address,
     abi,
-    signerOrProvider: signer,
+    signerOrProvider: provider,
   });
 
   return {
@@ -200,13 +214,14 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
   abi?: (typeof ABI)[T];
   contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
 }[] {
-  const provider = useProvider();
+  const connectedProvider = useProvider();
+  const mainnetProvider = getProvider({ chainId: 1 });
 
   return useMemo(
     () =>
       id
         ? id.map((contractId, index) => {
-            const { address } = CONTRACT[contractId];
+            const { address, network } = CONTRACT[contractId];
 
             let abi, contract;
 
@@ -217,6 +232,9 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
             } catch (e) {
               console.error(e);
             }
+
+            const provider =
+              network === NETWORK.SKALE ? connectedProvider : mainnetProvider;
 
             contract =
               abi &&
@@ -234,7 +252,7 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
             };
           })
         : [],
-    [provider],
+    [connectedProvider],
   );
 }
 

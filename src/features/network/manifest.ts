@@ -12,6 +12,7 @@ import {
   ContractId,
   ContractIdByAddress,
 } from '@/features/network/contract';
+import { OFFCHAIN } from '@/features/network/registry';
 import { NetworkType } from '@/features/network/types';
 import { Address } from 'abitype';
 import { NETWORK } from './literals';

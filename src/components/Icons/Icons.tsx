@@ -49,6 +49,7 @@ export const RoleIcon = ({ color = defaultColor }: { color?: string }) => (
 
 export const FcdIcon = ({ color = defaultColor }: { color?: string }) => (
   <svg
+    className="w-7 h-7"
     width="32"
     height="32"
     viewBox="0 0 32 32"
@@ -102,6 +103,7 @@ export const FcdIcon = ({ color = defaultColor }: { color?: string }) => (
 
 export const MtmIcon = ({ color = defaultColor }: { color?: string }) => (
   <svg
+    className="w-7 h-7"
     width="32"
     height="32"
     viewBox="0 0 32 32"
