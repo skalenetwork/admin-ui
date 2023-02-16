@@ -25,7 +25,7 @@ const Popover = ({
           align="center"
           sideOffset={4}
           className={tw(
-            'border',
+            'border z-[99999999]',
             'radix-side-top:animate-slide-up radix-side-bottom:animate-slide-down',
             'rounded-lg p-4 shadow-md',
             'bg-[var(--white)]',

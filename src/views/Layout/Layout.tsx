@@ -114,7 +114,8 @@ export default function Layout() {
             <>
               <p>
                 <GlobeIcon />
-                {chain?.testnet ? ' Testnet' : ' Mainnet'}
+                &emsp;
+                {chain?.testnet ? 'Testnet' : 'Mainnet'}
               </p>
               <span className="opacity-75">
                 <CaretRightIcon />

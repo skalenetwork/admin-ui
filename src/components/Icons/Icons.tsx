@@ -34,9 +34,10 @@ export const GithubIcon = ({ color = defaultColor }: { color?: string }) => (
 
 export const RoleIcon = ({ color = defaultColor }: { color?: string }) => (
   <svg
+    className="h-6 w-6"
     width="25"
-    height="24"
-    viewBox="0 0 25 24"
+    height="25"
+    viewBox="0 0 25 25"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -49,7 +50,7 @@ export const RoleIcon = ({ color = defaultColor }: { color?: string }) => (
 
 export const FcdIcon = ({ color = defaultColor }: { color?: string }) => (
   <svg
-    className="w-7 h-7"
+    className="h-6"
     width="32"
     height="32"
     viewBox="0 0 32 32"
@@ -103,7 +104,7 @@ export const FcdIcon = ({ color = defaultColor }: { color?: string }) => (
 
 export const MtmIcon = ({ color = defaultColor }: { color?: string }) => (
   <svg
-    className="w-7 h-7"
+    className="h-6"
     width="32"
     height="32"
     viewBox="0 0 32 32"

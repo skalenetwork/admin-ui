@@ -107,6 +107,13 @@ main.inspect section .grid > *:not(.grid)[data-s='2']:after {
     bg-[var(--green10)] px-[4px] text-xs font-medium text-[var(--white)];
 }
 
+main.inspect section .grid > *:not(.grid)[data-s='3']:after {
+  content: '𖢥';
+  @apply absolute top-[-5px] right-[-5px]
+    flex items-center justify-center rounded-md
+    border border-[var(--red10)] bg-[var(--white)] px-[4px] text-sm font-medium text-[var(--red10)];
+}
+
 main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
   content: 'B';
   @apply absolute top-[-5px] right-[-5px]

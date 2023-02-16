@@ -1,8 +1,10 @@
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
+import { BridgeIcon } from '@/components/Icons/Icons';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useChainConnect, useHistory } from '@/features/bridge';
-import { TOKEN_STANDARD } from '@/features/network/literals';
+import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
+import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import {
@@ -284,7 +286,22 @@ export default function ImaManager() {
   // }, [peerSChains?.[0]?.chainName]);
 
   return (
-    <div className="grid spaced h-full w-full grid-rows-2 !gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
+    <div className="relative grid spaced h-full w-full grid-rows-2 !gap-0 rounded-lg bg-[var(--white)] px-4 py-2">
+      {chain?.network !== NETWORK.SKALE ? (
+        <NotSupported theme="blur">
+          <BridgeIcon className="mr-4" />
+          &emsp;
+          <strong>IMA Manager</strong> is the entry point for an SChain to
+          manage peering with other chains.
+          <br />
+          <br />
+          Only after initating a token mapping, you may be required to switch to{' '}
+          {chain ? chain.name : 'another chain'} for authorization
+          {chain ? ' on ' + chain.network : ''}.
+        </NotSupported>
+      ) : (
+        <></>
+      )}
       <Card
         full
         heading={
@@ -300,6 +317,8 @@ export default function ImaManager() {
           <div className="scrollbar flex h-full w-full flex-col gap-3 overflow-auto py-0 pr-4">
             {!chains?.length ? (
               <Prelay>. . .</Prelay>
+            ) : chain?.network !== NETWORK.SKALE ? (
+              <Prelay>Switch to an SChain to view connected chains</Prelay>
             ) : (
               chains.map(({ name }) => (
                 <PeerChainItem

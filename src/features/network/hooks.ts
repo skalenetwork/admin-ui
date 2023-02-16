@@ -14,7 +14,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Address,
   useAccount,
-  useChainId,
   useContract,
   useNetwork,
   useProvider,
@@ -156,11 +155,44 @@ export function useAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
   return data;
 }
 
+export function getContractProvider<T extends ContractId>({
+  id,
+  chains,
+  chain,
+}: {
+  id: T;
+  chains: ReturnType<typeof useNetwork>['chains'];
+  chain: ReturnType<typeof useNetwork>['chain'];
+}) {
+  if (!chain) return;
+
+  const { network: contractNetwork } = CONTRACT[id];
+  let chainId;
+
+  // verbose for intuition
+
+  if (chain.network === NETWORK.SKALE) {
+    if (contractNetwork === NETWORK.SKALE) {
+      chainId = chain.id;
+    } else {
+      chainId = chains.find((c) => chain.network === c.network)?.id;
+    }
+  } else if (chain.network === NETWORK.ETHEREUM) {
+  } else {
+    return;
+  }
+
+  return getProvider({
+    chainId,
+  });
+}
+
 export function useContractProvider<T extends ContractId>({ id }: { id: T }) {
-  const connectedChainId = useChainId();
-  const { network } = CONTRACT[id];
-  return useProvider({
-    chainId: network === NETWORK.SKALE ? connectedChainId : 1,
+  const { chain, chains } = useNetwork();
+  return getContractProvider({
+    id,
+    chain,
+    chains,
   });
 }
 
@@ -271,13 +303,13 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
     isError: signerIsError,
     isLoading: signerIsLoading,
   } = useSigner();
-  const provider = useProvider();
   const { address } = useAccount();
+  const provider = useContractProvider({ id });
 
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
   const api = useMemo(() => {
-    return connected && chain && signer && provider && id
+    return chain && signer && provider && id
       ? getApi(id, {
           chain,
           provider,

@@ -1,7 +1,4 @@
-import {
-  context as analyticsContext,
-  useBlockHistory,
-} from '@/features/analytics';
+import { useBlockHistory } from '@/features/analytics';
 import { useMemo } from 'react';
 
 import Card from '@/components/Card/Card';
@@ -83,70 +80,82 @@ export function ChainAnalytics() {
           </Card>
         </div>
       </div>
-      <div className="grid spaced grid-cols-3">
-        <div className="grid spaced grid-rows-[60%_40%]">
-          <div data-id="active_users" data-s="-1">
-            <Card full heading="Active users">
-              <div className="flex h-full flex-col">
-                <div className="flex flex-col gap-2">
-                  <FormattedMetric
-                    amount={countAccounts}
-                    label="Total user count"
-                  />
-                  <FormattedMetric
-                    amount={Math.floor(countAccounts / 30)}
-                    label="Users last 30 days"
-                  />
-                  <FormattedMetric
-                    amount={Math.floor(countAccounts / 4)}
-                    label="Users last 7 days"
-                  />
-                </div>
-              </div>
-            </Card>
-          </div>
-          <div data-id="ima_pool" data-s="1">
-            <Card full heading="IMA Community pool"></Card>
-          </div>
-        </div>
-        <div data-id="transactions+chart" data-s="-1">
-          <Card full heading="Transactions">
-            <div className="flex h-full flex-col ">
-              <div className="flex flex-col gap-2">
-                <FormattedMetric amount={tx} label="Total transactions count" />
-                <FormattedMetric
-                  amount={tx / 12}
-                  label="Transactions last 30 days"
-                />
-                <FormattedMetric
-                  amount={tx / 12 / 4}
-                  label="Transactions last 7 days"
-                />
-              </div>
-              <div className="relative h-[max] flex-grow">
-                <Bar />
-              </div>
+      <div className="grid gap-x-3 grid-cols-3 grid-rows-[55%_45%] grid-flow-col">
+        <div data-id="active_users" data-s="-1" className="mb-2">
+          <Card full heading="Active users">
+            <div className="grid grid-rows-3 gap-1 h-full">
+              <FormattedMetric
+                amount={countAccounts}
+                label="Total user count"
+              />
+              <FormattedMetric
+                amount={Math.floor(countAccounts / 30)}
+                label="Users last 30 days"
+              />
+              <FormattedMetric
+                amount={Math.floor(countAccounts / 4)}
+                label="Users last 7 days"
+              />
             </div>
           </Card>
         </div>
-        <div data-id="gas_save+chart" data-s="-1">
-          <Card full heading="Gas Fees saved">
-            <div className="flex h-full flex-col ">
-              <div className="flex flex-col gap-2">
-                <FormattedMetric
-                  format="currency"
-                  amount={tx / 12}
-                  label="Transactions last 30 days"
-                />
-                <FormattedMetric
-                  format="currency"
-                  amount={tx / 12 / 4}
-                  label="Transactions last 7 days"
-                />
-              </div>
-              <div className="relative h-[max] flex-grow">
-                <Bar />
-              </div>
+        <div data-id="ima_pool" data-s="1" className="mt-1">
+          <Card full heading="IMA Community pool"></Card>
+        </div>
+        <div data-id="transactions_count" data-s="-1">
+          <Card full heading="Transactions" className="!rounded-b-none">
+            <div className="grid grid-rows-3 gap-1 h-full">
+              <FormattedMetric amount={tx} label="Total transactions count" />
+              <FormattedMetric
+                amount={tx / 12}
+                label="Transactions last 30 days"
+              />
+              <FormattedMetric
+                amount={tx / 12 / 4}
+                label="Transactions last 7 days"
+              />
+            </div>
+          </Card>
+        </div>
+        <div data-id="transactions_chart" data-s="3">
+          <Card
+            full
+            lean
+            heading=""
+            bodyClass="flex flex-col h-full"
+            className="!rounded-t-none"
+          >
+            <div className="relative h-max flex-grow">
+              <Bar />
+            </div>
+          </Card>
+        </div>
+        <div data-id="gas_save_count" data-s="-1">
+          <Card full heading="Gas Fees saved" className="!rounded-b-none">
+            <div className="grid grid-rows-3 gap-1 h-full">
+              <FormattedMetric
+                format="currency"
+                amount={tx / 12}
+                label="Transactions last 30 days"
+              />
+              <FormattedMetric
+                format="currency"
+                amount={tx / 12 / 4}
+                label="Transactions last 7 days"
+              />
+            </div>
+          </Card>
+        </div>
+        <div data-id="gas_save_chart" data-s="3">
+          <Card
+            full
+            lean
+            heading=""
+            bodyClass="flex flex-col h-full"
+            className="!rounded-t-none"
+          >
+            <div className="relative h-max flex-grow">
+              <Bar />
             </div>
           </Card>
         </div>
@@ -165,16 +174,16 @@ function Bar() {
     {
       label: 'Series 1',
       data: [
-        { primary: '1', secondary: 40 },
-        { primary: '2', secondary: 96 },
-        { primary: '3', secondary: 49 },
-        { primary: '4', secondary: 92 },
-        { primary: '5', secondary: 38 },
-        { primary: '6', secondary: 57 },
-        { primary: '7', secondary: 50 },
-        { primary: '8', secondary: 11 },
-        { primary: '9', secondary: 57 },
-        { primary: '10', secondary: 49 },
+        { primary: '1', secondary: Math.random() },
+        { primary: '2', secondary: Math.random() },
+        { primary: '3', secondary: Math.random() },
+        { primary: '4', secondary: Math.random() },
+        { primary: '5', secondary: Math.random() },
+        { primary: '6', secondary: Math.random() },
+        { primary: '7', secondary: Math.random() },
+        { primary: '8', secondary: Math.random() },
+        { primary: '9', secondary: Math.random() },
+        { primary: '10', secondary: Math.random() },
       ],
     },
   ];
@@ -213,7 +222,3 @@ function Bar() {
 }
 
 export default withErrorBoundary(ChainAnalytics);
-
-export const context = {
-  ...analyticsContext.reducers,
-};
