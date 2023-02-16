@@ -133,7 +133,7 @@ export default function Layout() {
               Not Connected
             </div>
           )}
-          {connected && (
+          {chain && (
             <div className="cursor-pointer">
               <RoleList />
             </div>

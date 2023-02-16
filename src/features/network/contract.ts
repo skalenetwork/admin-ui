@@ -27,6 +27,13 @@ namespace ContractManifestBase {
   };
 }
 
+/**
+ * An important iteration would be to make the network field an array
+ * example [NETWORK.GOERLI, NETWORK.ETHEREUM]
+ * NETWORK is a direct match of `Chain.network` and used as a comparison filter
+ * this will require minor refactor in network hooks and libs
+ */
+
 const CONTRACT_INACTIVE = {
   MESSAGE_PROXY_MAINNET: {
     network: NETWORK.ETHEREUM,

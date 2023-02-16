@@ -9,7 +9,7 @@ export const ACRONYMS = ['IMA', 'ETH', 'MTM', 'FCD', 'ERC'];
  * EVM-based networks
  */
 export const NETWORK = {
-  ETHEREUM: 'ethereum',
+  ETHEREUM: 'homestead',
   SKALE: 'skale',
 } as const;
 

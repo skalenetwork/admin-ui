@@ -1,26 +1,30 @@
 import { RoleIcon } from '@/components/Icons/Icons';
 import Popover from '@/components/Popover/Popover';
 import { useTypedContracts } from '@/features/network/hooks';
-import { ACRONYMS, NETWORK } from '@/features/network/literals';
+import { ACRONYMS } from '@/features/network/literals';
 import { CONTRACT } from '@/features/network/manifest';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useQueries } from '@tanstack/react-query';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import { snakeToSentenceCase } from '../../utils';
 
 type Props = {};
 
 export default function RoleList({}: Props) {
-  const contracts = useTypedContracts({
+  const allContracts = useTypedContracts({
     id: Object.keys(CONTRACT),
   });
 
   const account = useAccount();
+  const { chain } = useNetwork();
 
-  const contractsWithRoles = contracts
+  console.log(chain?.network);
+
+  const filteredContracts = allContracts
     .filter(
       (contract) =>
-        contract.abi && CONTRACT[contract.contractId].network === NETWORK.SKALE,
+        contract.abi &&
+        CONTRACT[contract.contractId].network === chain?.network,
     )
     .map(({ contract, abi, contractId }) => ({
       contract,
@@ -34,14 +38,13 @@ export default function RoleList({}: Props) {
         .map((fragment) => fragment.name),
     }));
 
-  console.log('contractsWithRoles', contractsWithRoles);
+  console.log('filteredContracts', filteredContracts);
 
-  // better be broken down, improve queryKey
-  const allContractsWithRoles = useQueries({
-    queries: contractsWithRoles.map((details) => {
+  const rolesOfFilteredContracts = useQueries({
+    queries: filteredContracts.map((details) => {
       return {
         enabled: Boolean(details.contract),
-        queryKey: ['allContractsWithRoles', details.contractId],
+        queryKey: ['rolesOfFilteredContracts', details.contractId],
         queryFn: async () => {
           // tuple
           const roles: [string, any] = await Promise.all(
@@ -54,40 +57,52 @@ export default function RoleList({}: Props) {
               ]),
             ),
           );
-          return {
-            ...details,
-            roles: roles.map((role) => ({
-              name: role[0],
-              isOfSigner: role[1],
-            })),
-          };
+          return roles.map((role) => ({
+            name: role[0],
+            isOfSigner: role[1],
+          }));
         },
       };
     }),
   });
 
-  console.log('allContractsWithRoles', allContractsWithRoles);
+  const listOfContractsWithRoles = filteredContracts.map((data, index) => {
+    const roles = rolesOfFilteredContracts[index].data;
+    return {
+      ...data,
+      roles:
+        roles ||
+        (data.roles
+          ? data.roles.map((roleName: string) => ({ name: roleName }))
+          : []),
+    };
+  });
+
+  console.log('listOfContractsWithRoles', listOfContractsWithRoles);
 
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>
-      {allContractsWithRoles.map(({ data }, index) => (
+      {listOfContractsWithRoles.map((data, index) => (
         <div
           className="my-2 min-w-[300px] rounded-lg bg-[var(--gray3)] p-4"
           key={index}
         >
           <p className="font-semibold">{data?.contractName}</p>
-          {data?.roles.map(({ name, isOfSigner }, index) => (
-            <div className="flex flex-row" key={index}>
-              {snakeToSentenceCase(name, ACRONYMS)}{' '}
-              <div className="ml-auto">
-                {isOfSigner ? (
-                  <CheckIcon className="text-[var(--green11)]" />
-                ) : (
-                  <Cross2Icon className="text-[var(--red11)]" />
-                )}
+          {data.roles.map &&
+            data.roles.map(({ name, isOfSigner }, index) => (
+              <div className="flex flex-row" key={index}>
+                {snakeToSentenceCase(name, ACRONYMS)}{' '}
+                <div className="ml-auto">
+                  {isOfSigner === undefined ? (
+                    '?'
+                  ) : isOfSigner === true ? (
+                    <CheckIcon className="text-[var(--green11)]" />
+                  ) : (
+                    <Cross2Icon className="text-[var(--red11)]" />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       ))}
     </Popover>
