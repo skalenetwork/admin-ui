@@ -207,13 +207,11 @@ export function useTypedContract<T extends ContractIdWithAbi>({
   id: T;
 }): {
   address?: (typeof CONTRACT)[T]['address'];
-  abi?: (typeof ABI)[T];
+  abi?: ReturnType<typeof getAbi>;
   contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
 } {
   const { address } = CONTRACT[id];
-  const abi = useAbi({
-    id,
-  });
+  const abi = ABI[id];
 
   const provider = useContractProvider({ id });
 

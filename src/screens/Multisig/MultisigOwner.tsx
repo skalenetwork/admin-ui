@@ -30,7 +30,7 @@ export function MultisigOwner({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex w-full items-center gap-8 py-2"
+      className="flex w-full items-center gap-4 py-2"
     >
       <NiceAddress
         address={address}

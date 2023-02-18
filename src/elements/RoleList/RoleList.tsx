@@ -18,8 +18,6 @@ export default function RoleList({}: Props) {
   const account = useAccount();
   const { chain } = useNetwork();
 
-  console.log(chain?.network);
-
   const filteredContracts = allContracts
     .filter(
       (contract) =>
@@ -37,8 +35,6 @@ export default function RoleList({}: Props) {
         )
         .map((fragment) => fragment.name),
     }));
-
-  console.log('filteredContracts', filteredContracts);
 
   const rolesOfFilteredContracts = useQueries({
     queries: filteredContracts.map((details) => {
@@ -77,8 +73,6 @@ export default function RoleList({}: Props) {
           : []),
     };
   });
-
-  console.log('listOfContractsWithRoles', listOfContractsWithRoles);
 
   return (
     <Popover title="Chain Roles" trigger={<RoleIcon />}>

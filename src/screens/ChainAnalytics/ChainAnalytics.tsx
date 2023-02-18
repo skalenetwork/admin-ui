@@ -1,4 +1,4 @@
-import { useBlockHistory } from '@/features/analytics';
+import { useBlockHistory, usePoolStats } from '@/features/analytics';
 import { useMemo } from 'react';
 
 import Card from '@/components/Card/Card';
@@ -23,10 +23,10 @@ function FormattedMetric({
   format?: 'currency' | 'number';
   label?: string;
 }) {
-  let _amount = Number(amount.toFixed(0));
-  let value = _amount
-    ? (format === 'currency' ? fmtcurr : fmtnum).format(_amount)
-    : '...';
+  const numeral = Number(Number(amount).toFixed(0));
+  let value = isNaN(amount)
+    ? '...'
+    : (format === 'currency' ? fmtcurr : fmtnum).format(numeral);
   return (
     <div>
       <p className="p-0 text-2xl font-semibold">{value}</p>
@@ -44,6 +44,8 @@ export function ChainAnalytics() {
     time: dayStart,
     includeLatest: true,
   });
+
+  const { walletBalance } = usePoolStats();
 
   const tx = Math.random() * 50000;
 
@@ -100,7 +102,19 @@ export function ChainAnalytics() {
           </Card>
         </div>
         <div data-id="ima_pool" data-s="1" className="mt-1">
-          <Card full heading="IMA Community pool"></Card>
+          <Card
+            full
+            heading="IMA Community pool"
+            bodyClass="h-full grid grid-rows-2 grid-cols-2"
+          >
+            <FormattedMetric amount={980} label="Active users" />
+            <FormattedMetric amount={240} label="Inactive users" />
+            <FormattedMetric amount={420} label="Exists" />
+            <FormattedMetric
+              amount={walletBalance}
+              label="sChain wallet balance"
+            />
+          </Card>
         </div>
         <div data-id="transactions_count" data-s="-1">
           <Card full heading="Transactions" className="!rounded-b-none">

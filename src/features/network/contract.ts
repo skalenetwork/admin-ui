@@ -7,6 +7,8 @@
 import * as ADDRESS from '@/features/network/address';
 import { NETWORK } from '@/features/network/literals';
 
+import mainnetImaUnion from './abi/abi-ima-mainnet.union';
+
 type SwapKeyValue<
   T extends Record<string, S>,
   S extends { address: string },
@@ -88,10 +90,10 @@ export const CONTRACT = {
     name: 'Marionette',
   },
   COMMUNITY_POOL: {
-    network: NETWORK.SKALE,
+    network: NETWORK.ETHEREUM,
     type: 'sudo',
-    key: 'schain:community:pool',
-    address: ADDRESS.COMMUNITY_POOL_ADDRESS,
+    key: 'foreign:community:pool',
+    address: mainnetImaUnion['community_pool_address'],
     name: 'CommunityPool',
   },
   COMMUNITY_LOCKER: {
@@ -147,35 +149,35 @@ export const CONTRACT = {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:depositbox:erc20',
-    address: ADDRESS.DEPOSIT_BOX_ERC20_ADDRESS,
+    address: mainnetImaUnion['deposit_box_erc20_address'],
     name: 'DepositBoxERC20',
   },
   DEPOSIT_BOX_ERC721: {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:depositbox:erc721',
-    address: ADDRESS.DEPOSIT_BOX_ERC721_ADDRESS,
+    address: mainnetImaUnion['deposit_box_erc721_address'],
     name: 'DepositBoxERC721',
   },
   DEPOSIT_BOX_ERC721_WITH_METADATA: {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:depositbox:erc721_with_metadata',
-    address: ADDRESS.DEPOSIT_BOX_ERC721_WITH_METADATA_ADDRESS,
+    address: mainnetImaUnion['deposit_box_erc721_with_metadata_address'],
     name: 'DepositBoxERC721',
   },
   DEPOSIT_BOX_ERC1155: {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:depositbox:erc1155',
-    address: ADDRESS.DEPOSIT_BOX_ERC1155_ADDRESS,
+    address: mainnetImaUnion['deposit_box_erc1155_address'],
     name: 'DepositBoxERC1155',
   },
   LINKER: {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:linker',
-    address: ADDRESS.LINKER_ADDRESS,
+    address: mainnetImaUnion['linker_address'],
     name: 'Linker',
   },
 } as const satisfies ContractManifestBase.Item;

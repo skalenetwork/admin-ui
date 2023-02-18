@@ -3,12 +3,45 @@
  * @module AnalyticsHooks
  */
 
+import { useTypedContract } from '@/features/network/hooks';
 import { useIsFetching, useQueries } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
-import { useBlockNumber, useNetwork, useProvider } from 'wagmi';
+import {
+  useAccount,
+  useBlockNumber,
+  useContractReads,
+  useNetwork,
+  useProvider,
+} from 'wagmi';
 import { TimedBlocks } from './core/block';
 
-export function useAnalytics() {}
+export function usePoolStats() {
+  const { contract, abi, address } = useTypedContract({
+    id: 'COMMUNITY_POOL',
+  });
+
+  const { address: walletAddress } = useAccount();
+  const { chain } = useNetwork();
+
+  const { data } = useContractReads({
+    enabled: Boolean(walletAddress && chain),
+    contracts: [
+      {
+        address,
+        abi,
+        functionName: 'getBalance',
+        args: [walletAddress, chain?.name],
+      },
+    ],
+  });
+
+  console.log('kia chal ra ai', data?.[0]);
+
+  return {
+    walletBalance: data?.[0],
+  };
+}
+
 /**
  * Get measures for block history over defined period
  * @param param0

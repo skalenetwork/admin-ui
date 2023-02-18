@@ -36,6 +36,7 @@ import {
 } from 'wagmi';
 
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import { usePoolStats } from '@/features/analytics';
 
 // update this when @features/../chains.mainnet is updated
 const chains = [ethereumMainnet, ...Object.values(skaleChains.staging)];
