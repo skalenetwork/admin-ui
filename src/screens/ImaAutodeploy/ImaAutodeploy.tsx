@@ -23,9 +23,9 @@ const SingleConfig = ({
       <div>
         <p className="font-medium">{title}</p>
         {isEnabled === true ? (
-          <p className="text-sm leading-none text-[var(--green7)]">Enabled</p>
+          <p className="text-sm leading-none text-[var(--green10)]">Enabled</p>
         ) : (
-          <p className="text-sm leading-none text-[var(--red7)]">Disabled</p>
+          <p className="text-sm leading-none text-[var(--red10)]">Disabled</p>
         )}
       </div>
       <div className="ml-auto">

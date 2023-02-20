@@ -7,6 +7,8 @@
 import * as ADDRESS from '@/features/network/address';
 import { NETWORK } from '@/features/network/literals';
 
+import type { Entries } from 'type-fest';
+
 import mainnetImaUnion from './abi/abi-ima-mainnet.union';
 
 type SwapKeyValue<
@@ -51,30 +53,23 @@ const CONTRACT_INACTIVE = {
     address: ADDRESS.MESSAGE_PROXY_FOR_SCHAIN_ADDRESS,
     name: 'MessageProxyForSchain', // to confirm
   },
-  CONTEXT: {
-    network: NETWORK.SKALE,
-    type: 'sudo',
-    key: 'schain:context',
-    address: ADDRESS.SCHAIN_CONTEXT_ADDRESS,
-    name: 'Context',
-  },
-  ETHERBASE: {
-    network: NETWORK.SKALE,
-    type: 'sudo',
-    key: 'schain:etherbase',
-    address: ADDRESS.SCHAIN_ETHERBASE_ADDRESS,
-    name: 'Etherbase',
-  },
 } satisfies ContractManifestBase.Item;
 
 export const CONTRACT = {
+  FILESTORAGE: {
+    network: NETWORK.SKALE,
+    type: 'storage',
+    key: 'schain:filestorage',
+    address: ADDRESS.FILESTORAGE_ADDRESS,
+    name: 'FileStorage',
+  },
   CONFIG_CONTROLLER: {
     network: NETWORK.SKALE,
     type: 'sudo',
     key: 'schain:config_controller',
     address: ADDRESS.SCHAIN_CONFIG_CONTROLLER_ADDRESS,
     name: 'ConfigController',
-  } as const,
+  },
   MULTISIG_WALLET: {
     network: NETWORK.SKALE,
     type: 'sudo',
@@ -205,3 +200,21 @@ export type ContractIdByAddress<T extends ContractDetailList['address']> =
 
 // export type ContractDetailsByAddress<TAddress extends ContractList['address']> =
 //   ContractManifest[ContractId];
+
+export const SContractEntries = Object.entries(
+  CONTRACT,
+) as Entries<ContractManifest>;
+
+export function getSContractProp<
+  TContractId extends ContractId,
+  TProp extends keyof ContractManifest[TContractId],
+>(id: TContractId, prop: TProp): ContractManifest[TContractId][TProp] {
+  return CONTRACT[id]?.[prop];
+}
+
+export function compareSContractProp<
+  TContractId extends ContractId,
+  TProp extends keyof ContractManifest[TContractId],
+>(id: TContractId, prop: TProp, predicate: string): boolean {
+  return CONTRACT[id]?.[prop] === predicate;
+}

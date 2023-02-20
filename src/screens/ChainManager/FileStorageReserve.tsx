@@ -1,8 +1,15 @@
-import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import Card from '@/components/Card/Card';
+import Dialog from '@/components/Dialog/Dialog';
 import Progress from '@/components/Progress/Progress';
+import Field from '@/elements/Field/Field';
+import { useSContractWrite } from '@/features/network/hooks';
+import { useStorageSpace } from '@/features/storage/hooks';
+import { Address } from 'abitype';
+import { BigNumber } from 'ethers';
 import prettyBytes from 'pretty-bytes';
 import { useMemo } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { tw } from 'twind';
 
 import type { WidgetWithAlertProps } from '../types';
 
@@ -39,35 +46,125 @@ export const StorageStatus = ({
   );
 };
 
+type StorageReserveForm = {
+  reserveSpaceAddress: Address;
+  reserveSpaceAmount: string;
+  reserveSpaceUnit: 'kb' | 'gb' | 'mb';
+};
+
 export default function FileStorageReserve({
   id,
   alertKey,
   toggleAlert,
 }: WidgetWithAlertProps) {
+  const { totalReservedSpace = 0, totalStorageSpace = 0 } = useStorageSpace();
+
+  const form = useForm<StorageReserveForm>({
+    mode: 'all',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      reserveSpaceAddress: '' as Address,
+      reserveSpaceAmount: '1',
+      reserveSpaceUnit: 'kb',
+    },
+  });
+
+  const unit = form.watch('reserveSpaceUnit');
+  const multiplier =
+    unit === 'kb' ? 1 : unit === 'mb' ? 2 : unit === 'gb' ? 3 : 0;
+  const amount =
+    Number(form.watch('reserveSpaceAmount')) * Math.pow(1024, multiplier);
+
+  const args = [form.watch('reserveSpaceAddress'), BigNumber.from(amount)];
+
+  const { write: reserveSpace, isLoading } = useSContractWrite('FILESTORAGE', {
+    name: 'reserveSpace',
+    args,
+  });
+
   return (
     <Card full heading="Filestorage">
       <div className="flex h-full flex-col justify-between">
         <StorageStatus
           className="flex flex-col gap-1"
-          occupiedSpace={500}
-          reservedSpace={1000}
+          occupiedSpace={totalReservedSpace}
+          reservedSpace={totalStorageSpace}
         />
-        <center>
-          <AlertDialog
-            open={alertKey === id}
-            onOpenChange={toggleAlert(id)}
-            trigger={
-              <button className="btn btn-wide w-5/6">Reserve file space</button>
-            }
+        <FormProvider {...form}>
+          <Dialog
             title={`Reserve file space`}
-            description={<p>Please confirm this action</p>}
-            onAction={async () => {
-              return {
-                status: 'success',
-              };
+            open={alertKey === id}
+            onOpenChange={(open) => {
+              toggleAlert(`${id}`)(open);
             }}
+            trigger={
+              <center>
+                <button
+                  className={tw(
+                    'btn btn-wide w-5/6 m-auto',
+                    isLoading ? 'loading' : '',
+                  )}
+                  disabled={isLoading}
+                >
+                  Reserve file space
+                </button>
+              </center>
+            }
+            description={''}
+            activeStep={1}
+            steps={[
+              {
+                onSubmit: form.handleSubmit(
+                  (data) => {
+                    console.log(data);
+                    reserveSpace?.();
+                    toggleAlert(id)(false);
+                  },
+                  (err) => {
+                    console.log('kia ha masla', err);
+                  },
+                ),
+                content: (
+                  <div className="w-2/3 m-auto">
+                    <Field<StorageReserveForm>
+                      control={() => <input type="text" />}
+                      name="reserveSpaceAddress"
+                      label="Address"
+                      required="Address is invalid"
+                    />
+                    <div className="grid grid-cols-2">
+                      <Field<StorageReserveForm>
+                        control={() => (
+                          <input type="text" className="border-r-0" />
+                        )}
+                        name="reserveSpaceAmount"
+                        label="Space to reserve"
+                        required="Address is invalid"
+                        validate={(val) =>
+                          !isNaN(Number(val)) || 'Space amount is invalid'
+                        }
+                      />
+                      <Field<StorageReserveForm>
+                        control={() => (
+                          <select>
+                            <option value="kb">kB</option>
+                            <option value="mb">MB</option>
+                            <option value="gb">GB</option>
+                          </select>
+                        )}
+                        name="reserveSpaceUnit"
+                        label="units"
+                      />
+                    </div>
+                  </div>
+                ),
+                actionElement({ className }) {
+                  return <button className={className}>Reserve</button>;
+                },
+              },
+            ]}
           />
-        </center>
+        </FormProvider>
       </div>
     </Card>
   );

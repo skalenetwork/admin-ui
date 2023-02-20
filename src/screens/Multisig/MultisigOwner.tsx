@@ -1,5 +1,5 @@
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useTypedContract } from '@/features/network/hooks';
+import { useSContract } from '@/features/network/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -14,7 +14,7 @@ export function MultisigOwner({
   address: Address;
   showControls?: boolean;
 }) {
-  const { abi, address: contractAddress } = useTypedContract({
+  const { abi, address: contractAddress } = useSContract({
     id: 'MULTISIG_WALLET',
   });
 

@@ -1,4 +1,4 @@
-export const MultisigWalletABI = [
+export default [
   {
     constant: true,
     inputs: [{ name: '', type: 'uint256' }],

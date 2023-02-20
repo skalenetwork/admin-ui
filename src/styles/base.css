@@ -46,7 +46,23 @@
 
   button[disabled],
   .btn[disabled] {
-    @apply cursor-default opacity-50 grayscale transition-all;
+    @apply cursor-default transition-all;
+  }
+
+  button[disabled]:not(.loading),
+  .btn[disabled]:not(.loading) {
+    @apply opacity-50  grayscale;
+  }
+
+  button[disabled].loading,
+  .btn[disabled].loading {
+    @apply relative text-opacity-50 opacity-90;
+  }
+
+  button[disabled].loading:before,
+  .btn[disabled].loading:before {
+    content: '';
+    @apply absolute -top-1 -right-1 z-50 h-3 w-3 animate-bounce rounded-full bg-[var(--yellow10)];
   }
 
   .btn.negative {

@@ -5,29 +5,28 @@
 
 import { CONTRACT, ContractId } from '@/features/network/contract';
 import { Abi, AbiError, AbiEvent, AbiFunction } from 'abitype';
-import { ConfigControllerABI } from './abi-configcontroller';
+import ConfigControllerABI from './abi-config_controller';
+import FileStorageABI from './abi-filestorage';
 import mainnetImaUnion from './abi-ima-mainnet.union';
 import schainImaUnion from './abi-ima.union';
-import { MarionetteABI } from './abi-marionette';
-import { MultisigWalletABI } from './abi-multisigwallet';
-
-export type GetAbiProps<T> = { id: T };
+import MarionetteABI from './abi-marionette';
+import MultisigWalletABI from './abi-multisig_wallet';
 
 export type ContractName<K extends ContractId> = Lowercase<
   (typeof CONTRACT)[K]['name']
 >;
 
-type RelaxedAbi = (
-  | Omit<AbiFunction, 'stateMutability'>
-  | AbiEvent
-  | AbiError
-)[];
+type RelaxedAbi = Readonly<
+  (Omit<AbiFunction, 'stateMutability'> | AbiEvent | AbiError)[]
+>;
 
 /**
  * @description Must be satisfied to ensure feature / type availability in dev and runtime
  * Not satisfied on removing RelaxedAbi will show invalid ABIs
+ * always 100% export as const to avoid nonsensical exceptions with indexing
  */
 export const ABI = {
+  FILESTORAGE: FileStorageABI,
   CONFIG_CONTROLLER: ConfigControllerABI,
   MULTISIG_WALLET: MultisigWalletABI,
   MARIONETTE: MarionetteABI,
@@ -45,8 +44,8 @@ export const ABI = {
   LINKER: mainnetImaUnion['linker_abi'],
   DEPOSIT_BOX_ERC721_WITH_METADATA:
     mainnetImaUnion['deposit_box_erc721_with_metadata_abi'],
-} satisfies {
-  [key in ContractId as ContractId]: Abi;
+} as const satisfies {
+  [key in ContractId as ContractId]: Abi | RelaxedAbi;
 };
 
 export type ContractIdWithAbi = keyof typeof ABI;
@@ -56,23 +55,9 @@ export type ContractIdWithAbi = keyof typeof ABI;
  * @param param0
  * @returns
  */
-export function getAbi<T extends ContractIdWithAbi>({
-  id,
-}: GetAbiProps<T>): (typeof ABI)[T] {
-  return ABI[id];
+
+export function getAbi<T extends ContractId>(id: T): (typeof ABI)[T] {
+  return ABI[id] as (typeof ABI)[T];
 }
 
-/**
- * Dynamically import ABI
- * @todo dynamic import return type not inferring, deprecate if not possible
- * @param param0
- * @returns
- */
-false &&
-  function importAbi<T extends ContractId>({ id }: GetAbiProps<T>) {
-    const lowerName = CONTRACT[id].name.toLocaleLowerCase() as ContractName<T>;
-    const path = `./abi-${lowerName}` as const;
-    // will require a default export from abi-*.ts when used
-    /* @vite-ignore */
-    return import(path).then((x) => x.default);
-  };
+////

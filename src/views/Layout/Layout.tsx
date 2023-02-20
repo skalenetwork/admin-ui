@@ -84,18 +84,18 @@ export default function Layout() {
         px-8 text-sm text-[var(--color-footer)]"
       >
         <p>Powered by Dirt Road Dev</p>
-        <div className="flex items-center justify-center gap-2 pl-16">
+        <div className="flex items-center justify-center gap-2 pl-20">
           {connected ? (
             <>
               <span
                 className={tw`opacity-[${flags?.fcdEnabled ? '1' : '0.5'}]`}
               >
-                <FcdIcon /> Free Contract Deployment
+                <FcdIcon /> FCD
               </span>
               <span
                 className={tw`opacity-[${flags?.mtmEnabled ? '1' : '0.5'}]`}
               >
-                <MtmIcon /> Multi-transaction Mode
+                <MtmIcon /> MTM
               </span>
             </>
           ) : (
@@ -112,8 +112,8 @@ export default function Layout() {
         <div className="ml-auto flex items-center justify-between gap-4">
           {chain ? (
             <>
-              <p>
-                <GlobeIcon />
+              <p className="align-middle">
+                {chain?.network} <GlobeIcon />
                 &emsp;
                 {chain?.testnet ? 'Testnet' : 'Mainnet'}
               </p>

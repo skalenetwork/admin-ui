@@ -1,3 +1,4 @@
+import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
 /**
  * @namespace Network
  * @module NetworkHooks
@@ -9,17 +10,23 @@ import { NETWORK } from '@/features/network/literals';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { getContract, getProvider } from '@wagmi/core';
-import { Abi, ExtractAbiEventNames } from 'abitype';
+import {
+  Abi,
+  AbiParametersToPrimitiveTypes,
+  AbiTypeToPrimitiveType,
+  ExtractAbiEventNames,
+  ExtractAbiFunction,
+} from 'abitype';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Address,
   useAccount,
   useContract,
+  useContractReads,
   useNetwork,
   useProvider,
   useSigner,
 } from 'wagmi';
-import { ABI, ContractIdWithAbi, getAbi, GetAbiProps } from './abi/abi';
+import { ABI, ContractIdWithAbi, getAbi } from './abi/abi';
 import type {
   ContractDetailList,
   ContractId,
@@ -67,6 +74,7 @@ export function useExplorer(requests: ExplorerProps[]) {
     return {
       queryKey: [chain?.id, module, action, args],
       queryFn: () => fetch(url).then((res) => res.json()),
+      refetchOnWindowFocus: false,
     };
   });
   return useQueries({
@@ -96,10 +104,7 @@ export function useEvents<
     : string[];
 }) {
   const contractId = build.contractIdFromAddress(address);
-  const { contract } = useTypedContract({ id: contractId });
-  const abi = getAbi({
-    id: contractId,
-  });
+  const { contract, abi } = useSContract({ id: contractId });
 
   const [streamEvents, setStreamEvents] = useState([]);
 
@@ -147,23 +152,24 @@ export function useChainMetadata({
   return { data, isError };
 }
 
-export function useAbi<T extends ContractIdWithAbi>({ id }: GetAbiProps<T>) {
+export function useAbi<T extends ContractIdWithAbi>(id: T) {
   const { data } = useQuery({
     queryKey: ['*', 'abi', id],
-    queryFn: () => getAbi({ id }),
+    queryFn: () => getAbi(id),
   });
   return data;
 }
 
-export function getContractProvider<T extends ContractId>({
-  id,
-  chains,
-  chain,
-}: {
-  id: T;
-  chains: ReturnType<typeof useNetwork>['chains'];
-  chain: ReturnType<typeof useNetwork>['chain'];
-}) {
+export function getSContractProvider<T extends ContractId>(
+  id: T,
+  {
+    chains,
+    chain,
+  }: {
+    chains: ReturnType<typeof useNetwork>['chains'];
+    chain: ReturnType<typeof useNetwork>['chain'];
+  },
+) {
   if (!chain) return;
 
   const { network: contractNetwork } = CONTRACT[id];
@@ -187,10 +193,9 @@ export function getContractProvider<T extends ContractId>({
   });
 }
 
-export function useContractProvider<T extends ContractId>({ id }: { id: T }) {
+export function useSContractProvider<T extends ContractId>({ id }: { id: T }) {
   const { chain, chains } = useNetwork();
-  return getContractProvider({
-    id,
+  return getSContractProvider(id, {
     chain,
     chains,
   });
@@ -201,25 +206,30 @@ export function useContractProvider<T extends ContractId>({ id }: { id: T }) {
  * @param param0
  * @returns
  */
-export function useTypedContract<T extends ContractIdWithAbi>({
+export function useSContract<
+  TContractId extends ContractIdWithAbi,
+  TAbi extends (typeof ABI)[TContractId] = (typeof ABI)[TContractId],
+>({
   id,
 }: {
-  id: T;
+  id: TContractId;
 }): {
-  address?: (typeof CONTRACT)[T]['address'];
-  abi?: ReturnType<typeof getAbi>;
-  contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
+  address?: (typeof CONTRACT)[TContractId]['address'];
+  abi?: TAbi;
+  contract?: ReturnType<typeof useContract<TAbi>>;
 } {
   const { address } = CONTRACT[id];
   const abi = ABI[id];
 
-  const provider = useContractProvider({ id });
+  const provider = useSContractProvider({ id });
 
   const contract = useContract({
     address,
     abi,
     signerOrProvider: provider,
   });
+
+  const mutate = () => {};
 
   return {
     address,
@@ -229,12 +239,110 @@ export function useTypedContract<T extends ContractIdWithAbi>({
 }
 
 /**
+ * Read values from a network contract
+ * @param id ContractId
+ * @param param1
+ * @returns
+ */
+export function useSContractReads<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TBaseParams extends Parameters<typeof useContractReads>[0],
+  TFunctionName extends Extract<
+    TAbi[number],
+    | { type: 'function'; stateMutability: 'view' }
+    | { type: 'function'; constant: true }
+  >['name'],
+  TReturnData extends AbiTypeToPrimitiveType<
+    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
+  >,
+>(
+  id: TContractId,
+  {
+    reads,
+    ...params
+  }: {
+    [K in keyof TBaseParams as Exclude<K, 'contracts'>]: TBaseParams[K];
+  } & {
+    reads: Array<{
+      name: TFunctionName;
+      args?: AbiParametersToPrimitiveTypes<
+        ExtractAbiFunction<TAbi, TFunctionName>['inputs']
+      >;
+      chainId?: number;
+    }>;
+  },
+) {
+  const { abi, address } = useSContract({ id: id });
+  const contracts = reads.map(({ name, ...oneRead }) => {
+    return {
+      abi,
+      address,
+      functionName: name,
+      ...oneRead,
+    };
+  });
+
+  const response = useContractReads({
+    ...params,
+    contracts,
+  });
+  return {
+    ...response,
+    data: response.data && Array.from(response.data),
+  } as typeof response & { data?: TReturnData[] };
+}
+
+export function useSContractWrite<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TFunctionName extends Extract<
+    TAbi[number],
+    | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
+    | { type: 'function'; constant: false }
+  >['name'],
+  TBaseParams extends Parameters<
+    typeof usePrepareContractWrite<TAbi, TFunctionName>
+  >[0],
+  TReturnData extends AbiTypeToPrimitiveType<
+    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
+  >,
+>(
+  id: TContractId,
+  {
+    name,
+    ...params
+  }: Exclude<TBaseParams, 'abi' | 'address' | 'functionName'> & {
+    name: TFunctionName;
+  },
+) {
+  const { abi, address } = build.addressAbiPair(id);
+
+  const args = {
+    ...params,
+    abi,
+    address: address as Address,
+    functionName: name,
+  };
+
+  console.log('useWrite', id, args);
+
+  const { config } = usePrepareContractWrite(args);
+
+  return useContractWrite(config);
+  // return {
+  //   ...response,
+  //   data: response.data && Array.from(response.data),
+  // } as typeof response & { data?: TReturnData[] };
+}
+
+/**
  * Use wagmi:useContractWrites compatible typed interfaces for any network supported contract by preset ID
  * @description Fetches a list of contracts, for a single, prefer useTypedContract
  * @param param0
  * @returns
  */
-export function useTypedContracts<T extends ContractIdWithAbi>({
+export function useSContracts<T extends ContractIdWithAbi>({
   id,
 }: {
   id: T[];
@@ -256,9 +364,7 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
             let abi, contract;
 
             try {
-              abi = getAbi({
-                id: contractId,
-              });
+              abi = getAbi(contractId);
             } catch (e) {
               console.error(e);
             }
@@ -294,7 +400,7 @@ export function useTypedContracts<T extends ContractIdWithAbi>({
  * @param param0
  * @returns
  */
-export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
+export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
   const { chain } = useNetwork();
   const {
     data: signer,
@@ -302,7 +408,7 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
     isLoading: signerIsLoading,
   } = useSigner();
   const { address } = useAccount();
-  const provider = useContractProvider({ id });
+  const provider = useSContractProvider({ id });
 
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
@@ -325,8 +431,3 @@ export function useContractApi<T extends keyof typeof API>({ id }: { id: T }) {
 
   return { connected, chainId: chain?.id, signer, api };
 }
-
-/**
- * useContract with methods API i.e. functionName({...}: { [arg_name]: [arg_type] })
- */
-function useContractWithApi() {}

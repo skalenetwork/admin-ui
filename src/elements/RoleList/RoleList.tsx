@@ -1,6 +1,6 @@
+import Hoverover from '@/components/Hoverover/Hoverover';
 import { RoleIcon } from '@/components/Icons/Icons';
-import Popover from '@/components/Popover/Popover';
-import { useTypedContracts } from '@/features/network/hooks';
+import { useSContracts } from '@/features/network/hooks';
 import { ACRONYMS } from '@/features/network/literals';
 import { CONTRACT } from '@/features/network/manifest';
 import { CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
@@ -11,7 +11,7 @@ import { snakeToSentenceCase } from '../../utils';
 type Props = {};
 
 export default function RoleList({}: Props) {
-  const allContracts = useTypedContracts({
+  const allContracts = useSContracts({
     id: Object.keys(CONTRACT),
   });
 
@@ -75,7 +75,7 @@ export default function RoleList({}: Props) {
   });
 
   return (
-    <Popover title="Chain Roles" trigger={<RoleIcon />}>
+    <Hoverover title="Chain Roles" trigger={<RoleIcon />}>
       {listOfContractsWithRoles.map((data, index) => (
         <div
           className="my-2 min-w-[300px] rounded-lg bg-[var(--gray3)] p-4"
@@ -99,6 +99,6 @@ export default function RoleList({}: Props) {
             ))}
         </div>
       ))}
-    </Popover>
+    </Hoverover>
   );
 }

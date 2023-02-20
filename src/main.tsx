@@ -1,7 +1,4 @@
 // organize-imports-ignore
-
-import { store } from '@/app/store'; // order this early
-
 import './polyfills';
 import { MotionConfig } from 'framer-motion';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -69,21 +66,19 @@ const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <WagmiConfig client={wagmiClient}>
-          <ConnectKitProvider
-            theme="nouns"
-            options={{
-              initialChainId: 0,
-            }}
-          >
-            <MotionConfig transition={{ duration: 0.3, ease: 'easeIn' }}>
-              <App />
-            </MotionConfig>
-          </ConnectKitProvider>
-        </WagmiConfig>
-      </QueryClientProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <WagmiConfig client={wagmiClient}>
+        <ConnectKitProvider
+          theme="nouns"
+          options={{
+            initialChainId: 0,
+          }}
+        >
+          <MotionConfig transition={{ duration: 0.3, ease: 'easeIn' }}>
+            <App />
+          </MotionConfig>
+        </ConnectKitProvider>
+      </WagmiConfig>
+    </QueryClientProvider>
   </React.StrictMode>,
 );

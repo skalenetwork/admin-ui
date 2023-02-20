@@ -3,18 +3,14 @@
  * @module ConfigHooks
  */
 
-import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
-import { useContractApi } from '@/features/network/hooks';
+import { getAbi } from '@/features/network/abi/abi';
+import { useSContractApi, useSContractReads } from '@/features/network/hooks';
 import { SCHAIN_CONFIG_CONTROLLER_ADDRESS } from '@skaleproject/constants/lib/addresses/predeployed';
-import {
-  useContractReads,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 const configControllerContract = {
   address: `${SCHAIN_CONFIG_CONTROLLER_ADDRESS}` as `0x${string}`,
-  abi: ConfigControllerABI,
+  abi: getAbi('CONFIG_CONTROLLER'),
 } as const;
 
 export function useConfigController() {
@@ -22,20 +18,18 @@ export function useConfigController() {
     connected,
     api: controller,
     signer,
-  } = useContractApi({
+  } = useSContractApi({
     id: 'CONFIG_CONTROLLER',
   });
 
-  const { data, status, refetch } = useContractReads({
+  const { data, status, refetch } = useSContractReads('CONFIG_CONTROLLER', {
     enabled: !!connected,
-    contracts: [
+    reads: [
       {
-        ...configControllerContract,
-        functionName: 'isMTMEnabled',
+        name: 'isMTMEnabled',
       },
       {
-        ...configControllerContract,
-        functionName: 'isFCDEnabled',
+        name: 'isFCDEnabled',
       },
     ],
   });

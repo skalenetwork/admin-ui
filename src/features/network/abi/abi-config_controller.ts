@@ -1,4 +1,4 @@
-export const ConfigControllerABI = [
+export default [
   {
     anonymous: false,
     inputs: [

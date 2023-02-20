@@ -1,4 +1,12 @@
+import { CrownIcon } from '@/components/Icons/Icons';
 import Field from '@/elements/Field/Field';
+import { addresses } from '@/features/network';
+import { ContractDetailList, ContractId } from '@/features/network/contract';
+import { useSContract } from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
+import { build, CONTRACT } from '@/features/network/manifest';
+import NotSupported from '@/screens/NotSupported';
+import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   Address,
@@ -8,34 +16,13 @@ import {
   usePrepareContractWrite,
   useQuery,
 } from 'wagmi';
-
 import rolesMetadata from '../../metadata/roles.json';
-
-import { CrownIcon } from '@/components/Icons/Icons';
-import { addresses } from '@/features/network';
-import { NETWORK } from '@/features/network/literals';
-import NotSupported from '@/screens/NotSupported';
-
-import { ContractDetailList, ContractId } from '@/features/network/contract';
-import { useTypedContract } from '@/features/network/hooks';
-import { build, CONTRACT } from '@/features/network/manifest';
-
-import { getAbi } from '@/features/network/abi/abi';
-import { useEffect, useMemo } from 'react';
 
 type FormData = {
   contractAddress: ContractDetailList['address'];
   role: string;
   assigneeAddress: string;
 };
-
-const contractsWithRoles = Object.entries(CONTRACT).map((id, details) => {
-  try {
-    const abi = getAbi({ id });
-  } catch (e) {
-    return;
-  }
-});
 
 export default function RoleAssigner() {
   const form = useForm({
@@ -58,7 +45,7 @@ export default function RoleAssigner() {
     return build.contractIdFromAddress(contractAddress);
   }, [contractAddress]);
 
-  const { contract, abi } = useTypedContract({
+  const { contract, abi } = useSContract({
     id: selectedContractId,
   });
 
@@ -113,16 +100,15 @@ export default function RoleAssigner() {
       )}
       <div className="py-2">
         <p>Please fill in all inputs to assign role:</p>
-        <small>@todo: two column fields</small>
       </div>
-      <div className="grid grid-cols-2">
-        <div>
-          <FormProvider {...form}>
-            <form
-              onSubmit={form.handleSubmit((data) => {
-                writeAsync?.();
-              })}
-            >
+      <div>
+        <FormProvider {...form}>
+          <form
+            onSubmit={form.handleSubmit((data) => {
+              writeAsync?.();
+            })}
+          >
+            <div className="grid grid-cols-2">
               <Field<FormData>
                 name="contractAddress"
                 label="Contract"
@@ -148,6 +134,8 @@ export default function RoleAssigner() {
                 required="Contract is required"
                 placeholder="Choose a contract"
               />
+            </div>
+            <div className="grid grid-cols-2">
               <Field<FormData>
                 name="role"
                 label="Role"
@@ -160,21 +148,25 @@ export default function RoleAssigner() {
                 )}
                 required="Role is required"
                 placeholder="Choose a role"
-              >
+              />
+              <div className="pt-4 px-4">
                 <small className="text-[var(--gray10)]">
                   {roleDescription}
                 </small>
-              </Field>
+              </div>
+            </div>
+            <div className="grid grid-cols-2">
               <Field<FormData>
                 name="assigneeAddress"
                 label="Assignee"
                 control={() => <input type="text" />}
                 required="Assignee address is required"
                 placeholder="0x..."
-              >
+              />
+              <div className="pt-4 px-4">
                 <div className="my-2 flex flex-row gap-4">
                   <button
-                    className="btn btn-outline text-sm"
+                    className="btn btn-outline py-3"
                     onClick={() => {
                       form.setValue(
                         'assigneeAddress',
@@ -195,13 +187,13 @@ export default function RoleAssigner() {
                     Fill my address
                   </button>
                 </div>
-              </Field>
-              <button type="submit" className="btn mt-8">
-                Assign Role
-              </button>
-            </form>
-          </FormProvider>
-        </div>
+              </div>
+            </div>
+            <button type="submit" className="btn mt-4">
+              Assign Role
+            </button>
+          </form>
+        </FormProvider>
       </div>
     </div>
   );

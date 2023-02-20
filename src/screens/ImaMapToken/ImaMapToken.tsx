@@ -2,15 +2,33 @@ import Card from '@/components/Card/Card';
 import Stepper from '@/components/Stepper/Stepper';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
-import * as addresses from '@/features/network/address';
+import { ABI } from '@/features/network/abi/abi';
+import { CONTRACT } from '@/features/network/contract';
 import { useExplorer } from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
 import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
 import Prelay from '@/screens/Prelay';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { tw } from 'twind';
 
+import * as addresses from '@/features/network/address';
+
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
+
+function liteEncodeAbiFunctions(abi) {
+  return abi
+    .filter((a) => a.type === 'function')
+    .map((i) => `${i.name};${i.inputs?.length};${i.outputs?.length}`);
+}
+
+const wildcardLiteEncodedAbis = Object.entries(CONTRACT)
+  .filter(([id, c]) => c.network === NETWORK.SKALE)
+  .map(([id, c]) => ABI[id])
+  .concat([])
+  .map((oneAbi) => {
+    return liteEncodeAbiFunctions(oneAbi);
+  });
 
 export default function ImaMapToken() {
   const { chainName } = useParams();
@@ -35,10 +53,23 @@ export default function ImaMapToken() {
   const originTokensFiltered: { address: string; name: string }[] =
     originTokens.isSuccess && originTokens?.data?.result
       ? originTokens.data.result
-          .filter(
-            (c: { Address: string }) =>
-              !wildcardAddresses.includes(c.Address.toLowerCase()),
-          )
+          .filter((c) => {
+            const matchable = liteEncodeAbiFunctions(JSON.parse(c['ABI']));
+            const abiMatches = wildcardLiteEncodedAbis.some((wildcard) => {
+              const foundInWildcard = matchable.filter((func) =>
+                wildcard.includes(func),
+              ).length;
+              const ratio = foundInWildcard / wildcard.length;
+              return ratio > 0.9;
+            });
+            abiMatches && console.log('catches', abiMatches, c.ContractName);
+            c['ContractName'] === 'TransparentUpgradeableProxy' &&
+              console.log('Proxythingy', matchable);
+            return (
+              !abiMatches &&
+              !wildcardAddresses.includes(c.Address.toLowerCase())
+            );
+          })
           .map((c: { Address: string; ContractName: string }) => ({
             address: c.Address,
             name: c.ContractName,

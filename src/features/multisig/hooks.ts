@@ -4,13 +4,12 @@
  * https://github.com/skalenetwork/multisigwallet-predeployed/blob/develop/contracts/MultiSigWallet.sol
  */
 
-import { addresses } from '@/features/network';
-import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
-import { CONTRACT } from '@/features/network/contract';
+import { getAbi } from '@/features/network/abi/abi';
+import { CONTRACT, getSContractProp } from '@/features/network/contract';
 import {
-  useContractApi,
   useEvents,
-  useTypedContract,
+  useSContract,
+  useSContractApi,
 } from '@/features/network/hooks';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
@@ -20,8 +19,8 @@ import { useBalance, useContractRead } from 'wagmi';
 import { scope } from './core';
 
 const multisigContract = {
-  address: `${addresses.SCHAIN_MULTISIG_WALLET_ADDRESS}` as `0x${string}`,
-  abi: MultisigWalletABI,
+  address: getSContractProp('MULTISIG_WALLET', 'address'),
+  abi: getAbi('MULTISIG_WALLET'),
 };
 
 export function useMultisig({
@@ -29,11 +28,11 @@ export function useMultisig({
 }: { address?: Address } = {}) {
   const defaultParams = { staleTime: 60 * 5 };
 
-  const contract = useTypedContract({
+  const contract = useSContract({
     id: 'MULTISIG_WALLET',
   });
 
-  const { connected, api, chainId, signer } = useContractApi({
+  const { connected, api, chainId, signer } = useSContractApi({
     id: 'MULTISIG_WALLET',
   });
 

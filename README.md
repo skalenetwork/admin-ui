@@ -84,7 +84,7 @@ First class TypeScript support allows dynamic typing from ABIs enabling TS compa
 
 Medium-to-fast changing data
 
-Registry points to files published externally to feature scope, from any source. It dynamically fetches source data in runtime, produces the parsed object and exposes predefined types for it.
+Registry points to files published externally to feature scope, from any source. It dynamically fetches source data in runtime, produces the parsed object and exposes predefined types for it. Just kidding... it's currently not exactly that organized, but it's an easy implementation, and when the use cases extend from barely 2 this is a good mental model for quick implementation. Following is already implemented though.
 
 Presently registered metadata includes:
 

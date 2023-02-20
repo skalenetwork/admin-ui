@@ -1,4 +1,4 @@
-export const MarionetteABI = [
+export default [
   {
     anonymous: false,
     inputs: [

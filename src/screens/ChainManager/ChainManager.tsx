@@ -7,6 +7,7 @@ import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import FileStorageReserve from './FileStorageReserve';
 
 import { useChainMetadata } from '@/features/network/hooks';
+import { useStorageSpace } from '@/features/storage/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
@@ -296,6 +297,8 @@ export default function ChainManager() {
     },
     [alertKey],
   );
+
+  const {} = useStorageSpace();
 
   return (
     <>

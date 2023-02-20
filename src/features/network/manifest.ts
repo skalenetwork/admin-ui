@@ -37,7 +37,6 @@ export const build = {
       (key) => CONTRACT[key].address === address,
     ) as ContractIdByAddress<TAddress>;
   },
-  contractEntries(): [ContractId, ContractDetailList] {},
 };
 
 /**

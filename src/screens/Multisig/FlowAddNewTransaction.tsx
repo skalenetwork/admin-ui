@@ -12,16 +12,14 @@ import { useAccount, useBalance } from 'wagmi';
 
 import { toSentenceCase } from '../../utils';
 
-import { addresses, manifest } from '@/features/network';
-import { ConfigControllerABI } from '@/features/network/abi/abi-configcontroller';
-import { MarionetteABI } from '@/features/network/abi/abi-marionette';
-import { MultisigWalletABI } from '@/features/network/abi/abi-multisigwallet';
+import { manifest } from '@/features/network';
 
 import Dialog from '@/components/Dialog/Dialog';
 import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { getAbi } from '@/features/network/abi/abi';
+import { SContractEntries } from '@/features/network/contract';
 import { AlertProps } from '@/screens/types';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 
@@ -43,20 +41,6 @@ export type AdvancedFormData = {
 };
 
 export type DataOut = InfoFormData & AdvancedFormData;
-
-const predeployedAddresses = {
-  ConfigController: addresses.SCHAIN_CONFIG_CONTROLLER_ADDRESS,
-  Marionette: addresses.SCHAIN_MARIONETTE_ADDRESS,
-  Etherbase: addresses.SCHAIN_ETHERBASE_ADDRESS,
-  MultisigWallet: addresses.SCHAIN_MULTISIG_WALLET_ADDRESS,
-  Context: addresses.SCHAIN_CONTEXT_ADDRESS,
-} as const;
-
-const predeployedAbis = {
-  ConfigController: JSON.stringify(ConfigControllerABI),
-  Marionette: JSON.stringify(MarionetteABI),
-  MultisigWallet: JSON.stringify(MultisigWalletABI),
-} as const;
 
 export function FlowAddNewTransaction({
   id = 'add_new_transaction',
@@ -168,12 +152,12 @@ export function FlowAddNewTransaction({
    */
   useEffect(() => {
     if (!contractAddress) return;
-    const contractId = Object.keys(CONTRACT).find(
-      (id) => CONTRACT[id].address === contractAddress,
-    );
+    const contractId = SContractEntries.find(
+      ([id, { address }]) => address === contractAddress,
+    )?.[0];
     if (contractId) {
       try {
-        const abi = getAbi({ id: contractId });
+        const abi = getAbi(contractId);
         const serializedAbi = JSON.stringify(abi);
         form[0].setValue('contractABI', serializedAbi);
         form[0].trigger('contractABI');

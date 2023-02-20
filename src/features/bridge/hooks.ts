@@ -6,17 +6,15 @@
 
 import { ABI } from '@/features/network/abi/abi';
 import { CONTRACT } from '@/features/network/contract';
-import { useExplorer, useTypedContract } from '@/features/network/hooks';
+import {
+  useExplorer,
+  useSContract,
+  useSContractReads,
+} from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { ethers } from 'ethers';
-import {
-  useContractRead,
-  useContractReads,
-  useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useContractWrite, useNetwork, usePrepareContractWrite } from 'wagmi';
 import { toSentenceCase } from '../../utils';
 
 type TokenTypeProps<S> = {
@@ -31,35 +29,36 @@ export function useTokenManager<T extends TokenStandard>({
   standard,
 }: TokenTypeProps<T>) {
   const id = `TOKEN_MANAGER_${standard}` as const;
-  return useTypedContract({ id });
-}
-
-export function useTokenManagerLinker() {
-  return useTypedContract({
-    id: 'TOKEN_MANAGER_LINKER' as const,
-  });
+  return useSContract({ id });
 }
 
 export function useToggleAutodeploy<T extends TokenStandard>({
   standard,
 }: TokenTypeProps<T>) {
   const { address, abi } = useTokenManager({
-    standard: 'ERC20',
+    standard: standard as typeof standard,
   });
 
-  const { data: isEnabled, refetch } = useContractRead({
-    address,
-    abi,
-    functionName: 'automaticDeploy',
-  });
+  const { data: flags, refetch } = useSContractReads(
+    `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20',
+    {
+      reads: [
+        {
+          name: 'automaticDeploy',
+        },
+      ],
+    },
+  );
+
+  const isEnabled = flags?.[0];
 
   const { config } = usePrepareContractWrite({
+    enabled: isEnabled !== undefined && abi && address,
     address,
     abi,
     functionName: isEnabled
       ? 'disableAutomaticDeploy'
       : 'enableAutomaticDeploy',
-    enabled: isEnabled !== undefined,
     onSuccess: () => refetch(),
   });
 
@@ -87,7 +86,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
  * @param param0
  */
 export function useChainConnect({ chainName }: { chainName: string }) {
-  const { address, abi } = useTypedContract({
+  const { address, abi } = useSContract({
     id: 'TOKEN_MANAGER_LINKER',
   });
 
@@ -95,19 +94,15 @@ export function useChainConnect({ chainName }: { chainName: string }) {
 
   const targetChain = chains.find((chain) => chain.name === chainName);
 
-  const { data } = useContractReads({
+  const { data } = useSContractReads('TOKEN_MANAGER_LINKER', {
     enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
-    contracts: [
+    reads: [
       {
-        address,
-        abi: abi,
-        functionName: 'hasSchain',
+        name: 'hasSchain',
         args: [targetChain?.name],
       },
       {
-        address,
-        abi: abi,
-        functionName: 'hasSchain',
+        name: 'hasSchain',
         args: [originChain?.name],
         chainId: targetChain?.id,
       },
