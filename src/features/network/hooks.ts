@@ -229,7 +229,7 @@ export function useSContract<
   abi?: TAbi;
   contract?: ReturnType<typeof useContract<TAbi>>;
 } {
-  const { address } = CONTRACT[id];
+  const { address } = CONTRACT[id] || {};
   const abi = ABI[id];
 
   const provider = useSContractProvider({ id });
