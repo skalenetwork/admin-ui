@@ -220,7 +220,7 @@ export default function ImaMapToken() {
     ],
   });
 
-  const { data: clonedContractData } = useQuery({
+  const clonedContractInfo = useQuery({
     enabled: !!clonedContractForRoles,
     queryKey: [`CUSTOM:${clonedContractForRoles?.address}`, 'constuctor_data'],
     queryFn: async () => {
@@ -240,7 +240,7 @@ export default function ImaMapToken() {
 
   console.log(
     'clonedContractData',
-    clonedContractData,
+    clonedContractInfo,
     MINTER_ROLE,
     BURNER_ROLE,
   );
@@ -361,26 +361,44 @@ export default function ImaMapToken() {
                               message: 'Address is invalid',
                             }}
                           />
-                          <fieldset>
+                          <fieldset
+                            className={
+                              clonedContractInfo.isLoading
+                                ? 'animate-pulse'
+                                : ''
+                            }
+                          >
                             <label htmlFor="">Contract symbol</label>
                             <p className="input-like">
-                              {clonedContractData?.symbol}
+                              {clonedContractInfo.data?.symbol}
                             </p>
                           </fieldset>
-                          <fieldset>
+                          <fieldset
+                            className={
+                              clonedContractInfo.isLoading
+                                ? 'animate-pulse'
+                                : ''
+                            }
+                          >
                             <label htmlFor="">Contract name</label>
                             <p className="input-like">
-                              {clonedContractData?.name}
+                              {clonedContractInfo?.data?.name}
                             </p>
                           </fieldset>
-                          <fieldset>
+                          <fieldset
+                            className={
+                              clonedContractInfo.isLoading
+                                ? 'animate-pulse'
+                                : ''
+                            }
+                          >
                             <label htmlFor="">Number of decimals</label>
                             <p
                               className="input-like"
                               contentEditable="false"
                               aria-readonly={true}
                             >
-                              {clonedContractData?.decimals}
+                              {clonedContractInfo.data?.decimals}
                             </p>
                           </fieldset>
                         </div>
