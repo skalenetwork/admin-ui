@@ -73,10 +73,6 @@
     @apply bg-[var(--green8)];
   }
 
-  fieldset {
-    @apply my-1;
-  }
-
   fieldset > * {
     @apply block w-full;
   }

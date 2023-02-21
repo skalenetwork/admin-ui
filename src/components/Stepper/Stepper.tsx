@@ -23,6 +23,7 @@ type Props = {
   className?: string;
   steps: Step[];
   trigger?: (props: Trigger) => JSX.Element;
+  bodyClass?: string;
 };
 
 export function StepperTrigger({
@@ -33,8 +34,11 @@ export function StepperTrigger({
   totalSteps,
 }: Trigger) {
   return (
-    <div className="group py-8">
-      <div className="cursor-pointer px-8 py-2 text-sm text-[var(--gray10)] group-radix-state-active:text-[var(--black)]">
+    <div
+      className="group py-4"
+      data-state={index === activeIndex ? 'active' : 'inactive'}
+    >
+      <div className="px-8 py-2 text-sm text-[var(--gray10)] group-radix-state-active:text-[var(--black)]">
         {index + 1}. {label}
       </div>
       <div className="grid grid-cols-[1fr_max-content_1fr] items-center justify-center gap-0">
@@ -89,6 +93,7 @@ export default function Stepper({
   className = '',
   steps,
   trigger = StepperTrigger,
+  bodyClass = '',
 }: Props) {
   const [activeId, setActiveId] = useState('');
 
@@ -121,19 +126,17 @@ export default function Stepper({
       onValueChange={(val) => setActiveId(val)}
     >
       <TabsPrimitive.List className="flex justify-center">
-        {steps.map(({ id, label }, index) => (
-          <TabsPrimitive.Trigger value={id} asChild>
-            {trigger({
-              id,
-              label,
-              index,
-              activeIndex,
-              totalSteps: steps.length,
-            })}
-          </TabsPrimitive.Trigger>
-        ))}
+        {steps.map(({ id, label }, index) =>
+          trigger({
+            id,
+            label,
+            index,
+            activeIndex,
+            totalSteps: steps.length,
+          }),
+        )}
       </TabsPrimitive.List>
-      <div>
+      <div className={bodyClass}>
         {steps.map(({ id, content }) => (
           <TabsPrimitive.Content value={id} asChild>
             {content({

@@ -59,8 +59,18 @@ type ExplorerProps = {
  * @param param0
  * @returns
  */
-export function useExplorer(requests: ExplorerProps[]) {
-  const { chain } = useNetwork();
+export function useExplorer(
+  requests: ExplorerProps[],
+  {
+    chainId,
+    enabled,
+  }: {
+    enabled?: boolean;
+    chainId?: number;
+  } = {},
+) {
+  const { chain: currentChain, chains } = useNetwork();
+  const chain = chainId ? chains.find((c) => c.id === chainId) : currentChain;
   const baseUrl = chain?.blockExplorers?.default.url;
 
   const queries = requests.map((request: ExplorerProps) => {
@@ -72,6 +82,7 @@ export function useExplorer(requests: ExplorerProps[]) {
         queryString ? '&' + queryString : ''
       }`;
     return {
+      enabled,
       queryKey: [chain?.id, module, action, args],
       queryFn: () => fetch(url).then((res) => res.json()),
       refetchOnWindowFocus: false,
