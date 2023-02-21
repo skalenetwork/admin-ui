@@ -167,7 +167,8 @@ export default function RoleAssigner() {
                 <div className="my-2 flex flex-row gap-4">
                   <button
                     className="btn btn-outline py-3"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       form.setValue(
                         'assigneeAddress',
                         addresses.SCHAIN_MULTISIG_WALLET_ADDRESS as string,
@@ -179,7 +180,8 @@ export default function RoleAssigner() {
                   </button>
                   <button
                     className="btn btn-outline text-sm"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       form.setValue('assigneeAddress', address as string);
                       form.trigger('assigneeAddress');
                     }}

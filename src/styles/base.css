@@ -87,9 +87,15 @@
 
   fieldset input,
   fieldset select,
-  fieldset textarea {
+  fieldset textarea,
+  .input-like {
     @apply rounded border border-[var(--gray8)] bg-[var(--white)] py-3 px-4 text-[var(--gray11)];
     @apply focus:border-[var(--primary)] focus:outline-none;
+  }
+
+  .input-like:before {
+    content: '.';
+    @apply relative right-0 bottom-0 opacity-0;
   }
 
   input[data-error],

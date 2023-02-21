@@ -15,8 +15,8 @@ import { tw } from 'twind';
 import { Tabs } from '@/components/Tabs/Tabs';
 import { useTokenManager } from '@/features/bridge';
 import * as addresses from '@/features/network/address';
-import { CaretLeftIcon } from '@radix-ui/react-icons';
-import { useContract, useNetwork, useQuery } from 'wagmi';
+import { CaretLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { useContract, useNetwork, useProvider, useQuery } from 'wagmi';
 
 import imaAbi from '@/features/network/abi/abi-ima.union';
 import { useQueries } from '@tanstack/react-query';
@@ -69,6 +69,8 @@ const SubmitButtonPair = ({
 export default function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
+
+  const provider = useProvider();
 
   const standard = (
     searchParam.get('standard') || ''
@@ -177,9 +179,14 @@ export default function ImaMapToken() {
     }),
   ] as const;
 
+  const cloneContractAddress = form[1].watch('cloneContractAddress');
+
   const clonedContractForRoles = useContract({
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
-    address: form[1].watch('cloneContractAddress'),
+    address: form[1].getFieldState('cloneContractAddress').invalid
+      ? ''
+      : cloneContractAddress,
+    signerOrProvider: provider,
   });
 
   const { data: roleHashes } = useQueries({
@@ -191,8 +198,10 @@ export default function ImaMapToken() {
           'role',
           'MINTER_ROLE',
         ],
-        queryFn: () => {
-          return clonedContractForRoles?.MINTER_ROLE?.();
+        queryFn: async () => {
+          return clonedContractForRoles?.MINTER_ROLE
+            ? await clonedContractForRoles?.MINTER_ROLE?.()
+            : '';
         },
       },
       {
@@ -202,8 +211,10 @@ export default function ImaMapToken() {
           'role',
           'BURNER_ROLE',
         ],
-        queryFn: () => {
-          return clonedContractForRoles?.BURNER_ROLE?.();
+        queryFn: async () => {
+          return clonedContractForRoles?.BURNER_ROLE
+            ? await clonedContractForRoles?.BURNER_ROLE?.()
+            : '';
         },
       },
     ],
@@ -224,10 +235,15 @@ export default function ImaMapToken() {
     },
   });
 
-  console.log('clonedContractData', clonedContractData);
-
   const MINTER_ROLE = roleHashes?.[0];
   const BURNER_ROLE = roleHashes?.[1];
+
+  console.log(
+    'clonedContractData',
+    clonedContractData,
+    MINTER_ROLE,
+    BURNER_ROLE,
+  );
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
     ? [
@@ -325,6 +341,13 @@ export default function ImaMapToken() {
                           The pre-deployed contract section is for contracts
                           that are already deployed on the target chain. Simply
                           put in your address and confirm the action.
+                          {MINTER_ROLE === '' ||
+                            (BURNER_ROLE === '' && (
+                              <span>
+                                <ExclamationTriangleIcon /> Be sure to use Open
+                                zeppelin access control
+                              </span>
+                            ))}
                         </div>
                         <div className="grid grid-cols-2 grid-rows-2 h-full gap-4 m-auto">
                           <Field<CloneTokenData>
@@ -340,27 +363,25 @@ export default function ImaMapToken() {
                           />
                           <fieldset>
                             <label htmlFor="">Contract symbol</label>
-                            <input
-                              type="text"
-                              readOnly
-                              defaultValue={clonedContractData?.symbol}
-                            />
+                            <p className="input-like">
+                              {clonedContractData?.symbol}
+                            </p>
                           </fieldset>
                           <fieldset>
                             <label htmlFor="">Contract name</label>
-                            <input
-                              type="text"
-                              readOnly
-                              defaultValue={clonedContractData?.name}
-                            />
+                            <p className="input-like">
+                              {clonedContractData?.name}
+                            </p>
                           </fieldset>
                           <fieldset>
                             <label htmlFor="">Number of decimals</label>
-                            <input
-                              type="text"
-                              readOnly
-                              defaultValue={clonedContractData?.decimals}
-                            />
+                            <p
+                              className="input-like"
+                              contentEditable="false"
+                              aria-readonly={true}
+                            >
+                              {clonedContractData?.decimals}
+                            </p>
                           </fieldset>
                         </div>
                         <SubmitButtonPair
