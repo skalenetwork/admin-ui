@@ -34,7 +34,6 @@ export const staging = {\n`;
 
   for await (let chain of Object.create(data)) {
     const name = chain.chain_info.schain_name;
-    console.log(name);
     const rpcUrls = buildRpcUrls([
       {
         subdomain: rpcSubdomain,

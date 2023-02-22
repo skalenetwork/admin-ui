@@ -58,7 +58,6 @@ export function FlowAddNewOwner({
         ...form[1].getValues(),
       };
       onSubmit(data);
-      console.log('handleFinalSubmit', data);
       toggleAlert(id)(false);
     },
     [form],
@@ -83,7 +82,6 @@ export function FlowAddNewOwner({
         {
           onSubmit: form[0].handleSubmit(
             (data) => {
-              console.log(data);
               setStep((step) => step + 1);
               return data;
             },
@@ -133,7 +131,6 @@ export function FlowAddNewOwner({
         {
           onSubmit: form[1].handleSubmit(
             (data) => {
-              console.log(data);
               setStep((step) => step + 1);
               return data;
             },

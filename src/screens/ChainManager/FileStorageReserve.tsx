@@ -116,13 +116,10 @@ export default function FileStorageReserve({
               {
                 onSubmit: form.handleSubmit(
                   (data) => {
-                    console.log(data);
                     reserveSpace?.();
                     toggleAlert(id)(false);
                   },
-                  (err) => {
-                    console.log('kia ha masla', err);
-                  },
+                  (err) => {},
                 ),
                 content: (
                   <div className="w-2/3 m-auto">

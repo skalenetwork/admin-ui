@@ -117,9 +117,6 @@ export default function ImaMapToken() {
               const ratio = foundInWildcard / wildcard.length;
               return ratio > 0.9;
             });
-            abiMatches && console.log('catches', abiMatches, c.ContractName);
-            c['ContractName'] === 'TransparentUpgradeableProxy' &&
-              console.log('Proxythingy', matchable);
             return (
               !abiMatches &&
               !wildcardAddresses.includes(c.Address.toLowerCase())
@@ -189,10 +186,10 @@ export default function ImaMapToken() {
     signerOrProvider: provider,
   });
 
-  const { data: roleHashes } = useQueries({
+  const roleHashesQuery = useQueries({
     queries: [
       {
-        enabled: !!clonedContractForRoles,
+        enabled: !!clonedContractForRoles?.address,
         queryKey: [
           `CUSTOM:${clonedContractForRoles?.address}`,
           'role',
@@ -205,7 +202,7 @@ export default function ImaMapToken() {
         },
       },
       {
-        enabled: !!clonedContractForRoles,
+        enabled: !!clonedContractForRoles?.address,
         queryKey: [
           `CUSTOM:${clonedContractForRoles?.address}`,
           'role',
@@ -235,8 +232,8 @@ export default function ImaMapToken() {
     },
   });
 
-  const MINTER_ROLE = roleHashes?.[0];
-  const BURNER_ROLE = roleHashes?.[1];
+  const MINTER_ROLE = roleHashesQuery.data?.[0];
+  const BURNER_ROLE = roleHashesQuery.data?.[1];
 
   console.log(
     'clonedContractData',
@@ -341,13 +338,6 @@ export default function ImaMapToken() {
                           The pre-deployed contract section is for contracts
                           that are already deployed on the target chain. Simply
                           put in your address and confirm the action.
-                          {MINTER_ROLE === '' ||
-                            (BURNER_ROLE === '' && (
-                              <span>
-                                <ExclamationTriangleIcon /> Be sure to use Open
-                                zeppelin access control
-                              </span>
-                            ))}
                         </div>
                         <div className="grid grid-cols-2 grid-rows-2 h-full gap-4 m-auto">
                           <Field<CloneTokenData>
@@ -402,6 +392,20 @@ export default function ImaMapToken() {
                             </p>
                           </fieldset>
                         </div>
+                        {!(
+                          roleHashesQuery[0].isError ||
+                          roleHashesQuery[1].isError ||
+                          MINTER_ROLE === '' ||
+                          BURNER_ROLE === ''
+                        ) &&
+                          clonedContractForRoles?.address && (
+                            <p className="text-sm">
+                              <span className="text-[var(--red10)]">
+                                <ExclamationTriangleIcon />
+                              </span>{' '}
+                              Be sure to use Open zeppelin access control
+                            </p>
+                          )}
                         <SubmitButtonPair
                           text="Next"
                           stepPrev={stepPrev}

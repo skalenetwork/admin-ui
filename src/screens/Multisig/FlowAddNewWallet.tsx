@@ -40,7 +40,6 @@ export function FlowAddNewWallet({
   const handleFinalSubmit = useCallback(
     (data) => {
       onSubmit(data);
-      console.log('handleFinalSubmit', data);
       toggleAlert(id)(false);
     },
     [form],

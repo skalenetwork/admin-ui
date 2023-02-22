@@ -3,9 +3,8 @@
  * @module AnalyticsHooks
  */
 
-import { useSContractReads } from '@/features/network/hooks';
-import { useIsFetching, useQueries } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useExplorer, useSContractReads } from '@/features/network/hooks';
+import { useMemo } from 'react';
 import { useAccount, useBlockNumber, useNetwork, useProvider } from 'wagmi';
 import { TimedBlocks } from './core/block';
 
@@ -52,56 +51,58 @@ export function useBlockHistory({
 
   const { data: blockNumber } = useBlockNumber();
 
-  const dayStartTime = time - (time % 86400000);
+  const dayStartTime = (time - (time % 86400000)) / 1000; // seconds
 
-  const chainId = chain ? chain.id : 1;
+  // ?module=block&action=getblocknobytime×tamp={blockTimestamp}&closest={before/after}
 
-  const fetchPastBlock = useCallback(
-    async (delta: number) => {
-      return timedBlocks.getDate(
-        String(((dayStartTime as number) - delta) / 1000),
-        true,
-      );
+  const [dayZero, week, month] = useExplorer([
+    {
+      module: 'block',
+      action: 'getblocknobytime',
+      args: {
+        timestamp: dayStartTime,
+        closest: 'before',
+      },
     },
-    [dayStartTime, timedBlocks],
-  );
-
-  const isFetching = useIsFetching({ queryKey: ['block_moment'] });
-
-  const initialData = { block: 0, timestamp: 0 };
-
-  const [dayZero, week, month] = useQueries({
-    queries: [
-      {
-        initialData,
-        queryKey: ['block_moment', chainId, time, 0],
-        cacheTime: Infinity,
-        queryFn: () => fetchPastBlock(0),
+    {
+      module: 'block',
+      action: 'getblocknobytime',
+      args: {
+        timestamp: dayStartTime - 7 * 86400,
+        closest: 'before',
       },
-      {
-        initialData,
-        queryKey: ['block_moment', chainId, time, 7],
-        cacheTime: Infinity,
-        queryFn: () => fetchPastBlock(7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      module: 'block',
+      action: 'getblocknobytime',
+      args: {
+        timestamp: dayStartTime - 30 * 86400,
+        closest: 'before',
       },
-      {
-        initialData,
-        queryKey: ['block_moment', chainId, time, 30],
-        cacheTime: Infinity,
-        queryFn: () => fetchPastBlock(30 * 24 * 60 * 60 * 1000),
-      },
-    ],
-  });
+    },
+  ]);
+
+  const isFetching = dayZero.isLoading && week.isLoading && month.isLoading;
 
   const blocksToNow =
-    dayZero.data && blockNumber ? blockNumber - dayZero.data.block : 0;
+    dayZero.data?.result && blockNumber
+      ? blockNumber - Number(dayZero.data.result.blockNumber)
+      : 0;
   const increment = includeLatest ? blocksToNow : 0;
 
-  const blocksTotal = dayZero.data ? dayZero.data.block + increment : 0;
+  const blocksTotal = dayZero.data?.result
+    ? Number(dayZero.data.result.blockNumber) + increment
+    : 0;
   const blocksLatestWeek =
-    blocksTotal && week.data?.block ? blocksTotal - week.data.block : 0;
+    blocksTotal && week.data?.result
+      ? blocksTotal - Number(week.data.result.blockNumber)
+      : 0;
   const blocksLatestMonth =
-    blocksTotal && month.data?.block ? blocksTotal - month.data.block : 0;
+    blocksTotal && month.data?.result
+      ? blocksTotal - Number(month.data.result.blockNumber)
+      : 0;
+
+  console.log('blockwhaat', blocksLatestWeek);
 
   return {
     isFetching,

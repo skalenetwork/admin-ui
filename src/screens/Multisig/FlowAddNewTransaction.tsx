@@ -242,7 +242,6 @@ export function FlowAddNewTransaction({
         ...form[1].getValues(),
       };
       onSubmit(data);
-      console.log('handleFinalSubmit', data);
       toggleAlert(id)(false);
     },
     [form],
@@ -267,7 +266,6 @@ export function FlowAddNewTransaction({
         {
           onSubmit: form[0].handleSubmit(
             (data) => {
-              console.log(data);
               setStep((step) => step + 1);
               return data;
             },
