@@ -135,11 +135,11 @@ main.inspect section .grid > *:not(.grid)[data-s='-1']:after {
 }
 
 .negative {
-  @apply bg-red-400 text-white;
+  @apply bg-[var(--red10)] text-white;
 }
 
 .positive {
-  @apply bg-green-400 text-white;
+  @apply bg-[var(--green10)] text-white;
 }
 
 svg {

@@ -1,5 +1,6 @@
 import { Transition } from '@headlessui/react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
+import { Cross1Icon } from '@radix-ui/react-icons';
 import { Fragment, useCallback } from 'react';
 import { tw } from 'twind';
 
@@ -69,23 +70,28 @@ export default function AlertDialog({
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
               )}
             >
-              <AlertDialogPrimitive.Title className="mb-4 text-center text-2xl font-medium text-[var(--black)]">
-                {title}
+              <AlertDialogPrimitive.Title className="my-2 text-center font-semibold text-[var(--black)]">
+                <h4>{title}</h4>
               </AlertDialogPrimitive.Title>
-              <AlertDialogPrimitive.Description className="mt-2 text-sm font-normal text-[var(--black)]">
-                {description}
+              <AlertDialogPrimitive.Description className="my-2 font-normal text-[var(--black)]">
+                <p className="text-sm">{description}</p>
               </AlertDialogPrimitive.Description>
-              <div className="mt-4 flex justify-end space-x-2">
-                <button className="btn btn-wide" onClick={handleAction}>
+              <AlertDialogPrimitive.Cancel
+                className={tw(
+                  'absolute top-4 right-5 inline-flex items-center justify-center rounded-full',
+                  'focus:outline-none focus-visible:ring focus-visible:ring-[var(--primary)] focus-visible:ring-opacity-75',
+                )}
+              >
+                <div className="text-[var(--gray10)]">
+                  <Cross1Icon />
+                </div>
+              </AlertDialogPrimitive.Cancel>
+              <div className="mt-4 flex justify-end space-x-2 w-full">
+                <button className="btn w-1/2" onClick={handleAction}>
                   Yes
                 </button>
                 <AlertDialogPrimitive.Cancel
-                  className={tw(
-                    'btn inline-flex select-none justify-center rounded-md px-4 py-2 text-sm font-medium',
-                    'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 hover:dark:bg-gray-600',
-                    'border border-gray-300 dark:border-transparent',
-                    'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
-                  )}
+                  className={'btn btn-outline w-1/2'}
                 >
                   Cancel
                 </AlertDialogPrimitive.Cancel>

@@ -97,7 +97,7 @@ export const WidgetConfigFcd = ({
       tooltip={'Peep Peeep'}
     >
       <div className="flex h-full flex-col justify-between">
-        <p className="text-[var(--slate9)]">
+        <p className="text-[var(--gray9)]">
           Authorization to deploy contracts on the chain is removed.
           <br />
           Anybody can deploy contracts on the chain!
@@ -158,7 +158,7 @@ export const WidgetConfigMtm = ({
       tooltip={'Peep Peeep'}
     >
       <div className="flex h-full flex-col justify-between">
-        <p className="text-[var(--slate9)]">
+        <p className="text-[var(--gray9)]">
           Allows accounts to send multiple transactions with incremental nonces
           per block
         </p>
@@ -225,7 +225,7 @@ export const WidgetManageChainlist = () => {
       }
     >
       <div className="flex h-full flex-col justify-between">
-        <p className="text-[var(--slate9)]">
+        <p className="text-[var(--gray9)]">
           Chainlist.wtf provides users appropriate Chain ID and Network ID to
           connect to their wallets and Web3 middleware providers.
         </p>
@@ -275,7 +275,7 @@ export const WidgetManageMetadata = () => {
       }
     >
       <div className="flex h-full flex-col justify-between">
-        <p className="text-[var(--slate9)]">
+        <p className="text-[var(--gray9)]">
           Submit metadata to display in the SKALE network UI
         </p>
         <center>
@@ -333,7 +333,7 @@ export default function ChainManager() {
         <div data-id="to_autodeploy" data-s="2">
           <Card full heading="Set Auto Deployment in IMA">
             <div className="flex h-full flex-col justify-between">
-              <p className="text-[var(--slate9)]">
+              <p className="text-[var(--gray9)]">
                 SKALE Chain automatic deployment manager
               </p>
               <center>

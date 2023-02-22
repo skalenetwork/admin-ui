@@ -66,11 +66,11 @@
   }
 
   .btn.negative {
-    @apply bg-[var(--red8)];
+    @apply bg-[var(--red10)];
   }
 
   .btn.positive {
-    @apply bg-[var(--green8)];
+    @apply bg-[var(--green10)];
   }
 
   fieldset > * {
