@@ -47,7 +47,7 @@ export default function AlertDialog({
           >
             <AlertDialogPrimitive.Overlay
               forceMount
-              className="fixed inset-0 z-20 bg-[var(--blackA11)]"
+              className="fixed inset-0 top-0 bottom-0 z-20 grid place-items-center overflow-y-auto bg-[var(--blackA10)] backdrop-blur-sm"
             />
           </Transition.Child>
           <Transition.Child
@@ -66,7 +66,7 @@ export default function AlertDialog({
                 'flex flex-col items-center justify-start p-16 first-letter:gap-4',
                 'w-[95vw] max-w-xl rounded-lg p-4 md:w-full',
                 'top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]',
-                'border-[1px] border-[var(--gray3)] bg-[var(--white)]',
+                'border bg-[var(--white)]',
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
               )}
             >

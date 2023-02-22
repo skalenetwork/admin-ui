@@ -52,7 +52,7 @@ const Dialog = ({
           >
             <DialogPrimitive.Overlay
               forceMount
-              className="fixed inset-0 top-0 bottom-0 z-20 grid place-items-center overflow-y-auto bg-[var(--blackA11)]"
+              className="fixed inset-0 top-0 bottom-0 z-20 grid place-items-center overflow-y-auto bg-[var(--blackA10)] backdrop-blur-sm"
             />
           </Transition.Child>
           <Transition.Child
@@ -72,7 +72,7 @@ const Dialog = ({
                 'flex flex-col justify-start first-letter:gap-4',
                 'max-h-[96vh] w-max min-w-[600px] max-w-[80vw] rounded-lg',
                 'top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]',
-                'bg-[var(--white)] text-[var(--black)]',
+                'border bg-[var(--white)] text-[var(--black)]',
                 'focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75',
               )}
             >
