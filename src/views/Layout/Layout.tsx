@@ -56,7 +56,20 @@ export default function Layout() {
         </div>
         <div className="flex items-center gap-4">
           <div className="">
-            <ConnectKitButton />
+            <ConnectKitButton.Custom>
+              {({ isConnected, show, truncatedAddress, ensName }) => {
+                return (
+                  <button
+                    className="bg-gray-50 text-black py-1.5 border px-8 text-sm rounded-full"
+                    onClick={show}
+                  >
+                    {isConnected
+                      ? ensName ?? truncatedAddress
+                      : 'Connect Wallet'}
+                  </button>
+                );
+              }}
+            </ConnectKitButton.Custom>
           </div>
           <a
             target={'_blank'}
