@@ -119,6 +119,13 @@ export const CONTRACT = {
     address: ADDRESS.TOKEN_MANAGER_ERC721_ADDRESS,
     name: 'TokenManagerERC721',
   },
+  TOKEN_MANAGER_ERC721_WITH_METADATA: {
+    network: NETWORK.SKALE,
+    type: 'ima:bridge',
+    key: 'schain:tokenmanager:erc721_with_metadata',
+    address: ADDRESS.TOKEN_MANAGER_ERC721_WITH_METADATA_ADDRESS,
+    name: 'TokenManagerERC721WithMetadata',
+  },
   TOKEN_MANAGER_ERC1155: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
@@ -159,7 +166,7 @@ export const CONTRACT = {
     type: 'ima:bridge',
     key: 'foreign:depositbox:erc721_with_metadata',
     address: mainnetImaUnion['deposit_box_erc721_with_metadata_address'],
-    name: 'DepositBoxERC721',
+    name: 'DepositBoxERC721WithMetadata',
   },
   DEPOSIT_BOX_ERC1155: {
     network: NETWORK.ETHEREUM,

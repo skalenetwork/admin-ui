@@ -183,7 +183,7 @@ export function getSContractProvider<T extends ContractId>(
 ) {
   if (!chain) return;
 
-  const { network: contractNetwork } = CONTRACT[id];
+  const { network: contractNetwork } = CONTRACT[id] || {};
   let chainId;
 
   // verbose for intuition

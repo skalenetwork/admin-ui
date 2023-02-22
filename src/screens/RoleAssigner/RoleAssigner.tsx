@@ -179,7 +179,7 @@ export default function RoleAssigner() {
                     Fill pre-deployed Multisig
                   </button>
                   <button
-                    className="btn btn-outline text-sm"
+                    className="btn btn-outline py-3"
                     onClick={(e) => {
                       e.preventDefault();
                       form.setValue('assigneeAddress', address as string);

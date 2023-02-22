@@ -192,6 +192,16 @@ export function FlowAddNewOwner({
           onSubmit: handleFinalSubmit,
           content: (
             <div>
+              <div className="p-4">
+                <h4>Existing owners</h4>
+                {owners.map((ownerAddress, index) => (
+                  <MultisigOwner key={index} address={ownerAddress} />
+                ))}
+              </div>
+              <div className="p-4">
+                <h4>Adding new owner</h4>
+                <MultisigOwner address={form[0].getValues().ownerAddress} />
+              </div>
               <div className="grid w-full grid-flow-col grid-cols-[min-content_max-content_1fr] grid-rows-2 gap-x-16 text-sm">
                 <p className="font-medium text-[var(--primary)]">Details:</p>
                 <div></div>
@@ -206,10 +216,6 @@ export function FlowAddNewOwner({
                   {form[1].getValues().confirmationCount} out of {owners.length}{' '}
                   Owner(s)
                 </div>
-              </div>
-              <div className="p-4">
-                <h4>Adding new owner</h4>
-                <MultisigOwner address={form[0].getValues().ownerAddress} />
               </div>
             </div>
           ),

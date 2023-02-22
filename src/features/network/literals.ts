@@ -40,6 +40,10 @@ export const TOKEN_STANDARD = {
     name: 'erc721',
     label: 'ERC-721',
   },
+  ERC721_WITH_METADATA: {
+    name: 'erc721_with_metadata',
+    label: 'ERC-721 with Metadata',
+  },
   ERC1155: {
     name: 'erc1155',
     label: 'ERC-1155',

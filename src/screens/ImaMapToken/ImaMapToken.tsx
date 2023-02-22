@@ -257,7 +257,7 @@ export default function ImaMapToken() {
                   (err) => {},
                 )}
               >
-                <p className="font-medium pb-8">Available tokens on origin:</p>
+                <p className="font-medium pb-4">Available tokens on origin:</p>
                 <div className="flex flex-col h-32 overflow-auto ">
                   {originTokens.isFetching || originTokens.isLoading ? (
                     <Prelay>

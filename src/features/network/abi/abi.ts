@@ -32,6 +32,8 @@ export const ABI = {
   MARIONETTE: MarionetteABI,
   TOKEN_MANAGER_ERC20: schainImaUnion['token_manager_erc20_abi'],
   TOKEN_MANAGER_ERC721: schainImaUnion['token_manager_erc721_abi'],
+  TOKEN_MANAGER_ERC721_WITH_METADATA:
+    schainImaUnion['token_manager_erc721_with_metadata_abi'],
   TOKEN_MANAGER_ERC1155: schainImaUnion['token_manager_erc1155_abi'],
   TOKEN_MANAGER_ETH: schainImaUnion['token_manager_eth_abi'],
   TOKEN_MANAGER_LINKER: schainImaUnion['token_manager_linker_abi'],
