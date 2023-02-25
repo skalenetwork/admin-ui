@@ -102,29 +102,27 @@ export const WidgetConfigFcd = ({
           <br />
           Anybody can deploy contracts on the chain!
         </p>
-        {connected && toggle && (
-          <center>
-            <AlertDialog
-              open={alertKey === id}
-              onOpenChange={toggleAlert(id)}
-              trigger={
-                <button className="btn btn-wide w-5/6">
-                  {isEnabled ? 'Disable' : 'Enable'} FCD
-                </button>
-              }
-              title={`${
-                isEnabled ? 'Disable' : 'Enable'
-              } Free Contract Deployment?`}
-              description="Please confirm this action"
-              onAction={async () => {
-                toggle();
-                return {
-                  status: 'success',
-                };
-              }}
-            />
-          </center>
-        )}
+        <center>
+          <AlertDialog
+            open={alertKey === id}
+            onOpenChange={toggleAlert(id)}
+            trigger={
+              <button className="btn btn-wide w-5/6" disabled={!toggle}>
+                {isEnabled ? 'Disable' : 'Enable'} FCD
+              </button>
+            }
+            title={`${
+              isEnabled ? 'Disable' : 'Enable'
+            } Free Contract Deployment?`}
+            description="Please confirm this action"
+            onAction={async () => {
+              toggle?.();
+              return {
+                status: 'success',
+              };
+            }}
+          />
+        </center>
       </div>
     </Card>
   );
@@ -162,13 +160,13 @@ export const WidgetConfigMtm = ({
           Allows accounts to send multiple transactions with incremental nonces
           per block
         </p>
-        {connected && toggle && (
+        {
           <center>
             <AlertDialog
               open={alertKey === id}
               onOpenChange={toggleAlert(id)}
               trigger={
-                <button className="btn btn-wide w-5/6">
+                <button className="btn btn-wide w-5/6" disabled={!toggle}>
                   {isEnabled ? 'Disable' : 'Enable'} MTM
                 </button>
               }
@@ -177,14 +175,14 @@ export const WidgetConfigMtm = ({
               } Multi-transaction mode?`}
               description="Please confirm this action"
               onAction={async () => {
-                toggle();
+                toggle?.();
                 return {
                   status: 'success',
                 };
               }}
             />
           </center>
-        )}
+        }
       </div>
     </Card>
   );

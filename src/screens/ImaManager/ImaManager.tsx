@@ -369,7 +369,7 @@ export default function ImaManager() {
         ) : (
           <Prelay>
             <FunnelIcon className="h-5" />
-            &emsp;No IMA transactions yet!
+            &emsp;No IMA token actions yet!
           </Prelay>
         )}
       </Card>
