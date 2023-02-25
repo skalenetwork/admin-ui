@@ -16,6 +16,7 @@ import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
@@ -68,7 +69,7 @@ const SelectedPeerChainItem = ({
   name: string;
 }) => {
   const { chain } = useNetwork();
-  const { status: connectionStatus } = useChainConnect({
+  const { status: connectionStatus, connect } = useChainConnect({
     chainName: name,
   });
 
@@ -118,7 +119,17 @@ const SelectedPeerChainItem = ({
           <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
           <div className="flex flex-grow items-center">
             {connectionStatus === 'target' ? (
-              <button className="btn btn-outline m-auto w-2/3 rounded-full">
+              <button
+                onClick={() => {
+                  connect?.writeAsync &&
+                    toast.promise(connect.writeAsync(), {
+                      pending: `Accepting request from ${name}`,
+                      success: `Request accepted from ${name}`,
+                      error: `Failed to accept request from ${name}`,
+                    });
+                }}
+                className="btn btn-outline m-auto w-2/3 rounded-full"
+              >
                 Accept request
               </button>
             ) : (
