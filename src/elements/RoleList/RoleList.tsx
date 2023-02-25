@@ -47,8 +47,9 @@ export default function RoleList({}: Props) {
             details.roles.map((role: string) =>
               Promise.all([
                 role,
-                details.contract?.[role]().then((roleHash: string) =>
-                  details.contract?.hasRole(roleHash, account.address),
+                details.contract?.[role]().then(
+                  (roleHash: string) =>
+                    details.contract?.hasRole(roleHash, account.address), // special rules should extend this
                 ),
               ]),
             ),

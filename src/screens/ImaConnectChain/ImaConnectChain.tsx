@@ -42,14 +42,16 @@ export default function ImaConnectChain() {
           disabled={chain?.connect.isLoading}
           value={selectedChainName}
           onValueChange={(value) => setSelectedChainName(value)}
-          className="flex flex-row flex-wrap h-full w-full
+          className="flex flex-row flex-wrap h-auto w-full
       overflow-auto gap-4"
         >
           {chains.map((someChain) => {
             const chain = useChainConnect({
               chainName: someChain.name,
             });
-            return chain.status !== 'none' ||
+            return Boolean(originChain.testnet) !==
+              Boolean(someChain.testnet) ||
+              chain.status !== 'none' ||
               someChain.name === originChain?.name ? (
               <></>
             ) : (
