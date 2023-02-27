@@ -4,7 +4,6 @@ import { MotionConfig } from 'framer-motion';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux/';
 import App from './App';
 import { setup as tailwindSetup } from 'twind';
 
@@ -22,39 +21,11 @@ tailwindSetup({
   darkMode: 'class', // use a different dark mode strategy (default: 'media')
 });
 
-import { chains as skaleChains } from '@/features/network/chains/chains';
-
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
-import {
-  configureChains,
-  createClient,
-  mainnet as ethereumMainnet,
-  WagmiConfig,
-} from 'wagmi';
+import { createClient, WagmiConfig } from 'wagmi';
+import { provider, chains } from './provider';
 
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { usePoolStats } from '@/features/analytics';
-
-// update this when @features/../chains.mainnet is updated
-const chains = [
-  ethereumMainnet,
-  ...Object.values(skaleChains.staging),
-  ...Object.values(skaleChains.mainnet),
-];
-
-const { provider } = configureChains(chains, [
-  jsonRpcProvider({
-    rpc: (chain) => {
-      return chain?.rpcUrls
-        ? {
-            http: chain.rpcUrls.default.http[0],
-          }
-        : null;
-    },
-  }),
-]);
-
-const alchemyId = 'wee';
+const alchemyId = 'alchemy_id';
 const wagmiClient = createClient(
   getDefaultClient({
     appName: 'SKALE Admin UI',

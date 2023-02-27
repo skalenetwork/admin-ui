@@ -1,3 +1,4 @@
+import { useAsyncFn } from 'react-use';
 import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
 /**
  * @namespace Network
@@ -199,17 +200,29 @@ export function getSContractProvider<T extends ContractId>(
     return;
   }
 
-  return getProvider({
+  const provider = getProvider({
     chainId,
   });
+
+  return provider;
 }
 
 export function useSContractProvider<T extends ContractId>({ id }: { id: T }) {
   const { chain, chains } = useNetwork();
-  return getSContractProvider(id, {
+  const provider = getSContractProvider(id, {
     chain,
     chains,
   });
+  const network = useAsyncFn(async () => {
+    return provider?.getNetwork();
+  });
+  const { data: signer } = useSigner({
+    chainId: network[0].value?.chainId,
+  });
+  return {
+    provider,
+    signer,
+  };
 }
 
 /**
@@ -232,12 +245,13 @@ export function useSContract<
   const { address } = CONTRACT[id] || {};
   const abi = ABI[id];
 
-  const provider = useSContractProvider({ id });
+  const { provider, signer } = useSContractProvider({ id });
+  id === 'MULTISIG_WALLET' && console.log('MULTISIG_WALLET:provider', provider);
 
   const contract = useContract({
     address,
     abi,
-    signerOrProvider: provider,
+    signerOrProvider: signer || provider,
   });
 
   const mutate = () => {};
@@ -350,6 +364,7 @@ export function useSContractWrite<
 /**
  * Use wagmi:useContractWrites compatible typed interfaces for any network supported contract by preset ID
  * @description Fetches a list of contracts, for a single, prefer useTypedContract
+ * @todo refactor to getSContractProvider() when it's stable
  * @param param0
  * @returns
  */
@@ -413,13 +428,13 @@ export function useSContracts<T extends ContractIdWithAbi>({
  */
 export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
   const { chain } = useNetwork();
-  const {
-    data: signer,
-    isError: signerIsError,
-    isLoading: signerIsLoading,
-  } = useSigner();
+  // const {
+  //   data: signer,
+  //   isError: signerIsError,
+  //   isLoading: signerIsLoading,
+  // } = useSigner();
   const { address } = useAccount();
-  const provider = useSContractProvider({ id });
+  const { provider, signer } = useSContractProvider({ id });
 
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 

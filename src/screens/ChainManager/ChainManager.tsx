@@ -315,7 +315,7 @@ export default function ChainManager() {
             toggleAlert={toggleAlert}
           />
         </div>
-        <div data-id="fs_reserve_space" data-s="1">
+        <div data-id="fs_reserve_space" data-s="2">
           <FileStorageReserve
             id="fs_reserve_space"
             alertKey={alertKey}

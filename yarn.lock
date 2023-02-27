@@ -1763,6 +1763,15 @@
     "@skaleproject/utils" "*"
     ethers "^5.7.2"
 
+"@skaleproject/multisig-wallet@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@skaleproject/multisig-wallet/-/multisig-wallet-0.4.1.tgz#021c14acd2287d4dcbfd5f723e614f2f8c61617a"
+  integrity sha512-tU6OJqmc97JiG4wjgXHuOTPVtizfaGESDw0aefAyJnjKrc6y8etdPrRGrTPdWPUyaFeiOwVtvNY+eny1Xk/gJA==
+  dependencies:
+    "@skaleproject/constants" "*"
+    "@skaleproject/utils" "*"
+    ethers "^5.7.2"
+
 "@skaleproject/skale.js@^0.2.1":
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/@skaleproject/skale.js/-/skale.js-0.2.1.tgz#ecf20f0be91ed290af69fdf213b793f9c2dd8818"

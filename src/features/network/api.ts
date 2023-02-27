@@ -15,7 +15,7 @@ import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/To
 import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
-import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
+import { MultisigWallet } from '@skaleproject/multisig-wallet/lib/contract';
 import { Signer, Wallet } from 'ethers';
 import { Address, Chain } from 'wagmi';
 
@@ -40,12 +40,16 @@ function buildApi<R, U>(
   ApiClass: Class<R, U>,
   args: (params: ArgProps) => ConstructorParameters<Class<R, U>>,
 ) {
+  console.log(`Building API ${ApiClass} | args:`, args);
   return (props: ArgProps): R => {
     const passable = args(props);
     return new ApiClass(...passable);
   };
 }
 
+/**
+ * Maps ContractId to their API's argument-less "instantiators", NOT "instances"
+ */
 export const API = {
   CONFIG_CONTROLLER: buildApi(
     ConfigController,

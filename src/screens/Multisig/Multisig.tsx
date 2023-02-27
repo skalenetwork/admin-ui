@@ -159,7 +159,10 @@ export default function Multisig() {
     mutationFn:
       multisigApi &&
       ((payload: NewOwner) => {
-        return contract.contract?.addOwner(payload.ownerAddress as Address);
+        return contract.contract.addOwner(payload.ownerAddress as Address);
+        // return multisigApi.addOwner({
+        //   address: payload.ownerAddress,
+        // });
       }),
   });
 
