@@ -73,7 +73,7 @@ const SelectedPeerChainItem = ({
   className: string;
   name: string;
 }) => {
-  const { chain } = useNetwork();
+  const { chain, chains } = useNetwork();
   const { status: connectionStatus, connect } = useChainConnect({
     chainName: name,
   });
@@ -90,23 +90,26 @@ const SelectedPeerChainItem = ({
     }
   }, [alertKey]);
 
-  const { api } = useTokenManager({
-    standard: 'ERC20',
-    network: NETWORK.SKALE,
+  const selectedOriginChain = chains.find((c) => c.name === name);
+
+  const { api: tokenManager } = useTokenManager({
+    standard: standardName.toUpperCase(),
+    network: selectedOriginChain?.network,
   });
 
-  console.log('wtf', api);
+  // @todo implement
 
-  const { data } = useQuery({
-    enabled: Boolean(api?.api),
-    queryKey: ['asdjakjsd'],
+  const { data: tokenMappings } = useQuery({
+    enabled: Boolean(tokenManager?.api),
+    queryKey: ['CUSTOM:tokenMappings'],
     queryFn: () => {
-      console.log('wtf', api);
-      return api?.api.getTokenMappingsLength(name);
+      console.log('tokenManager', tokenManager);
+      return tokenManager?.api?.getTokenMappingsLength
+        ? tokenManager.api.getTokenMappingsLength()
+        : null;
     },
   });
-
-  console.log('token mappings?', data);
+  false && console.log('token mappings?', tokenMappings);
 
   // const contractId =
   //   selectedStandard &&
@@ -192,7 +195,7 @@ const SelectedPeerChainItem = ({
                       actionElement: ({ className }) => (
                         <Link
                           className={`${className}`}
-                          to={`token_map/${name}?standard=${selectedStandard?.name}`}
+                          to={`token_map/${name}?t=${chain?.id}&standard=${selectedStandard?.name}`}
                         >
                           Add new {selectedStandard?.label} token
                         </Link>

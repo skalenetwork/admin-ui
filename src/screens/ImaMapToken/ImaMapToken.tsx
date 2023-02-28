@@ -15,11 +15,23 @@ import { tw } from 'twind';
 import { Tabs } from '@/components/Tabs/Tabs';
 import { useTokenManager } from '@/features/bridge';
 import * as addresses from '@/features/network/address';
-import { CaretLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { useContract, useNetwork, useProvider, useQuery } from 'wagmi';
+import {
+  CaretLeftIcon,
+  CheckCircledIcon,
+  ExclamationTriangleIcon,
+} from '@radix-ui/react-icons';
+import {
+  Address,
+  useAccount,
+  useContract,
+  useNetwork,
+  useProvider,
+  useSigner,
+  useSwitchNetwork,
+} from 'wagmi';
 
 import imaAbi from '@/features/network/abi/abi-ima.union';
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
 
@@ -66,11 +78,20 @@ const SubmitButtonPair = ({
   );
 };
 
+type Token = { address: string; name: string };
+
 export default function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
 
-  const provider = useProvider();
+  const { chain: activeChain, chains } = useNetwork();
+  const account = useAccount();
+
+  const targetChainId = Number(searchParam.get('t'));
+  const targetChain = chains.find((c) => c.id === targetChainId);
+
+  const { data: signer } = useSigner();
+  const targetChainProvider = useProvider({ chainId: targetChainId });
 
   const standard = (
     searchParam.get('standard') || ''
@@ -78,9 +99,11 @@ export default function ImaMapToken() {
   const key = `${standard}OnChain_abi` as const;
   const tokenAbi = imaAbi[key];
 
-  const { chain: targetChain, chains } = useNetwork();
   const originChain = chains.find((c) => c.name === chainName);
   const originIsForeign = originChain?.network !== NETWORK.SKALE;
+
+  const handleOrigin = useSwitchNetwork({ chainId: originChain?.id });
+  const handleTarget = useSwitchNetwork({ chainId: targetChain?.id });
 
   const [originTokens] = useExplorer(
     [
@@ -100,12 +123,28 @@ export default function ImaMapToken() {
     },
   );
 
-  const { contract: tokenManager } = useTokenManager({
+  const ethereumTokens = useQuery({
+    enabled: originIsForeign,
+    queryKey: ['CUSTOM:ethereumTokens', 'name,address', 75],
+    initialData: () => [],
+    queryFn: async () => {
+      return fetch('https://tokens.coingecko.com/ethereum/all.json')
+        .then((res) => res.json())
+        .then((result: { tokens: Token[] }) => {
+          return result.tokens.slice(0, 75).map((token) => ({
+            name: token.name,
+            address: token.address,
+          }));
+        });
+    },
+  });
+
+  const { api: tokenManagerApi, contract: tokenManager } = useTokenManager({
     standard,
     network: originChain?.network,
   });
 
-  const originTokensFiltered: { address: string; name: string }[] =
+  const originTokensFiltered: Token[] =
     originTokens.isSuccess && originTokens?.data?.result
       ? originTokens.data.result
           .filter((c) => {
@@ -127,6 +166,10 @@ export default function ImaMapToken() {
             name: c.ContractName,
           }))
       : [];
+
+  const tokensFiltered = originIsForeign
+    ? ethereumTokens
+    : { ...originTokens, data: originTokensFiltered };
 
   type OriginTokenData = {
     originContractAddress: string;
@@ -183,7 +226,8 @@ export default function ImaMapToken() {
     address: form[1].getFieldState('cloneContractAddress').invalid
       ? ''
       : cloneContractAddress,
-    signerOrProvider: provider,
+    signerOrProvider:
+      activeChain?.id === targetChainId ? signer : targetChainProvider,
   });
 
   const roleHashesQuery = useQueries({
@@ -217,9 +261,36 @@ export default function ImaMapToken() {
     ],
   });
 
+  const MINTER_ROLE = roleHashesQuery[0].data;
+  const BURNER_ROLE = roleHashesQuery[1].data;
+
+  const { data: tmHasMinterRole } = useQuery({
+    enabled: Boolean(MINTER_ROLE && tokenManager),
+    queryFn: async () => {
+      return clonedContractForRoles?.hasRole
+        ? clonedContractForRoles.hasRole(
+            MINTER_ROLE as Address,
+            tokenManager.address,
+          )
+        : false;
+    },
+  });
+
+  const { data: tmHasBurnerRole } = useQuery({
+    enabled: Boolean(BURNER_ROLE && tokenManager),
+    queryFn: async () => {
+      return clonedContractForRoles?.hasRole
+        ? clonedContractForRoles.hasRole(
+            BURNER_ROLE as Address,
+            tokenManager.address,
+          )
+        : false;
+    },
+  });
+
   const clonedContractInfo = useQuery({
     enabled: !!clonedContractForRoles,
-    queryKey: [`CUSTOM:${clonedContractForRoles?.address}`, 'constuctor_data'],
+    queryKey: [`CUSTOM:${clonedContractForRoles?.address}`, 'constructor_data'],
     queryFn: async () => {
       const symbol = await clonedContractForRoles?.symbol();
       const name = await clonedContractForRoles?.name();
@@ -231,16 +302,6 @@ export default function ImaMapToken() {
       };
     },
   });
-
-  const MINTER_ROLE = roleHashesQuery.data?.[0];
-  const BURNER_ROLE = roleHashesQuery.data?.[1];
-
-  console.log(
-    'clonedContractData',
-    clonedContractInfo,
-    MINTER_ROLE,
-    BURNER_ROLE,
-  );
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
     ? [
@@ -258,14 +319,14 @@ export default function ImaMapToken() {
                 )}
               >
                 <p className="font-medium pb-4">Available tokens on origin:</p>
-                <div className="flex flex-col h-32 overflow-auto ">
-                  {originTokens.isFetching || originTokens.isLoading ? (
+                <div className="flex flex-col h-36 overflow-auto ">
+                  {tokensFiltered.isFetching || tokensFiltered.isLoading ? (
                     <Prelay>
                       <span className="animate-bounce px-2">ʕ￫ᴥ￩ʔ</span>{' '}
                       Holdon... Bera fetching alot of tokens!
                     </Prelay>
                   ) : (
-                    [...originTokensFiltered].map((token) => (
+                    tokensFiltered.data.map((token) => (
                       <button
                         key={token.address}
                         className={tw(
@@ -392,18 +453,13 @@ export default function ImaMapToken() {
                             </p>
                           </fieldset>
                         </div>
-                        {!(
-                          roleHashesQuery[0].isError ||
-                          roleHashesQuery[1].isError ||
-                          MINTER_ROLE === '' ||
-                          BURNER_ROLE === ''
-                        ) &&
+                        {!Boolean(MINTER_ROLE && BURNER_ROLE) &&
                           clonedContractForRoles?.address && (
-                            <p className="text-sm">
+                            <p className="text-sm text-center">
                               <span className="text-[var(--red10)]">
                                 <ExclamationTriangleIcon />
                               </span>{' '}
-                              Be sure to use Open zeppelin access control
+                              Contract is not using Open zeppelin access control{' '}
                             </p>
                           )}
                         <SubmitButtonPair
@@ -475,18 +531,6 @@ export default function ImaMapToken() {
               <form
                 onSubmit={form[2].handleSubmit(
                   async (data) => {
-                    false &&
-                      MINTER_ROLE &&
-                      (await clonedContractForRoles?.grantRole(
-                        MINTER_ROLE,
-                        tokenManagerAddress,
-                      ));
-                    false &&
-                      BURNER_ROLE &&
-                      (await clonedContractForRoles?.grantRole(
-                        BURNER_ROLE,
-                        tokenManagerAddress,
-                      ));
                     stepNext();
                   },
                   (err) => {},
@@ -497,42 +541,69 @@ export default function ImaMapToken() {
                     tooltip="Burn & Mint permissions to cloned token"
                     heading={
                       <div className="flex justify-between items-center">
-                        <h4 className="inline">Authorize Token Manager</h4>{' '}
+                        <h4 className="inline">Authorize Token Manager</h4> {}
                         <span
-                          className={`text-sm text-[var(${
-                            true ? '--gray10' : '--green10'
+                          className={tw`text-sm text-[var(${
+                            !tmHasBurnerRole || !tmHasMinterRole
+                              ? '--gray10'
+                              : '--green10'
                           })]`}
                         >
-                          Not assigned to token manager
+                          {!tmHasBurnerRole || !tmHasMinterRole ? (
+                            'Not assigned to token manager'
+                          ) : (
+                            <CheckCircledIcon />
+                          )}
                         </span>
                       </div>
                     }
                     className="bg-[var(--slate1)] w-full"
                   >
-                    <p className="text-sm text-[var(--blue10)]">
-                      Please assign minter and burner roles to the TokenManager{' '}
-                    </p>
-                    <div className="grid grid-cols-[1fr_max-content] mt-4 gap-4">
-                      <Field<PermissionData>
-                        control={() => <input type="text"></input>}
-                        name="tokenManagerRoleAddress"
-                        label="TokenManager Address"
-                        placeholder="0x..."
-                        required={`Fill address for relevant token manager on ${targetChain?.name}`}
-                        pattern={{
-                          value: /^0x[a-fA-F0-9]{40}$/,
-                          message: 'Address is invalid',
-                        }}
-                      />
-                      <div className="my-6 flex flex-row">
-                        <button
-                          className="btn btn-outline py-3"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          Re-assign roles
-                        </button>
-                      </div>
-                    </div>
+                    {tmHasBurnerRole && tmHasMinterRole ? (
+                      <>Minting and burning permissions are set correctly</>
+                    ) : (
+                      <>
+                        <p className="text-sm text-[var(--blue10)]">
+                          Please assign minter and burner roles to the
+                          TokenManager{' '}
+                        </p>
+                        <div className="grid grid-cols-[1fr_max-content] mt-4 gap-4">
+                          <Field<PermissionData>
+                            control={() => <input type="text"></input>}
+                            name="tokenManagerRoleAddress"
+                            label="TokenManager Address"
+                            placeholder="0x..."
+                            required={`Fill address for relevant token manager on ${targetChain?.name}`}
+                            pattern={{
+                              value: /^0x[a-fA-F0-9]{40}$/,
+                              message: 'Address is invalid',
+                            }}
+                          />
+                          <div className="my-6 flex flex-row">
+                            <button
+                              className="btn btn-outline py-3"
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                MINTER_ROLE &&
+                                  !tmHasMinterRole &&
+                                  (await clonedContractForRoles?.grantRole(
+                                    MINTER_ROLE,
+                                    tokenManager.address,
+                                  ));
+                                BURNER_ROLE &&
+                                  !tmHasBurnerRole &&
+                                  (await clonedContractForRoles?.grantRole(
+                                    BURNER_ROLE,
+                                    tokenManager.address,
+                                  ));
+                              }}
+                            >
+                              Re-assign roles
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </Card>
                   <SubmitButtonPair
                     text="Next"
@@ -549,8 +620,19 @@ export default function ImaMapToken() {
           label: `Confirm mapping`,
           content: ({ stepPrev, stepNext }) => (
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                await tokenManagerApi.api?.addTokenByOwner(
+                  originChain?.network === NETWORK.ETHEREUM
+                    ? 'Mainnet'
+                    : originChain?.name,
+                  form[0].getValues('originContractAddress'),
+                  form[1].getValues('cloneContractAddress'),
+                  {
+                    address: account.address,
+                  },
+                );
+                stepNext();
               }}
             >
               <div className="w-1/2 m-auto flex h-full flex-col justify-center gap-4">
@@ -589,11 +671,84 @@ export default function ImaMapToken() {
       ]
     : [];
 
+  // @todo close
+  const mainnetStep: Parameters<typeof Stepper>[0]['steps'][number] = {
+    id: 'register-ethereum',
+    label: `Register on ${originChain?.name}`,
+    content: ({ stepPrev, stepNext }) => (
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            // @todo split actions
+            await handleOrigin.switchNetworkAsync?.();
+            console.log('tokenManagerApi', tokenManagerApi);
+            const addTokenByOwnerResponse =
+              false &&
+              (await tokenManagerApi.api?.addTokenByOwner(
+                targetChain?.name,
+                form[0].getValues('originContractAddress'),
+                {
+                  address: account.address,
+                },
+              ));
+          } catch (e) {
+            console.error('tokenManagerApi tokenByOwner', e);
+            // handle error
+          }
+          await handleTarget.switchNetworkAsync?.();
+          stepNext();
+        }}
+      >
+        <div className="w-1/2 m-auto flex h-full flex-col justify-center gap-4">
+          <p className="font-medium">
+            Register {standard} token on {originChain?.name}:
+          </p>
+          <fieldset className="w-full">
+            <label htmlFor="" className="text-xs">
+              Origin token on{' '}
+              <span className="font-semibold">{originChain?.name}</span>
+            </label>
+            <input
+              type="text"
+              readOnly
+              value={form[0].getValues('originContractAddress')}
+            />
+          </fieldset>
+          {activeChain?.id !== targetChain?.id && (
+            <p className="text-sm">
+              Registration is a round trip from {originChain?.name}, you have
+              started it. <br />
+              <br />
+              <span className="text-[var(--yellow11)] animate-pulse">
+                <ExclamationTriangleIcon />
+              </span>{' '}
+              Do not navigate. Approve pending actions from your wallet.
+              <br></br>
+            </p>
+          )}
+          <SubmitButtonPair
+            text="Confirm"
+            stepPrev={async () => {
+              await handleTarget.switchNetworkAsync?.();
+              stepPrev();
+            }}
+            stepNext={stepNext}
+          />
+        </div>
+      </form>
+    ),
+  };
+
   return standard ? (
     <div className="grid h-full w-full rounded-lg bg-[var(--white)]">
       <Card full heading={`Add ${standard} with ${chainName}`}>
         <Stepper
-          steps={steps}
+          steps={
+            !originIsForeign
+              ? steps
+              : [...steps.slice(0, 3), mainnetStep, ...steps.slice(3)]
+          }
           className="h-full grid grid-rows-[max-content_1fr]"
           bodyClass="flex flex-col h-full w-5/6 m-auto flex-wrap"
         />

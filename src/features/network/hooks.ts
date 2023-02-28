@@ -134,14 +134,6 @@ export function useEvents<
     }),
   });
 
-  // eventNames.map((eventName) => {
-  //   const filter = contract?.filters[eventName]();
-  //   contract?.on({ ...filter, fromBlock, toBlock }, (event) => {
-  //     console.log(events);
-  //     setStreamEvents((events) => [...events, event]);
-  //   });
-  // });
-
   return {
     pastEvents,
     streamEvents,
@@ -188,14 +180,16 @@ export function getSContractProvider<T extends ContractId>(
   let chainId;
 
   // verbose for intuition
-
-  if (chain.network === NETWORK.SKALE) {
+  if (contractNetwork === NETWORK.ETHEREUM) {
+    chainId = chains.find((c) => chain.network === NETWORK.ETHEREUM)?.id;
+  } else if (chain.network === NETWORK.SKALE) {
     if (contractNetwork === NETWORK.SKALE) {
       chainId = chain.id;
     } else {
       chainId = chains.find((c) => chain.network === c.network)?.id;
     }
   } else if (chain.network === NETWORK.ETHEREUM) {
+    chainId = chains.find((c) => chain.network === NETWORK.ETHEREUM)?.id;
   } else {
     return;
   }
@@ -246,7 +240,6 @@ export function useSContract<
   const abi = ABI[id];
 
   const { provider, signer } = useSContractProvider({ id });
-  id === 'MULTISIG_WALLET' && console.log('MULTISIG_WALLET:provider', provider);
 
   const contract = useContract({
     address,
@@ -349,8 +342,6 @@ export function useSContractWrite<
     address: address as Address,
     functionName: name,
   };
-
-  console.log('useWrite', id, args);
 
   const { config } = usePrepareContractWrite(args);
 

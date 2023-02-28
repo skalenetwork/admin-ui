@@ -102,8 +102,6 @@ export function useBlockHistory({
       ? blocksTotal - Number(month.data.result.blockNumber)
       : 0;
 
-  console.log('blockwhaat', blocksLatestWeek);
-
   return {
     isFetching,
     data: {

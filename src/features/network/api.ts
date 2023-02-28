@@ -40,7 +40,6 @@ function buildApi<R, U>(
   ApiClass: Class<R, U>,
   args: (params: ArgProps) => ConstructorParameters<Class<R, U>>,
 ) {
-  console.log(`Building API ${ApiClass} | args:`, args);
   return (props: ArgProps): R => {
     const passable = args(props);
     return new ApiClass(...passable);
@@ -145,7 +144,8 @@ export function getApi<I extends keyof typeof API>(
   const abi = contractId ? ABI[contractId] : undefined;
   const contract = contractId ? CONTRACT[contractId] : undefined;
   if (!(contract ?? abi)) {
-    throw `getApi: id=${contractId} is invalid`;
+    console.error(`getApi: id=${contractId} is invalid`);
+    return;
   }
   try {
     // @ts-ignore
@@ -157,10 +157,10 @@ export function getApi<I extends keyof typeof API>(
       provider,
       signer,
     };
-    console.log('api', abi, address, chain, provider, signer);
+    false && console.log('api', abi, address, chain, provider, signer);
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
     console.error(e);
-    throw 'getApi: ' + e;
+    return;
   }
 }

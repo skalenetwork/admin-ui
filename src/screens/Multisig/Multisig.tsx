@@ -123,8 +123,6 @@ export default function Multisig() {
   const activeWalletAddress =
     allWallets[0]?.address || CONTRACT['MULTISIG_WALLET'].address;
 
-  console.log('allWallets', allWallets);
-
   const contractKey = CONTRACT['MULTISIG_WALLET'].key;
 
   const { chain } = useNetwork();
@@ -230,7 +228,7 @@ export default function Multisig() {
             wallets={allWallets.map((wallet) => wallet.address)}
             active={activeWalletAddress}
             onActiveChange={(val) => {
-              console.log('wallettt', val);
+              // @todo switch wallet of state
             }}
           />
           <FlowAddNewWallet
