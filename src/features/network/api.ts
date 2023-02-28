@@ -15,7 +15,7 @@ import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/To
 import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
-import { MultisigWallet } from '@skaleproject/multisig-wallet/lib/contract';
+import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
 import { Signer, Wallet } from 'ethers';
 import { Address, Chain } from 'wagmi';
 
