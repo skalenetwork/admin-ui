@@ -1,3 +1,4 @@
+import { useSContractApi } from '@/features/network/hooks';
 /**
  * @namespace Bridge
  * @module BridgeHooks
@@ -19,6 +20,7 @@ import { toSentenceCase } from '../../utils';
 
 type TokenTypeProps<S> = {
   standard: S;
+  network: typeof NETWORK.ETHEREUM | typeof NETWORK.SKALE;
 };
 
 const standards = Object.values(TOKEN_STANDARD);
@@ -27,17 +29,24 @@ type TokenStandard = Uppercase<(typeof standards)[number]['name']>;
 
 export function useTokenManager<T extends TokenStandard>({
   standard,
+  network,
 }: TokenTypeProps<T>) {
-  const id = `TOKEN_MANAGER_${standard}` as const;
-  return useSContract({ id });
+  const prefix = network === NETWORK.SKALE ? 'TOKEN_MANAGER' : 'DEPOSIT_BOX';
+  const id = `${prefix}_${standard}` as const;
+  return {
+    contract: useSContract({ id }),
+    api: useSContractApi({ id }),
+  };
 }
 
 export function useToggleAutodeploy<T extends TokenStandard>({
   standard,
 }: TokenTypeProps<T>) {
-  const { address, abi } = useTokenManager({
+  const { contract } = useTokenManager({
     standard: standard as typeof standard,
+    network: NETWORK.SKALE,
   });
+  const { address, abi } = contract;
 
   const { data: flags, refetch } = useSContractReads(
     `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20',

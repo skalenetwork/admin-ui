@@ -61,5 +61,3 @@ export type ContractIdWithAbi = keyof typeof ABI;
 export function getAbi<T extends ContractId>(id: T): (typeof ABI)[T] {
   return ABI[id] as (typeof ABI)[T];
 }
-
-////

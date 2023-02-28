@@ -1,3 +1,5 @@
+import { useExplorer } from '@/features/network/hooks';
+import { NETWORK } from './../network/literals';
 /**
  * @namespace Multisig
  * @module MultisigHooks
@@ -15,13 +17,72 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
-import { useBalance, useContractRead } from 'wagmi';
+import { useBalance, useContractRead, useNetwork } from 'wagmi';
 import { scope } from './core';
 
 const multisigContract = {
   address: getSContractProp('MULTISIG_WALLET', 'address'),
   abi: getAbi('MULTISIG_WALLET'),
 };
+
+function liteEncodeAbiFunctions(abi) {
+  return abi
+    .filter((a) => a.type === 'function')
+    .map((i) => `${i.name};${i.inputs?.length};${i.outputs?.length}`);
+}
+
+export function useFetchMultisigs(): {
+  data: { name: string; address: Address }[];
+} {
+  const { chain } = useNetwork();
+
+  if (chain?.network !== NETWORK.SKALE) {
+    return { data: [] };
+  }
+
+  const [deployedContracts] = useExplorer(
+    [
+      {
+        module: 'contract',
+        action: 'listcontracts',
+        args: {
+          page: '1',
+          offset: '200',
+          filter: 'verified',
+        },
+      },
+    ],
+    {
+      enabled: Boolean(chain),
+      chainId: chain?.id,
+    },
+  );
+
+  const multisigContracts =
+    deployedContracts.isSuccess && deployedContracts?.data?.result
+      ? deployedContracts.data.result
+          .filter((c) => {
+            const matchable = liteEncodeAbiFunctions(JSON.parse(c['ABI']));
+            const wildcard = liteEncodeAbiFunctions(getAbi('MULTISIG_WALLET'));
+            const abiOverlap = matchable.filter((func) =>
+              wildcard.includes(func),
+            ).length;
+            const ratio = abiOverlap / wildcard.length;
+            return (
+              ratio === 1 ||
+              multisigContract.address.toLowerCase() === c.Address.toLowerCase()
+            );
+          })
+          .map((c: { Address: string; ContractName: string }) => ({
+            address: ethers.utils.getAddress(c.Address),
+            name: c.ContractName,
+          }))
+      : [];
+
+  return {
+    data: multisigContracts,
+  };
+}
 
 export function useMultisig({
   address = multisigContract.address,

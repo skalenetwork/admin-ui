@@ -100,10 +100,10 @@ export default function ImaMapToken() {
     },
   );
 
-  const { contract: tokenManager, address: tokenManagerAddress } =
-    useTokenManager({
-      standard,
-    });
+  const { contract: tokenManager } = useTokenManager({
+    standard,
+    network: originChain?.network,
+  });
 
   const originTokensFiltered: { address: string; name: string }[] =
     originTokens.isSuccess && originTokens?.data?.result
@@ -171,7 +171,7 @@ export default function ImaMapToken() {
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
-        tokenManagerRoleAddress: tokenManagerAddress,
+        tokenManagerRoleAddress: tokenManager.address,
       },
     }),
   ] as const;

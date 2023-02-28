@@ -1,12 +1,11 @@
-import { ethers } from 'ethers';
-import { useCallback, useState } from 'react';
-import { Address, useNetwork } from 'wagmi';
-
 import Card from '@/components/Card/Card';
 import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useMultisig } from '@/features/multisig/hooks';
-import { addresses } from '@/features/network';
+import { useFetchMultisigs, useMultisig } from '@/features/multisig/hooks';
+import { ethers } from 'ethers';
+import { useCallback, useState } from 'react';
+import { useLocalStorage } from 'react-use';
+import { Address, useNetwork } from 'wagmi';
 
 import { PeopleIcon } from '@/components/Icons/Icons';
 import { CONTRACT } from '@/features/network/contract';
@@ -118,14 +117,13 @@ export function WalletSelect({
   );
 }
 
-function withToast() {}
-
 export default function Multisig() {
   // @todo: get from higher context:: multisigs+owners and filter those where signer is owner
-  const signerWallets = [
-    addresses.SCHAIN_MULTISIG_WALLET_ADDRESS as `0x${string}`,
-  ];
-  const activeWalletAddress = signerWallets[0];
+  const { data: allWallets } = useFetchMultisigs();
+  const activeWalletAddress =
+    allWallets[0]?.address || CONTRACT['MULTISIG_WALLET'].address;
+
+  console.log('allWallets', allWallets);
 
   const contractKey = CONTRACT['MULTISIG_WALLET'].key;
 
@@ -154,12 +152,27 @@ export default function Multisig() {
     events,
   } = data;
 
+  const [cachedOwners, setCachedOwners] = useLocalStorage(
+    `SKL_MULTISIG_OWNERS:${activeWalletAddress}`,
+    {},
+  );
+
   const addOwner = useMutation({
     mutationKey: queryKey([contractKey, 'addOwner']),
     mutationFn:
       multisigApi &&
-      ((payload: NewOwner) => {
-        return contract.contract.addOwner(payload.ownerAddress as Address);
+      (async (payload: NewOwner) => {
+        const txResponse = await contract.contract.addOwner(
+          payload.ownerAddress as Address,
+        );
+        setCachedOwners({
+          ...cachedOwners,
+          [payload.ownerAddress]: {
+            address: payload.ownerAddress,
+            name: payload.ownerName,
+          },
+        });
+        return txResponse;
         // return multisigApi.addOwner({
         //   address: payload.ownerAddress,
         // });
@@ -214,9 +227,11 @@ export default function Multisig() {
       <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
         <div className="flex h-full w-full items-center gap-2">
           <WalletSelect
-            wallets={signerWallets}
+            wallets={allWallets.map((wallet) => wallet.address)}
             active={activeWalletAddress}
-            onActiveChange={(val) => console.log}
+            onActiveChange={(val) => {
+              console.log('wallettt', val);
+            }}
           />
           <FlowAddNewWallet
             alertKey={alertKey}
@@ -340,6 +355,7 @@ export default function Multisig() {
               owners.data.map((address, i) => (
                 <MultisigOwner
                   key={address}
+                  name={(cachedOwners || {})[address]?.name}
                   address={address}
                   showControls={true}
                 />

@@ -2,7 +2,11 @@ import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useChainConnect, useHistory } from '@/features/bridge';
+import {
+  useChainConnect,
+  useHistory,
+  useTokenManager,
+} from '@/features/bridge';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -12,6 +16,7 @@ import {
   CaretLeftIcon,
   ChevronRightIcon,
 } from '@radix-ui/react-icons';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -84,6 +89,24 @@ const SelectedPeerChainItem = ({
       window.setTimeout(() => setStandardName(''), 500);
     }
   }, [alertKey]);
+
+  const { api } = useTokenManager({
+    standard: 'ERC20',
+    network: NETWORK.SKALE,
+  });
+
+  console.log('wtf', api);
+
+  const { data } = useQuery({
+    enabled: Boolean(api?.api),
+    queryKey: ['asdjakjsd'],
+    queryFn: () => {
+      console.log('wtf', api);
+      return api?.api.getTokenMappingsLength(name);
+    },
+  });
+
+  console.log('token mappings?', data);
 
   // const contractId =
   //   selectedStandard &&

@@ -75,7 +75,12 @@ export const API = {
   ),
   TOKEN_MANAGER_ERC20: buildApi(
     TokenManagerERC20,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, chain, signer, provider }) => [
+      provider,
+      address,
+      abi,
+      CONTRACT.TOKEN_MANAGER_ERC20.name,
+    ],
   ),
   TOKEN_MANAGER_ERC721: buildApi(
     TokenManagerERC721,
@@ -99,11 +104,15 @@ export const API = {
     address,
     abi,
   ]),
-  DEPOSIT_BOX_ERC20: buildApi(DepositBoxERC20, ({ address, abi, chain }) => [
-    { eth: {} },
-    address,
-    abi,
-  ]),
+  DEPOSIT_BOX_ERC20: buildApi(
+    DepositBoxERC20,
+    ({ address, abi, chain, signer, provider }) => [
+      provider,
+      address,
+      abi,
+      CONTRACT.DEPOSIT_BOX_ERC20.name,
+    ],
+  ),
   DEPOSIT_BOX_ERC721: buildApi(DepositBoxERC721, ({ address, abi, chain }) => [
     { eth: {} },
     address,
@@ -148,8 +157,10 @@ export function getApi<I extends keyof typeof API>(
       provider,
       signer,
     };
+    console.log('api', abi, address, chain, provider, signer);
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
+    console.error(e);
     throw 'getApi: ' + e;
   }
 }
