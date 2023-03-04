@@ -15,7 +15,7 @@ import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/To
 import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
 import { ConfigController } from '@skaleproject/config-controller/lib/contract';
-import { MultisigWallet } from '@skaleproject/multisig-wallet/lib';
+import { InjectedMultisigWallet } from '@skaleproject/multisig-wallet/lib';
 import { Signer, Wallet } from 'ethers';
 import { Address, Chain } from 'wagmi';
 
@@ -27,7 +27,23 @@ type ArgProps = {
   chain: Chain;
   address: Address;
   abi: any;
+  name: string;
 };
+
+// for audit
+// console.log(
+//         '\ntokenManager::audit',
+//         '\nprovider',
+//         provider,
+//         '\nsigner:',
+//         signer,
+//         '\nsigner.provider',
+//         signer?.provider,
+//         '\nsigner.provider instanceof Web3Provider?',
+//         signer?.provider instanceof ethers.providers.Web3Provider,
+//         '\nsigner.provider.getSigner !== undefined',
+//         signer?.provider?.getSigner !== undefined,
+//       );
 
 /**
  * Utility class instantiator
@@ -62,68 +78,56 @@ export const API = {
     ],
   ),
   MULTISIG_WALLET: buildApi(
-    MultisigWallet,
-    ({ address, abi, chain, signer }) => [
+    InjectedMultisigWallet,
+    ({ address, abi, signer }) => [
       {
         address,
         abi,
-        rpcUrl: chain.rpcUrls?.default?.http[0],
         signer: signer as Wallet,
       },
     ],
   ),
   TOKEN_MANAGER_ERC20: buildApi(
     TokenManagerERC20,
-    ({ address, abi, chain, signer, provider }) => [
-      provider,
-      address,
-      abi,
-      CONTRACT.TOKEN_MANAGER_ERC20.name,
-    ],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
   TOKEN_MANAGER_ERC721: buildApi(
     TokenManagerERC721,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
   TOKEN_MANAGER_ERC1155: buildApi(
     TokenManagerERC1155,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
-  TOKEN_MANAGER_ETH: buildApi(TokenManagerEth, ({ address, abi, chain }) => [
-    { eth: {} },
-    address,
-    abi,
-  ]),
+  TOKEN_MANAGER_ETH: buildApi(
+    TokenManagerEth,
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
+  ),
   TOKEN_MANAGER_LINKER: buildApi(
     TokenManagerLinker,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
-  DEPOSIT_BOX_ETH: buildApi(DepositBoxEth, ({ address, abi, chain }) => [
-    { eth: {} },
+  DEPOSIT_BOX_ETH: buildApi(DepositBoxEth, ({ address, abi, signer, name }) => [
+    signer?.provider,
     address,
     abi,
+    name,
   ]),
   DEPOSIT_BOX_ERC20: buildApi(
     DepositBoxERC20,
-    ({ address, abi, chain, signer, provider }) => [
-      provider,
-      address,
-      abi,
-      CONTRACT.DEPOSIT_BOX_ERC20.name,
-    ],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
-  DEPOSIT_BOX_ERC721: buildApi(DepositBoxERC721, ({ address, abi, chain }) => [
-    { eth: {} },
-    address,
-    abi,
-  ]),
+  DEPOSIT_BOX_ERC721: buildApi(
+    DepositBoxERC721,
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
+  ),
   DEPOSIT_BOX_ERC721_WITH_METADATA: buildApi(
     DepositBoxERC721,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
   DEPOSIT_BOX_ERC1155: buildApi(
     DepositBoxERC1155,
-    ({ address, abi, chain }) => [{ eth: {} }, address, abi],
+    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
   ),
 } satisfies {
   [key in keyof typeof CONTRACT & keyof typeof ABI]?: ReturnType<
@@ -149,15 +153,16 @@ export function getApi<I extends keyof typeof API>(
   }
   try {
     // @ts-ignore
-    const { address } = contract;
+    const { address, name } = contract;
     const props = {
       abi,
       address,
       chain,
       provider,
       signer,
+      name,
     };
-    false && console.log('api', abi, address, chain, provider, signer);
+    console.log('[getApi]', props);
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
     console.error(e);
