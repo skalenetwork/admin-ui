@@ -140,7 +140,91 @@ export function useEvents<
   };
 }
 
-export function useRoles({ address }: { address: Address }) {}
+export function useSContractRoles<T extends ContractId>(id: T) {
+  const { address } = useAccount();
+  const abi = getAbi(id);
+
+  console.log('useRoles:abi', abi);
+
+  const roles = (abi || [])
+    .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
+    .map((fragment) => fragment.name) as string[];
+
+  console.log('useRoles:roles', roles);
+
+  const roleHash = useSContractReads(id, {
+    reads: roles.map((role) => ({
+      name: role,
+    })),
+  });
+  const ofSigner = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'hasRole',
+          args: [role, address],
+        }))
+      : [],
+  });
+  const ofMarionette = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'hasRole',
+          args: [role, CONTRACT.MARIONETTE.address],
+        }))
+      : [],
+  });
+  const roleAdmin = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'getRoleAdmin',
+          args: [role],
+        }))
+      : [],
+  });
+
+  const data: {
+    name: string;
+    hash?: Address;
+    adminAddress?: Address;
+    permissions: {
+      marionette?: boolean;
+      signer?: boolean;
+    };
+  }[] = roles.map((role, index) => ({
+    name: role,
+    hash: roleHash.data?.[index] as Address,
+    adminAddress: roleAdmin.data?.[index] as Address,
+    permissions: {
+      marionette: ofMarionette.data?.[index] as boolean,
+      signer: ofSigner.data?.[index] as boolean,
+    },
+  }));
+
+  console.log(
+    'useRoles:data',
+    data,
+    'roleHash',
+    roleHash,
+    'ofSigner',
+    ofSigner,
+    'ofMarionette',
+    ofMarionette,
+    'roleAdmin',
+    roleAdmin,
+  );
+
+  return {
+    isLoading:
+      roleHash.isLoading &&
+      ofSigner.isLoading &&
+      ofMarionette.isLoading &&
+      roleAdmin.isLoading,
+    data,
+  };
+}
 
 export function useChainMetadata({
   networkType,
@@ -300,7 +384,7 @@ export function useSContractReads<
       ...oneRead,
     };
   });
-
+  console.log('useSContractReads', params);
   const response = useContractReads({
     ...params,
     contracts,

@@ -162,7 +162,7 @@ export function getApi<I extends keyof typeof API>(
       signer,
       name,
     };
-    console.log('[getApi]', props);
+    false && console.log('[getApi]', props);
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
     console.error(e);
