@@ -50,9 +50,18 @@ export function FlowAddNewOwner({
     }),
   ] as const;
 
+  // const addOwner = useSContractWrite('MULTISIG_WALLET', {
+  //   name: 'addOwner',
+  //   args: [form[0].watch('ownerAddress') as `0x{string}`],
+  //   overrides: {
+  //     gasLimit: BigNumber.from(375000),
+  //   },
+  // });
+
   const handleFinalSubmit = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
+      // await addOwner.writeAsync?.();
       const data = {
         ...form[0].getValues(),
         ...form[1].getValues(),

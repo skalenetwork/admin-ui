@@ -1,6 +1,6 @@
 import { CheckIcon } from '@radix-ui/react-icons';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { tw } from 'twind';
 
@@ -10,6 +10,7 @@ type Step = {
   content: (props: {
     stepNext: () => void;
     stepPrev: () => void;
+    markComplete: () => void;
   }) => JSX.Element | React.ReactNode;
 };
 
@@ -17,11 +18,13 @@ type Trigger = Pick<Step, 'id' | 'label'> & {
   index: number;
   activeIndex: number;
   totalSteps: number;
+  complete: boolean;
 };
 
 type Props = {
   className?: string;
   steps: Step[];
+  completeElement: JSX.Element;
   trigger?: (props: Trigger) => JSX.Element;
   bodyClass?: string;
 };
@@ -32,11 +35,12 @@ export function StepperTrigger({
   index,
   activeIndex,
   totalSteps,
+  complete,
 }: Trigger) {
   return (
     <div
       className="group py-4"
-      data-state={index === activeIndex ? 'active' : 'inactive'}
+      data-state={index === activeIndex || complete ? 'active' : 'inactive'}
     >
       <div className="px-8 py-2 text-sm text-[var(--gray10)] group-radix-state-active:text-[var(--black)]">
         {index + 1}. {label}
@@ -47,7 +51,7 @@ export function StepperTrigger({
             className={tw(
               'h-0.5',
               'bg-[var(--gray3)]',
-              index <= activeIndex && 'bg-[var(--primary)]',
+              (index <= activeIndex || complete) && 'bg-[var(--primary)]',
             )}
           ></div>
         ) : (
@@ -58,10 +62,10 @@ export function StepperTrigger({
             'flex h-6 w-6 items-center justify-center',
             'rounded-[50%]',
             'group-radix-state-active:shadow-[0_0_0_4px_var(--gray3)]',
-            index < activeIndex && 'bg-[var(--primary)]',
+            (index < activeIndex || complete) && 'bg-[var(--primary)]',
           )}
         >
-          {index < activeIndex ? (
+          {index < activeIndex || complete ? (
             <CheckIcon className="h-5 w-5 text-white" />
           ) : (
             <div
@@ -78,7 +82,7 @@ export function StepperTrigger({
             className={tw(
               'h-0.5',
               'bg-[var(--gray3)]',
-              index < activeIndex && 'bg-[var(--primary)]',
+              (index < activeIndex || complete) && 'bg-[var(--primary)]',
             )}
           ></div>
         ) : (
@@ -93,9 +97,11 @@ export default function Stepper({
   className = '',
   steps,
   trigger = StepperTrigger,
+  completeElement,
   bodyClass = '',
 }: Props) {
   const [activeId, setActiveId] = useState('');
+  const [complete, setComplete] = useState(false);
 
   // replace with a comparative effect if steps
   // are async or to change dynamically
@@ -119,6 +125,10 @@ export default function Stepper({
     }
   }, [activeIndex, steps]);
 
+  useEffect(() => {
+    complete === true && setActiveId('__complete');
+  }, [complete]);
+
   return (
     <TabsPrimitive.Root
       className={`${className}`}
@@ -133,6 +143,7 @@ export default function Stepper({
             index,
             activeIndex,
             totalSteps: steps.length,
+            complete,
           }),
         )}
       </TabsPrimitive.List>
@@ -142,9 +153,13 @@ export default function Stepper({
             {content({
               stepNext,
               stepPrev,
+              markComplete: () => setComplete(true),
             })}
           </TabsPrimitive.Content>
         ))}
+        <TabsPrimitive.Content value={'__complete'} asChild>
+          {completeElement}
+        </TabsPrimitive.Content>
       </div>
     </TabsPrimitive.Root>
   );

@@ -10,7 +10,7 @@ import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
 import Prelay from '@/screens/Prelay';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { tw } from 'twind';
 
 import { Tabs } from '@/components/Tabs/Tabs';
@@ -689,7 +689,7 @@ export default function ImaMapToken() {
         {
           id: 'map-token',
           label: `Confirm mapping`,
-          content: ({ stepPrev, stepNext }) => (
+          content: ({ stepPrev, stepNext, markComplete }) => (
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -703,7 +703,7 @@ export default function ImaMapToken() {
                     address: account.address,
                   },
                 );
-                stepNext();
+                markComplete();
               }}
             >
               <div className="w-1/2 m-auto flex h-full flex-col justify-center gap-4">
@@ -743,7 +743,6 @@ export default function ImaMapToken() {
       ]
     : [];
 
-  // @todo close
   const mainnetStep: Parameters<typeof Stepper>[0]['steps'][number] = {
     id: 'register-ethereum',
     label: `Register on ${originChain?.name}`,
@@ -792,7 +791,7 @@ export default function ImaMapToken() {
                 <ExclamationTriangleIcon />
               </span>{' '}
               Do not navigate. Approve pending actions from your wallet.
-              <br></br>
+              <bvr></bvr>
             </p>
           )}
           <SubmitButtonPair
@@ -817,6 +816,27 @@ export default function ImaMapToken() {
             !originIsForeign
               ? steps
               : [...steps.slice(0, 3), mainnetStep, ...steps.slice(3)]
+          }
+          completeElement={
+            <div className="w-1/2 m-auto flex h-full flex-col justify-center gap-4">
+              <h3 className="text-[#B16F0A] text-center">
+                You have finished mapping your token!
+              </h3>
+              <div className="flex flex-col gap-4 justify-center items-center">
+                <Link className="btn text-center w-64" to="/ima_manager">
+                  Map another token
+                </Link>
+                <Link
+                  className="btn text-center w-64"
+                  to="/ima_manager/connect"
+                >
+                  Connect a new chain
+                </Link>
+                <Link className="btn text-center w-64" to="/">
+                  Go to dashboard
+                </Link>
+              </div>
+            </div>
           }
           className="h-full grid grid-rows-[max-content_1fr]"
           bodyClass="flex flex-col h-full w-5/6 m-auto flex-wrap"

@@ -144,13 +144,9 @@ export function useSContractRoles<T extends ContractId>(id: T) {
   const { address } = useAccount();
   const abi = getAbi(id);
 
-  console.log('useRoles:abi', abi);
-
   const roles = (abi || [])
     .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
     .map((fragment) => fragment.name) as string[];
-
-  console.log('useRoles:roles', roles);
 
   const roleHash = useSContractReads(id, {
     reads: roles.map((role) => ({
@@ -203,18 +199,19 @@ export function useSContractRoles<T extends ContractId>(id: T) {
     },
   }));
 
-  console.log(
-    'useRoles:data',
-    data,
-    'roleHash',
-    roleHash,
-    'ofSigner',
-    ofSigner,
-    'ofMarionette',
-    ofMarionette,
-    'roleAdmin',
-    roleAdmin,
-  );
+  false &&
+    console.log(
+      'useRoles:data',
+      data,
+      'roleHash',
+      roleHash,
+      'ofSigner',
+      ofSigner,
+      'ofMarionette',
+      ofMarionette,
+      'roleAdmin',
+      roleAdmin,
+    );
 
   return {
     isLoading:
@@ -384,7 +381,6 @@ export function useSContractReads<
       ...oneRead,
     };
   });
-  console.log('useSContractReads', params);
   const response = useContractReads({
     ...params,
     contracts,

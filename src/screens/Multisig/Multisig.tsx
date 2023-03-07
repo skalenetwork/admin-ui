@@ -2,12 +2,11 @@ import Card from '@/components/Card/Card';
 import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useFetchMultisigs, useMultisig } from '@/features/multisig/hooks';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from 'react-use';
-import { Address, useNetwork } from 'wagmi';
+import { useNetwork } from 'wagmi';
 
-import { PeopleIcon } from '@/components/Icons/Icons';
 import { CONTRACT } from '@/features/network/contract';
 import { NETWORK } from '@/features/network/literals';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
@@ -162,6 +161,9 @@ export default function Multisig() {
       (async (payload: NewOwner) => {
         const txResponse = await contract.contract.addOwner(
           payload.ownerAddress as Address,
+          {
+            gasLimit: BigNumber.from(375000),
+          },
         );
         setCachedOwners({
           ...cachedOwners,
