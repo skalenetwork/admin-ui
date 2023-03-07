@@ -3,8 +3,9 @@ import Stepper from '@/components/Stepper/Stepper';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { ABI } from '@/features/network/abi/abi';
+import ERC20Standard from '@/features/network/abi/erc20-standard.json';
 import { CONTRACT } from '@/features/network/contract';
-import { useExplorer } from '@/features/network/hooks';
+import { useExplorer, useSContractWrite } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
 import Prelay from '@/screens/Prelay';
@@ -25,13 +26,17 @@ import {
   useAccount,
   useContract,
   useNetwork,
+  usePrepareSendTransaction,
   useProvider,
+  useSendTransaction,
   useSigner,
   useSwitchNetwork,
 } from 'wagmi';
 
 import imaAbi from '@/features/network/abi/abi-ima.union';
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { BigNumber, ethers } from 'ethers';
+import { useEffect, useMemo } from 'react';
 
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
 
@@ -53,7 +58,9 @@ const SubmitButtonPair = ({
   stepPrev,
   stepNext,
   text = 'Submit',
+  isReady = false,
 }: {
+  isReady: boolean;
   stepPrev?: () => void;
   stepNext?: () => void;
   text?: string;
@@ -71,7 +78,7 @@ const SubmitButtonPair = ({
           <CaretLeftIcon />
         </button>
       )}
-      <button className="btn" type="submit">
+      <button className="btn" type="submit" disabled={false}>
         {text}
       </button>
     </div>
@@ -118,7 +125,7 @@ export default function ImaMapToken() {
       },
     ],
     {
-      enabled: Boolean(originChain),
+      enabled: Boolean(originChain && originChain.network === NETWORK.SKALE),
       chainId: originChain?.id,
     },
   );
@@ -221,7 +228,7 @@ export default function ImaMapToken() {
 
   const cloneContractAddress = form[1].watch('cloneContractAddress');
 
-  const clonedContractForRoles = useContract({
+  const targetContract = useContract({
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
     address: form[1].getFieldState('cloneContractAddress').invalid
       ? ''
@@ -233,28 +240,20 @@ export default function ImaMapToken() {
   const roleHashesQuery = useQueries({
     queries: [
       {
-        enabled: !!clonedContractForRoles?.address,
-        queryKey: [
-          `CUSTOM:${clonedContractForRoles?.address}`,
-          'role',
-          'MINTER_ROLE',
-        ],
+        enabled: !!targetContract?.address,
+        queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'MINTER_ROLE'],
         queryFn: async () => {
-          return clonedContractForRoles?.MINTER_ROLE
-            ? await clonedContractForRoles?.MINTER_ROLE?.()
+          return targetContract?.MINTER_ROLE
+            ? await targetContract?.MINTER_ROLE?.()
             : '';
         },
       },
       {
-        enabled: !!clonedContractForRoles?.address,
-        queryKey: [
-          `CUSTOM:${clonedContractForRoles?.address}`,
-          'role',
-          'BURNER_ROLE',
-        ],
+        enabled: !!targetContract?.address,
+        queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'BURNER_ROLE'],
         queryFn: async () => {
-          return clonedContractForRoles?.BURNER_ROLE
-            ? await clonedContractForRoles?.BURNER_ROLE?.()
+          return targetContract?.BURNER_ROLE
+            ? await targetContract?.BURNER_ROLE?.()
             : '';
         },
       },
@@ -264,43 +263,81 @@ export default function ImaMapToken() {
   const MINTER_ROLE = roleHashesQuery[0].data;
   const BURNER_ROLE = roleHashesQuery[1].data;
 
-  const { data: tmHasMinterRole } = useQuery({
+  const tmHasMinterRole = useQuery({
     enabled: Boolean(MINTER_ROLE && tokenManager),
     queryFn: async () => {
-      return clonedContractForRoles?.hasRole
-        ? clonedContractForRoles.hasRole(
-            MINTER_ROLE as Address,
-            tokenManager.address,
-          )
+      return targetContract?.hasRole
+        ? targetContract.hasRole(MINTER_ROLE as Address, tokenManager.address)
         : false;
     },
   });
 
-  const { data: tmHasBurnerRole } = useQuery({
+  const tmHasBurnerRole = useQuery({
     enabled: Boolean(BURNER_ROLE && tokenManager),
     queryFn: async () => {
-      return clonedContractForRoles?.hasRole
-        ? clonedContractForRoles.hasRole(
-            BURNER_ROLE as Address,
-            tokenManager.address,
-          )
+      return targetContract?.hasRole
+        ? targetContract.hasRole(BURNER_ROLE as Address, tokenManager.address)
         : false;
     },
   });
 
-  const clonedContractInfo = useQuery({
-    enabled: !!clonedContractForRoles,
-    queryKey: [`CUSTOM:${clonedContractForRoles?.address}`, 'constructor_data'],
+  const targetContractInfo = useQuery({
+    enabled: Boolean(
+      targetContract && !form[1].getFieldState('cloneContractAddress').invalid,
+    ),
+    queryKey: [`CUSTOM:${targetContract?.address}`, 'constructor_data'],
     queryFn: async () => {
-      const symbol = await clonedContractForRoles?.symbol();
-      const name = await clonedContractForRoles?.name();
-      const decimals = await clonedContractForRoles?.decimals();
+      const symbol = await targetContract?.symbol();
+      const name = await targetContract?.name();
+      const decimals = await targetContract?.decimals();
       return {
         symbol,
         name,
         decimals,
       };
     },
+  });
+
+  const name = form[2].watch('name');
+  const symbol = form[2].watch('symbol');
+  const decimals = form[2].watch('decimals');
+
+  const constructorParams = useMemo(() => {
+    return !(name && symbol && decimals)
+      ? ''
+      : ethers.utils.defaultAbiCoder.encode(
+          ['string', 'string', 'uint256'],
+          [name, symbol, BigNumber.from(decimals)],
+        );
+  }, [name, symbol, decimals]);
+
+  const { address } = useAccount();
+
+  const toBeDeployedData = ERC20Standard.bytecode + constructorParams;
+
+  const { config } = usePrepareSendTransaction({
+    request: {
+      gasLimit: 1500000,
+      data: toBeDeployedData,
+      value: 0,
+      from: address,
+      to: addresses.ZERO_ADDRESS,
+      gasPrice: 100000, // default value on Schain
+    },
+  });
+  const deployment = useSendTransaction(config);
+
+  useEffect(() => {
+    deployment.isSuccess &&
+      deployment.data?.wait().then((confirmedTx) => {
+        confirmedTx.contractAddress &&
+          form[1].setValue('cloneContractAddress', confirmedTx.contractAddress);
+      });
+  }, [deployment.isSuccess]);
+
+  const registerMainnetToken = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
+    name: `add${standard}TokenByOwner`,
+    args: [targetChain?.name, form[0].getValues('originContractAddress')],
   });
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
@@ -342,6 +379,7 @@ export default function ImaMapToken() {
                             'originContractAddress',
                             token.address,
                           );
+                          form[0].trigger('originContractAddress');
                         }}
                       >
                         <NiceAddress
@@ -369,7 +407,11 @@ export default function ImaMapToken() {
                     message: 'Address is invalid',
                   }}
                 />
-                <SubmitButtonPair stepNext={stepNext} text="Next" />
+                <SubmitButtonPair
+                  isReady={form[0].formState.isValid}
+                  stepNext={stepNext}
+                  text="Next"
+                />
               </form>
             </FormProvider>
           ),
@@ -414,31 +456,31 @@ export default function ImaMapToken() {
                           />
                           <fieldset
                             className={
-                              clonedContractInfo.isLoading
+                              targetContractInfo.isFetching
                                 ? 'animate-pulse'
                                 : ''
                             }
                           >
                             <label htmlFor="">Contract symbol</label>
                             <p className="input-like">
-                              {clonedContractInfo.data?.symbol}
+                              {targetContractInfo.data?.symbol}
                             </p>
                           </fieldset>
                           <fieldset
                             className={
-                              clonedContractInfo.isLoading
+                              targetContractInfo.isFetching
                                 ? 'animate-pulse'
                                 : ''
                             }
                           >
                             <label htmlFor="">Contract name</label>
                             <p className="input-like">
-                              {clonedContractInfo?.data?.name}
+                              {targetContractInfo?.data?.name}
                             </p>
                           </fieldset>
                           <fieldset
                             className={
-                              clonedContractInfo.isLoading
+                              targetContractInfo.isFetching
                                 ? 'animate-pulse'
                                 : ''
                             }
@@ -449,20 +491,35 @@ export default function ImaMapToken() {
                               contentEditable="false"
                               aria-readonly={true}
                             >
-                              {clonedContractInfo.data?.decimals}
+                              {targetContractInfo.data?.decimals}
                             </p>
                           </fieldset>
                         </div>
-                        {!Boolean(MINTER_ROLE && BURNER_ROLE) &&
-                          clonedContractForRoles?.address && (
+                        {Boolean(targetContractInfo.isLoading) ? (
+                          <></>
+                        ) : Boolean(targetContractInfo.isError) ? (
+                          <p className="text-sm text-center">
+                            <span className="text-[var(--red10)]">
+                              <ExclamationTriangleIcon />
+                            </span>{' '}
+                            Address does not belong to a contract.
+                          </p>
+                        ) : (
+                          !Boolean(MINTER_ROLE && BURNER_ROLE) &&
+                          targetContractInfo.isSuccess && (
                             <p className="text-sm text-center">
                               <span className="text-[var(--red10)]">
                                 <ExclamationTriangleIcon />
                               </span>{' '}
                               Contract is not using Open zeppelin access control{' '}
                             </p>
-                          )}
+                          )
+                        )}
                         <SubmitButtonPair
+                          isReady={
+                            targetContractInfo.isSuccess &&
+                            Boolean(MINTER_ROLE && BURNER_ROLE)
+                          }
                           text="Next"
                           stepPrev={stepPrev}
                           stepNext={stepNext}
@@ -479,9 +536,16 @@ export default function ImaMapToken() {
                     <FormProvider {...form[2]}>
                       <form
                         onSubmit={form[2].handleSubmit(
-                          (data) => {
+                          async (data) => {
                             //@todo impl deploy default contract, then enable following with returned address
-                            // form[1].setValue('cloneContractAddress', addres);
+                            const response =
+                              await deployment.sendTransactionAsync?.();
+                            const receipt = await response?.wait();
+                            receipt &&
+                              form[1].setValue(
+                                'cloneContractAddress',
+                                receipt.contractAddress,
+                              );
                             stepNext();
                           },
                           (err) => {},
@@ -510,6 +574,10 @@ export default function ImaMapToken() {
                             required="Contract decimals are required"
                           />
                           <SubmitButtonPair
+                            isReady={
+                              form[2].formState.isValid &&
+                              Boolean(deployment.sendTransactionAsync)
+                            }
                             text="Deploy Contract"
                             stepPrev={stepPrev}
                             stepNext={stepNext}
@@ -544,12 +612,12 @@ export default function ImaMapToken() {
                         <h4 className="inline">Authorize Token Manager</h4> {}
                         <span
                           className={tw`text-sm text-[var(${
-                            !tmHasBurnerRole || !tmHasMinterRole
+                            !tmHasBurnerRole.data || !tmHasMinterRole.data
                               ? '--gray10'
                               : '--green10'
                           })]`}
                         >
-                          {!tmHasBurnerRole || !tmHasMinterRole ? (
+                          {!tmHasBurnerRole.data || !tmHasMinterRole.data ? (
                             'Not assigned to token manager'
                           ) : (
                             <CheckCircledIcon />
@@ -559,7 +627,7 @@ export default function ImaMapToken() {
                     }
                     className="bg-[var(--slate1)] w-full"
                   >
-                    {tmHasBurnerRole && tmHasMinterRole ? (
+                    {tmHasBurnerRole.data && tmHasMinterRole.data ? (
                       <>Minting and burning permissions are set correctly</>
                     ) : (
                       <>
@@ -585,14 +653,14 @@ export default function ImaMapToken() {
                               onClick={async (e) => {
                                 e.preventDefault();
                                 MINTER_ROLE &&
-                                  !tmHasMinterRole &&
-                                  (await clonedContractForRoles?.grantRole(
+                                  !tmHasMinterRole.data &&
+                                  (await targetContract?.grantRole(
                                     MINTER_ROLE,
                                     tokenManager.address,
                                   ));
                                 BURNER_ROLE &&
-                                  !tmHasBurnerRole &&
-                                  (await clonedContractForRoles?.grantRole(
+                                  !tmHasBurnerRole.data &&
+                                  (await targetContract?.grantRole(
                                     BURNER_ROLE,
                                     tokenManager.address,
                                   ));
@@ -606,6 +674,9 @@ export default function ImaMapToken() {
                     )}
                   </Card>
                   <SubmitButtonPair
+                    isReady={Boolean(
+                      tmHasBurnerRole.data && tmHasMinterRole.data,
+                    )}
                     text="Next"
                     stepPrev={stepPrev}
                     stepNext={stepNext}
@@ -660,6 +731,7 @@ export default function ImaMapToken() {
                   />
                 </fieldset>
                 <SubmitButtonPair
+                  isReady={true}
                   text="Confirm"
                   stepPrev={stepPrev}
                   stepNext={stepNext}
@@ -680,21 +752,17 @@ export default function ImaMapToken() {
         onSubmit={async (e) => {
           e.preventDefault();
           try {
-            // @todo split actions
             await handleOrigin.switchNetworkAsync?.();
-            console.log('tokenManagerApi', tokenManagerApi);
+            await new Promise((resolve, reject) =>
+              window.setTimeout(() => resolve(0), 4000),
+            );
+            false &&
+              console.log('[audit] tokenManagerApi.api', tokenManagerApi.api);
             const addTokenByOwnerResponse =
-              false &&
-              (await tokenManagerApi.api?.addTokenByOwner(
-                targetChain?.name,
-                form[0].getValues('originContractAddress'),
-                {
-                  address: account.address,
-                },
-              ));
+              await registerMainnetToken.writeAsync?.();
           } catch (e) {
             console.error('tokenManagerApi tokenByOwner', e);
-            // handle error
+            // @todo abort here
           }
           await handleTarget.switchNetworkAsync?.();
           stepNext();
@@ -728,6 +796,7 @@ export default function ImaMapToken() {
             </p>
           )}
           <SubmitButtonPair
+            isReady={registerMainnetToken.isSuccess}
             text="Confirm"
             stepPrev={async () => {
               await handleTarget.switchNetworkAsync?.();
