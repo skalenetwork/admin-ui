@@ -82,11 +82,12 @@ export default function ImaConnectChain() {
         <button
           className="btn btn-wide"
           onClick={() => {
-            debugger;
             handleSubmit();
           }}
           disabled={
-            !selectedChainName || !chain?.connect || chain?.connect.isLoading
+            !selectedChainName ||
+            !chain?.connect?.write ||
+            chain?.connect?.isLoading
           }
         >
           Connect

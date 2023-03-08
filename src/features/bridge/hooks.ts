@@ -1,4 +1,8 @@
-import { useSContractApi } from '@/features/network/hooks';
+import {
+  useSContractApi,
+  useSContractRead,
+  useSContractWrite,
+} from '@/features/network/hooks';
 /**
  * @namespace Bridge
  * @module BridgeHooks
@@ -15,7 +19,7 @@ import {
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { ethers } from 'ethers';
-import { useContractWrite, useNetwork, usePrepareContractWrite } from 'wagmi';
+import { useNetwork } from 'wagmi';
 import { toSentenceCase } from '../../utils';
 
 type TokenTypeProps<S> = {
@@ -42,33 +46,10 @@ export function useTokenManager<T extends TokenStandard>({
 export function useToggleAutodeploy<T extends TokenStandard>({
   standard,
 }: TokenTypeProps<T>) {
-  const { contract } = useTokenManager({
-    standard: standard as typeof standard,
-    network: NETWORK.SKALE,
-  });
-  const { address, abi } = contract;
+  const contractId = `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20';
 
-  const { data: flags, refetch } = useSContractReads(
-    `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20',
-    {
-      reads: [
-        {
-          name: 'automaticDeploy',
-        },
-      ],
-    },
-  );
-
-  const isEnabled = flags?.[0];
-
-  const { config } = usePrepareContractWrite({
-    enabled: isEnabled !== undefined && abi && address,
-    address,
-    abi,
-    functionName: isEnabled
-      ? 'disableAutomaticDeploy'
-      : 'enableAutomaticDeploy',
-    onSuccess: () => refetch(),
+  const autoDeployRead = useSContractRead(contractId, {
+    name: 'automaticDeploy',
   });
 
   const {
@@ -78,10 +59,16 @@ export function useToggleAutodeploy<T extends TokenStandard>({
     isLoading,
     isSuccess,
     write: toggle,
-  } = useContractWrite(config);
+  } = useSContractWrite(contractId, {
+    enabled: autoDeployRead.isSuccess,
+    name: autoDeployRead.data
+      ? 'disableAutomaticDeploy'
+      : 'enableAutomaticDeploy',
+    onSuccess: () => autoDeployRead.refetch(),
+  });
 
   return {
-    isEnabled,
+    isEnabled: autoDeployRead.data,
     toggle,
     data,
     isLoading,
@@ -95,12 +82,7 @@ export function useToggleAutodeploy<T extends TokenStandard>({
  * @param param0
  */
 export function useChainConnect({ chainName }: { chainName: string }) {
-  const { address, abi } = useSContract({
-    id: 'TOKEN_MANAGER_LINKER',
-  });
-
   const { chain: originChain, chains } = useNetwork();
-
   const targetChain = chains.find((chain) => chain.name === chainName);
 
   const { data } = useSContractReads('TOKEN_MANAGER_LINKER', {
@@ -117,24 +99,19 @@ export function useChainConnect({ chainName }: { chainName: string }) {
       },
     ],
   });
-
   const originConnected =
     chainName.toLowerCase() === 'ethereum' ? true : data?.[0];
   const targetConnected =
     chainName.toLowerCase() === 'ethereum' ? true : data?.[1];
 
-  const { config: connectConfig } = usePrepareContractWrite({
-    address,
-    abi,
-    functionName: 'connectSchain',
+  const connect = useSContractWrite('TOKEN_MANAGER_LINKER', {
+    name: 'connectSchain',
     args: [chainName],
     overrides: {
       gasPrice: ethers.BigNumber.from(100000000000),
       gasLimit: ethers.BigNumber.from(8000000),
     },
   });
-
-  const connect = useContractWrite(connectConfig);
 
   const status: ConnectionStatus =
     originConnected === true && targetConnected === true

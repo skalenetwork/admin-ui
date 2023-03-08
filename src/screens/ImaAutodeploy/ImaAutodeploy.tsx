@@ -33,7 +33,7 @@ const SingleConfig = ({
           <button
             className="btn slim negative w-44"
             onClick={() => toggle?.()}
-            disabled={isLoading}
+            disabled={isLoading || !toggle}
           >
             {isLoading ? 'Disabling...' : 'Disable'}
           </button>
@@ -41,7 +41,7 @@ const SingleConfig = ({
           <button
             className="btn slim positive w-44"
             onClick={() => toggle?.()}
-            disabled={isLoading}
+            disabled={isLoading || !toggle}
           >
             {isLoading ? 'Enabling...' : 'Enable'}
           </button>

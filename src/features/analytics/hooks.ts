@@ -3,7 +3,7 @@
  * @module AnalyticsHooks
  */
 
-import { useExplorer, useSContractReads } from '@/features/network/hooks';
+import { useExplorer, useSContractRead } from '@/features/network/hooks';
 import { useMemo } from 'react';
 import { useAccount, useBlockNumber, useNetwork, useProvider } from 'wagmi';
 import { TimedBlocks } from './core/block';
@@ -14,18 +14,14 @@ export function usePoolStats() {
   const { address: walletAddress } = useAccount();
   const { chain } = useNetwork();
 
-  const { data } = useSContractReads('COMMUNITY_POOL', {
-    enabled: Boolean(walletAddress && chain),
-    reads: [
-      {
-        name: 'getBalance',
-        args: [walletAddress, chain?.name],
-      },
-    ],
+  const { data } = useSContractRead('COMMUNITY_POOL', {
+    enabled: !!(walletAddress && chain),
+    name: 'getBalance',
+    args: [walletAddress, chain?.name],
   });
 
   return {
-    walletBalance: data?.[0],
+    walletBalance: data,
   };
 }
 
