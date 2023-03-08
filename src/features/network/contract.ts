@@ -212,6 +212,12 @@ export const SContractEntries = Object.entries(
   CONTRACT,
 ) as Entries<ContractManifest>;
 
+export function getSContractDetails<T extends ContractId>(
+  id: T,
+): ContractDetail<T> {
+  return CONTRACT[id] as ContractDetail<T>;
+}
+
 export function getSContractProp<
   TContractId extends ContractId,
   TProp extends keyof ContractManifest[TContractId],

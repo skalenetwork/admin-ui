@@ -1,13 +1,21 @@
-import { useAsyncFn } from 'react-use';
-import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
 /**
  * @namespace Network
  * @module NetworkHooks
  * @description Low-level hooks for using network contracts, roles, explorers etc.
  */
 
+import { ABI, ContractIdWithAbi, getAbi } from '@/features/network/abi/abi';
 import { API, getApi } from '@/features/network/api';
+import {
+  CONTRACT,
+  ContractDetailList,
+  ContractId,
+  ContractIdByAddress,
+  getSContractDetails,
+} from '@/features/network/contract';
+import { getSContractProvider } from '@/features/network/core';
 import { NETWORK } from '@/features/network/literals';
+import { build } from '@/features/network/manifest';
 import { ChainManifestItem, NetworkType } from '@/features/network/types';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { getContract, getProvider } from '@wagmi/core';
@@ -19,21 +27,19 @@ import {
   ExtractAbiFunction,
 } from 'abitype';
 import { useEffect, useMemo, useState } from 'react';
+import { useAsyncFn } from 'react-use';
 import {
+  Address,
   useAccount,
   useContract,
+  useContractRead,
   useContractReads,
+  useContractWrite,
   useNetwork,
+  usePrepareContractWrite,
   useProvider,
   useSigner,
 } from 'wagmi';
-import { ABI, ContractIdWithAbi, getAbi } from './abi/abi';
-import type {
-  ContractDetailList,
-  ContractId,
-  ContractIdByAddress,
-} from './contract';
-import { build, CONTRACT } from './manifest';
 
 const { chainMetadataUrl } = build;
 
@@ -56,232 +62,10 @@ type ExplorerProps = {
 };
 
 /**
- * Use API of the block explorer as configured by the chain
+ * Retrieve provider and signer for the network contract
  * @param param0
  * @returns
  */
-export function useExplorer(
-  requests: ExplorerProps[],
-  {
-    chainId,
-    enabled,
-  }: {
-    enabled?: boolean;
-    chainId?: number;
-  } = {},
-) {
-  const { chain: currentChain, chains } = useNetwork();
-  const chain = chainId ? chains.find((c) => c.id === chainId) : currentChain;
-  const baseUrl = chain?.blockExplorers?.default.url;
-
-  const queries = requests.map((request: ExplorerProps) => {
-    const { module, action, args } = request;
-    const queryString = new URLSearchParams(args).toString();
-    const url =
-      baseUrl +
-      `api?module=${module}&action=${action}${
-        queryString ? '&' + queryString : ''
-      }`;
-    return {
-      enabled,
-      queryKey: [chain?.id, module, action, args],
-      queryFn: () => fetch(url).then((res) => res.json()),
-      refetchOnWindowFocus: false,
-    };
-  });
-  return useQueries({
-    queries,
-  });
-}
-
-export function useEvents<
-  TAddress extends ContractDetailList['address'],
-  TContractId extends ContractIdByAddress<TAddress>,
-  TAbi extends (typeof ABI)[TContractId],
->({
-  address,
-  fromBlock,
-  toBlock,
-  blockHash,
-  eventNames,
-}: {
-  address: TAddress;
-  fromBlock?: number | string;
-  toBlock?: number | string;
-  blockHash?: string;
-  eventNames: TAddress extends ContractDetailList['address']
-    ? TAbi extends Abi
-      ? ExtractAbiEventNames<TAbi>[]
-      : string[]
-    : string[];
-}) {
-  const contractId = build.contractIdFromAddress(address);
-  const { contract, abi } = useSContract({ id: contractId });
-
-  const [streamEvents, setStreamEvents] = useState([]);
-
-  const pastEvents = useQueries({
-    queries: eventNames.map((eventName) => {
-      return {
-        enabled: Boolean(contract && contract.provider),
-        queryKey: ['logs', address, eventName],
-        queryFn: () => {
-          if (!contract) return [];
-          const filter = contract.filters[eventName]();
-          return contract?.queryFilter(filter, fromBlock, toBlock);
-        },
-      };
-    }),
-  });
-
-  return {
-    pastEvents,
-    streamEvents,
-  };
-}
-
-export function useSContractRoles<T extends ContractId>(id: T) {
-  const { address } = useAccount();
-  const abi = getAbi(id);
-
-  const roles = (abi || [])
-    .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
-    .map((fragment) => fragment.name) as string[];
-
-  const roleHash = useSContractReads(id, {
-    reads: roles.map((role) => ({
-      name: role,
-    })),
-  });
-  const ofSigner = useSContractReads(id, {
-    enabled: roleHash.isSuccess && Boolean(roleHash.data),
-    reads: roleHash.data
-      ? roleHash.data.map((role) => ({
-          name: 'hasRole',
-          args: [role, address],
-        }))
-      : [],
-  });
-  const ofMarionette = useSContractReads(id, {
-    enabled: roleHash.isSuccess && Boolean(roleHash.data),
-    reads: roleHash.data
-      ? roleHash.data.map((role) => ({
-          name: 'hasRole',
-          args: [role, CONTRACT.MARIONETTE.address],
-        }))
-      : [],
-  });
-  const roleAdmin = useSContractReads(id, {
-    enabled: roleHash.isSuccess && Boolean(roleHash.data),
-    reads: roleHash.data
-      ? roleHash.data.map((role) => ({
-          name: 'getRoleAdmin',
-          args: [role],
-        }))
-      : [],
-  });
-
-  const data: {
-    name: string;
-    hash?: Address;
-    adminAddress?: Address;
-    permissions: {
-      marionette?: boolean;
-      signer?: boolean;
-    };
-  }[] = roles.map((role, index) => ({
-    name: role,
-    hash: roleHash.data?.[index] as Address,
-    adminAddress: roleAdmin.data?.[index] as Address,
-    permissions: {
-      marionette: ofMarionette.data?.[index] as boolean,
-      signer: ofSigner.data?.[index] as boolean,
-    },
-  }));
-
-  false &&
-    console.log(
-      'useRoles:data',
-      data,
-      'roleHash',
-      roleHash,
-      'ofSigner',
-      ofSigner,
-      'ofMarionette',
-      ofMarionette,
-      'roleAdmin',
-      roleAdmin,
-    );
-
-  return {
-    isLoading:
-      roleHash.isLoading &&
-      ofSigner.isLoading &&
-      ofMarionette.isLoading &&
-      roleAdmin.isLoading,
-    data,
-  };
-}
-
-export function useChainMetadata({
-  networkType,
-}: {
-  networkType: NetworkType;
-}) {
-  const { data, isError } = useQuery({
-    queryKey: ['offchain', `metadata:${networkType}`] as const,
-    queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
-      return fetch(chainMetadataUrl(networkType)).then((res) => res.json());
-    },
-  });
-  return { data, isError };
-}
-
-export function useAbi<T extends ContractIdWithAbi>(id: T) {
-  const { data } = useQuery({
-    queryKey: ['*', 'abi', id],
-    queryFn: () => getAbi(id),
-  });
-  return data;
-}
-
-export function getSContractProvider<T extends ContractId>(
-  id: T,
-  {
-    chains,
-    chain,
-  }: {
-    chains: ReturnType<typeof useNetwork>['chains'];
-    chain: ReturnType<typeof useNetwork>['chain'];
-  },
-) {
-  if (!chain) return;
-
-  const { network: contractNetwork } = CONTRACT[id] || {};
-  let chainId;
-
-  // verbose for intuition
-  if (contractNetwork === NETWORK.ETHEREUM) {
-    chainId = chains.find((c) => chain.network === NETWORK.ETHEREUM)?.id;
-  } else if (chain.network === NETWORK.SKALE) {
-    if (contractNetwork === NETWORK.SKALE) {
-      chainId = chain.id;
-    } else {
-      chainId = chains.find((c) => chain.network === c.network)?.id;
-    }
-  } else if (chain.network === NETWORK.ETHEREUM) {
-    chainId = chains.find((c) => chain.network === NETWORK.ETHEREUM)?.id;
-  } else {
-    return;
-  }
-
-  const provider = getProvider({
-    chainId,
-  });
-
-  return provider;
-}
-
 export function useSContractProvider<T extends ContractId>({ id }: { id: T }) {
   const { chain, chains } = useNetwork();
   const provider = getSContractProvider(id, {
@@ -317,20 +101,22 @@ export function useSContract<
   abi?: TAbi;
   contract?: ReturnType<typeof useContract<TAbi>>;
 } {
-  const { address } = CONTRACT[id] || {};
-  const abi = ABI[id];
-
+  let isError = false;
+  let address, abi;
+  try {
+    address = getSContractDetails(id).address;
+    abi = getAbi(id);
+  } catch (e) {
+    isError = true;
+  }
   const { provider, signer } = useSContractProvider({ id });
-
   const contract = useContract({
     address,
     abi,
     signerOrProvider: signer || provider,
   });
-
-  const mutate = () => {};
-
   return {
+    isError,
     address,
     abi,
     contract,
@@ -338,7 +124,93 @@ export function useSContract<
 }
 
 /**
- * Read values from a network contract
+ * Use network contract SDK wrapper instance
+ * @todo make consistent with useTypedContract signature
+ * @todo after wrapper registration in manifest: refactor to remove injection
+ * @todo consider consuming useTypedContract within
+ * @param param0
+ * @returns
+ */
+export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
+  const { chain } = useNetwork();
+  // const {
+  //   data: signer,
+  //   isError: signerIsError,
+  //   isLoading: signerIsLoading,
+  // } = useSigner();
+  const { address } = useAccount();
+  const { provider, signer } = useSContractProvider({ id });
+  const connected = chain ? chain.network === NETWORK.SKALE : false;
+
+  const api = useMemo(() => {
+    return chain && signer && provider && id
+      ? getApi(id, {
+          chain,
+          provider,
+          signer,
+        })
+      : undefined;
+  }, [id, connected, chain?.id, signer, provider]);
+
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      address && api?.setSigner?.({ signer });
+    } catch (e) {}
+  }, [address, api]);
+
+  return { connected, chainId: chain?.id, signer, api };
+}
+
+/**
+ * Read a single variable from a network contract
+ * @param id
+ * @param param1
+ * @returns
+ */
+export function useSContractRead<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TBaseParams extends Parameters<typeof useContractRead>[0],
+  TFunctionName extends Extract<
+    TAbi[number],
+    | { type: 'function'; stateMutability: 'view' }
+    | { type: 'function'; constant: true }
+  >['name'],
+  TReturnData extends AbiTypeToPrimitiveType<
+    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
+  >,
+>(
+  id: TContractId,
+  {
+    name,
+    ...params
+  }: {
+    [K in keyof TBaseParams as Exclude<
+      K,
+      'args' | 'functionName' | 'abi' | 'address'
+    >]: TBaseParams[K];
+  } & {
+    name: TFunctionName;
+    args?: AbiParametersToPrimitiveTypes<
+      ExtractAbiFunction<TAbi, TFunctionName>['inputs']
+    >;
+  },
+) {
+  const { abi, address } = useSContract({ id });
+  const response = useContractRead({
+    ...params,
+    abi,
+    address,
+    functionName: name,
+  });
+  return {
+    ...response,
+  } as typeof response & { data?: TReturnData };
+}
+
+/**
+ * Read multiple values from a network contract
  * @param id ContractId
  * @param param1
  * @returns
@@ -391,6 +263,12 @@ export function useSContractReads<
   } as typeof response & { data?: TReturnData[] };
 }
 
+/**
+ * Write to a network contract
+ * @param id ContractId
+ * @param param1
+ * @returns
+ */
 export function useSContractWrite<
   TContractId extends ContractId,
   TAbi extends (typeof ABI)[TContractId],
@@ -489,42 +367,192 @@ export function useSContracts<T extends ContractIdWithAbi>({
   );
 }
 
+export function useSContractRoles<T extends ContractId>(id: T) {
+  const { address } = useAccount();
+  const abi = getAbi(id);
+
+  const roles = (abi || [])
+    .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
+    .map((fragment) => fragment.name) as string[];
+
+  const roleHash = useSContractReads(id, {
+    reads: roles.map((role) => ({
+      name: role,
+    })),
+  });
+  const ofSigner = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'hasRole',
+          args: [role, address],
+        }))
+      : [],
+  });
+  const ofMarionette = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'hasRole',
+          args: [role, CONTRACT.MARIONETTE.address],
+        }))
+      : [],
+  });
+  const roleAdmin = useSContractReads(id, {
+    enabled: roleHash.isSuccess && Boolean(roleHash.data),
+    reads: roleHash.data
+      ? roleHash.data.map((role) => ({
+          name: 'getRoleAdmin',
+          args: [role],
+        }))
+      : [],
+  });
+
+  const data: {
+    name: string;
+    hash?: Address;
+    adminAddress?: Address;
+    permissions: {
+      marionette?: boolean;
+      signer?: boolean;
+    };
+  }[] = roles.map((role, index) => ({
+    name: role,
+    hash: roleHash.data?.[index] as Address,
+    adminAddress: roleAdmin.data?.[index] as Address,
+    permissions: {
+      marionette: ofMarionette.data?.[index] as boolean,
+      signer: ofSigner.data?.[index] as boolean,
+    },
+  }));
+
+  false &&
+    console.log(
+      'useRoles:data',
+      data,
+      'roleHash',
+      roleHash,
+      'ofSigner',
+      ofSigner,
+      'ofMarionette',
+      ofMarionette,
+      'roleAdmin',
+      roleAdmin,
+    );
+
+  return {
+    isLoading:
+      roleHash.isLoading ||
+      ofSigner.isLoading ||
+      ofMarionette.isLoading ||
+      roleAdmin.isLoading,
+    data,
+  };
+}
+
 /**
- * Use predeployed contract SDK wrapper instance
- * @todo make consistent with useTypedContract signature
- * @todo after wrapper registration in manifest: refactor to remove injection
- * @todo consider consuming useTypedContract within
+ * Use API of the block explorer as configured by the chain
  * @param param0
  * @returns
  */
-export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
-  const { chain } = useNetwork();
-  // const {
-  //   data: signer,
-  //   isError: signerIsError,
-  //   isLoading: signerIsLoading,
-  // } = useSigner();
-  const { address } = useAccount();
-  const { provider, signer } = useSContractProvider({ id });
+export function useExplorer(
+  requests: ExplorerProps[],
+  {
+    chainId,
+    enabled,
+  }: {
+    enabled?: boolean;
+    chainId?: number;
+  } = {},
+) {
+  const { chain: currentChain, chains } = useNetwork();
+  const chain = chainId ? chains.find((c) => c.id === chainId) : currentChain;
+  const baseUrl = chain?.blockExplorers?.default.url;
 
-  const connected = chain ? chain.network === NETWORK.SKALE : false;
+  const queries = requests.map((request: ExplorerProps) => {
+    const { module, action, args } = request;
+    const queryString = new URLSearchParams(args).toString();
+    const url =
+      baseUrl +
+      `api?module=${module}&action=${action}${
+        queryString ? '&' + queryString : ''
+      }`;
+    return {
+      enabled,
+      queryKey: [chain?.id, module, action, args],
+      queryFn: () => fetch(url).then((res) => res.json()),
+      refetchOnWindowFocus: false,
+    };
+  });
+  return useQueries({
+    queries,
+  });
+}
 
-  const api = useMemo(() => {
-    return chain && signer && provider && id
-      ? getApi(id, {
-          chain,
-          provider,
-          signer,
-        })
-      : undefined;
-  }, [id, connected, chain?.id, signer, provider]);
+export function useEvents<
+  TAddress extends ContractDetailList['address'],
+  TContractId extends ContractIdByAddress<TAddress>,
+  TAbi extends (typeof ABI)[TContractId],
+>({
+  address,
+  fromBlock,
+  toBlock,
+  blockHash,
+  eventNames,
+}: {
+  address: TAddress;
+  fromBlock?: number | string;
+  toBlock?: number | string;
+  blockHash?: string;
+  eventNames: TAddress extends ContractDetailList['address']
+    ? TAbi extends Abi
+      ? ExtractAbiEventNames<TAbi>[]
+      : string[]
+    : string[];
+}) {
+  const contractId = build.contractIdFromAddress(address);
+  const { contract, abi } = useSContract({ id: contractId });
 
-  useEffect(() => {
-    try {
-      // @ts-ignore
-      address && api?.setSigner?.({ signer });
-    } catch (e) {}
-  }, [address, api]);
+  const [streamEvents, setStreamEvents] = useState([]);
 
-  return { connected, chainId: chain?.id, signer, api };
+  const pastEvents = useQueries({
+    queries: eventNames.map((eventName) => {
+      return {
+        enabled: Boolean(contract && contract.provider),
+        queryKey: ['logs', address, eventName],
+        queryFn: () => {
+          if (!contract) return [];
+          const filter = contract.filters[eventName]();
+          return contract?.queryFilter(filter, fromBlock, toBlock);
+        },
+      };
+    }),
+  });
+
+  return {
+    pastEvents,
+    streamEvents,
+  };
+}
+
+export function useChainMetadata({
+  networkType,
+}: {
+  networkType: NetworkType;
+}) {
+  const { data, isError } = useQuery({
+    queryKey: ['offchain', `metadata:${networkType}`] as const,
+    queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
+      return fetch(chainMetadataUrl(networkType)).then((res) => res.json());
+    },
+  });
+  return { data, isError };
+}
+
+export function useAbi<T extends ContractIdWithAbi>(id: T) {
+  const { data } = useQuery({
+    queryKey: ['*', 'abi', id],
+    queryFn: () => getAbi(id),
+  });
+  return data;
 }

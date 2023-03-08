@@ -1,7 +1,8 @@
 import Hoverover from '@/components/Hoverover/Hoverover';
 import { RoleIcon } from '@/components/Icons/Icons';
+import { getSContractProp } from '@/features/network/contract';
 import {
-  useSContractReads,
+  useSContractRead,
   useSContractRoles,
   useSContracts,
 } from '@/features/network/hooks';
@@ -15,36 +16,20 @@ type Props = {};
 
 const RoleQuickView = ({ id }: { id: ContractId }) => {
   const account = useAccount();
-  const { name: contractName } = CONTRACT[id];
+  const contractName = getSContractProp(id, 'name');
   const { data, isLoading } = useSContractRoles(id);
-  const puppeteerRoleHash = useSContractReads('MARIONETTE', {
-    reads: [
-      {
-        name: 'PUPPETEER_ROLE',
-      },
-    ],
+  const puppeteerRoleHash = useSContractRead('MARIONETTE', {
+    name: 'PUPPETEER_ROLE',
   });
-  console.log('puppy', puppeteerRoleHash);
-  const isMultisigPuppeteer = useSContractReads('MARIONETTE', {
+  const isMultisigPuppeteer = useSContractRead('MARIONETTE', {
     enabled: puppeteerRoleHash.isSuccess,
-    reads: [
-      {
-        name: 'hasRole',
-        args: [
-          puppeteerRoleHash.data as Address,
-          CONTRACT.MULTISIG_WALLET.address,
-        ],
-      },
-    ],
+    name: 'hasRole',
+    args: [puppeteerRoleHash.data as Address, CONTRACT.MULTISIG_WALLET.address],
   });
-  const isSignerMultisigOwner = useSContractReads('MULTISIG_WALLET', {
+  const isSignerMultisigOwner = useSContractRead('MULTISIG_WALLET', {
     enabled: !!account.address,
-    reads: [
-      {
-        name: 'isOwner',
-        args: [account.address],
-      },
-    ],
+    name: 'isOwner',
+    args: [account.address as Address],
   });
   return data.length === 0 ? (
     <></>
@@ -56,12 +41,14 @@ const RoleQuickView = ({ id }: { id: ContractId }) => {
           <div className="flex flex-row" key={index}>
             {snakeToSentenceCase(name, ACRONYMS)}{' '}
             <div className="ml-auto">
-              {isLoading ? (
+              {isLoading ||
+              isMultisigPuppeteer.isLoading ||
+              isSignerMultisigOwner.isLoading ? (
                 '?'
               ) : signer === true ? (
                 <CheckIcon className="text-[var(--green11)]" />
-              ) : isSignerMultisigOwner &&
-                isMultisigPuppeteer &&
+              ) : isSignerMultisigOwner.data === true &&
+                isMultisigPuppeteer.data === true &&
                 marionette === true ? (
                 <CircleIcon className="text-[var(--green11)]" />
               ) : (
@@ -75,11 +62,10 @@ const RoleQuickView = ({ id }: { id: ContractId }) => {
 };
 
 export default function RoleList({}: Props) {
-  const allContracts = useSContracts({
-    id: Object.keys(CONTRACT),
-  });
   const { chain } = useNetwork();
-
+  const allContracts = useSContracts({
+    id: Object.keys(CONTRACT) as ContractId[],
+  });
   const filteredContracts = allContracts.filter(
     (contract) =>
       contract.abi && CONTRACT[contract.contractId].network === chain?.network,

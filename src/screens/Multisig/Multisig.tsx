@@ -5,8 +5,9 @@ import { useFetchMultisigs, useMultisig } from '@/features/multisig/hooks';
 import { BigNumber, ethers } from 'ethers';
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from 'react-use';
-import { useNetwork } from 'wagmi';
+import { Address, useNetwork } from 'wagmi';
 
+import { PeopleIcon } from '@/components/Icons/Icons';
 import { CONTRACT } from '@/features/network/contract';
 import { NETWORK } from '@/features/network/literals';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
@@ -149,10 +150,12 @@ export default function Multisig() {
     events,
   } = data;
 
-  const [cachedOwners, setCachedOwners] = useLocalStorage(
-    `SKL_MULTISIG_OWNERS:${activeWalletAddress}`,
-    {},
-  );
+  const [cachedOwners, setCachedOwners] = useLocalStorage<{
+    [key: string]: {
+      address: string;
+      name: string;
+    };
+  }>(`SKL_MULTISIG_OWNERS:${activeWalletAddress}`, {});
 
   const addOwner = useMutation({
     mutationKey: queryKey([contractKey, 'addOwner']),
@@ -406,7 +409,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`Queue ( ${pendingTrxIds?.data?.length} )`}
-            className="h-1/2 bg-[var(--slate)]"
+            className="h-1/2 !bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
@@ -441,7 +444,7 @@ export default function Multisig() {
           <Card
             lean
             heading={`History ( ${executedTrxIds?.data?.length} )`}
-            className="h-1/2 bg-[var(--slate)]"
+            className="h-1/2 !bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">

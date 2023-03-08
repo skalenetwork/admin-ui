@@ -606,6 +606,7 @@ export default function ImaMapToken() {
               >
                 <div className="w-2/3 m-auto flex h-full flex-col justify-center items-center">
                   <Card
+                    className="!bg-[var(--slate1)] w-full"
                     tooltip="Burn & Mint permissions to cloned token"
                     heading={
                       <div className="flex justify-between items-center">
@@ -625,7 +626,6 @@ export default function ImaMapToken() {
                         </span>
                       </div>
                     }
-                    className="bg-[var(--slate1)] w-full"
                   >
                     {tmHasBurnerRole.data && tmHasMinterRole.data ? (
                       <>Minting and burning permissions are set correctly</>
