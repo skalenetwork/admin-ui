@@ -2,20 +2,17 @@ import { CrownIcon } from '@/components/Icons/Icons';
 import Field from '@/elements/Field/Field';
 import { addresses } from '@/features/network';
 import { ContractDetailList, ContractId } from '@/features/network/contract';
-import { useSContract } from '@/features/network/hooks';
+import {
+  useSContract,
+  useSContractRead,
+  useSContractWrite,
+} from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { build, CONTRACT } from '@/features/network/manifest';
 import NotSupported from '@/screens/NotSupported';
 import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import {
-  Address,
-  useAccount,
-  useContractWrite,
-  useNetwork,
-  usePrepareContractWrite,
-  useQuery,
-} from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import rolesMetadata from '../../metadata/roles.json';
 
 type FormData = {
@@ -57,12 +54,9 @@ export default function RoleAssigner() {
         .map((fragment) => fragment.name)
     : [];
 
-  const { data: roleHash } = useQuery({
+  const { data: roleHash } = useSContractRead(selectedContractId, {
     enabled: !!role,
-    queryKey: [selectedContractId, 'role', role],
-    queryFn: () => {
-      return contract?.[role]() as Address;
-    },
+    name: role,
   });
 
   useEffect(() => {
@@ -75,13 +69,19 @@ export default function RoleAssigner() {
     return foundRole ? foundRole.description : '';
   }, [role, contractAddress]);
 
-  const { config } = usePrepareContractWrite({
-    abi,
-    address: contractAddress,
-    functionName: 'grantRole',
+  // const { config } = usePrepareContractWrite({
+  //   abi,
+  //   address: contractAddress,
+  //   functionName: 'grantRole',
+  //   args: [roleHash, assigneeAddress],
+  // });
+  // const { writeAsync } = useContractWrite(config);
+
+  const { writeAsync } = useSContractWrite(selectedContractId, {
+    enabled: !!(roleHash && assigneeAddress),
+    name: 'grantRole',
     args: [roleHash, assigneeAddress],
   });
-  const { writeAsync } = useContractWrite(config);
 
   return (
     <div
@@ -191,7 +191,11 @@ export default function RoleAssigner() {
                 </div>
               </div>
             </div>
-            <button type="submit" className="btn mt-4">
+            <button
+              type="submit"
+              className="btn mt-4"
+              disabled={!form.formState.isValid || !writeAsync}
+            >
               Assign Role
             </button>
           </form>
