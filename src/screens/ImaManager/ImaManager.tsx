@@ -7,6 +7,7 @@ import {
   useHistory,
   useTokenManager,
 } from '@/features/bridge';
+import { useSContractRead } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -17,13 +18,14 @@ import {
   ChevronRightIcon,
 } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
+import { BigNumber } from 'ethers';
 import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { tw } from 'twind';
-import { useNetwork } from 'wagmi';
+import { Address, useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
 import { FormattedPeerChain } from './FormattedPeerChain';
 
@@ -84,40 +86,86 @@ const SelectedPeerChainItem = ({
     return standards.find((s) => s.name === standardName);
   }, [standardName]);
 
+  const selectedOriginChain = chains.find((c) => c.name === name);
+
+  const contractPrefix =
+    selectedOriginChain?.network === NETWORK.SKALE
+      ? 'TOKEN_MANAGER'
+      : 'DEPOSIT_BOX';
+  const contractId =
+    selectedOriginChain && selectedStandard
+      ? (`${contractPrefix}_${selectedStandard?.name.toUpperCase()}` as const)
+      : undefined;
+
   useEffect(() => {
     if (alertKey !== name) {
       window.setTimeout(() => setStandardName(''), 500);
     }
   }, [alertKey]);
 
-  const selectedOriginChain = chains.find((c) => c.name === name);
-
   const { api: tokenManager } = useTokenManager({
     standard: standardName.toUpperCase(),
     network: selectedOriginChain?.network,
   });
 
-  // @todo implement
-
-  const { data: tokenMappings } = useQuery({
-    enabled: Boolean(tokenManager?.api),
+  // pending ima-js release
+  console.log('tokenManager', tokenManager, {
+    standard: standardName.toUpperCase(),
+    network: selectedOriginChain?.network,
+  });
+  const mappingsLength = useQuery({
+    enabled: !!(tokenManager?.api && chain),
     queryKey: ['CUSTOM:tokenMappings'],
-    queryFn: () => {
+    queryFn: async () => {
       console.log('tokenManager', tokenManager);
-      return tokenManager?.api?.getTokenMappingsLength
-        ? tokenManager.api.getTokenMappingsLength()
-        : null;
+      const { api } = tokenManager;
+      const length = await api?.getTokenMappingsLength(chain.name);
+      const mapping = await api?.getTokenMappings(
+        chain.name,
+        BigNumber.from(0),
+        length,
+      );
+      return mapping || null;
     },
   });
-  false && console.log('token mappings?', tokenMappings);
 
-  // const contractId =
-  //   selectedStandard &&
-  //   (`TOKEN_MANAGER_${selectedStandard?.name.toUpperCase()}` as const);
+  // alternate for ethereum mapping
+  const ethereumMappingLength = useSContractRead(
+    contractId as 'DEPOSIT_BOX_ERC20',
+    {
+      enabled: !!(
+        chain &&
+        contractId &&
+        selectedOriginChain?.network === NETWORK.ETHEREUM &&
+        selectedStandard
+      ),
+      name: `getSchainToAll${selectedStandard?.name.toUpperCase()}Length`,
+      args: [chain?.name],
+      chainId: selectedOriginChain?.id,
+    },
+  );
+  const ethereumMappings = useSContractRead(contractId as 'DEPOSIT_BOX_ERC20', {
+    enabled: !!(ethereumMappingLength.data?.gt(0) && selectedStandard),
+    name: `getSchainToAll${selectedStandard?.name.toUpperCase()}`,
+    args: [chain?.name, BigNumber.from(0), ethereumMappingLength.data],
+    chainId: selectedOriginChain?.id,
+  });
 
-  // const { api } = useContractApi({
-  //   id: contractId as 'TOKEN_MANAGER_ERC20',
-  // });
+  const targetTokenMappings: { name?: string; address: Address }[] =
+    selectedOriginChain?.network === NETWORK.ETHEREUM
+      ? (ethereumMappings.data || []).map((addr) => {
+          address: addr;
+        })
+      : [];
+  const originTokenMappings: { name?: string; address: Address }[] = [];
+
+  console.log(
+    '[audit] ethereum mappings',
+    'length',
+    ethereumMappingLength,
+    'mappings',
+    ethereumMappings,
+  );
 
   return (
     <motion.div
@@ -162,7 +210,7 @@ const SelectedPeerChainItem = ({
               <>
                 <span className="font-medium">Mapped Tokens: </span>
                 <Dialog
-                  title={`${selectedStandard?.label} Tokens ( )`}
+                  title={`${selectedStandard?.label} Tokens`}
                   description={''}
                   trigger={
                     <button className="">
@@ -207,33 +255,43 @@ const SelectedPeerChainItem = ({
                             List of mapped {selectedStandard?.label} tokens with{' '}
                             <span className="font-semibold">{name}</span> chain:
                           </p>
+                          {selectedOriginChain?.network === NETWORK.SKALE && (
+                            <Card
+                              className="max-h-36 p-0"
+                              bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
+                              heading={
+                                <p className="font-medium text-[var(--primary)]">
+                                  Mapped from {chain?.name}
+                                </p>
+                              }
+                            >
+                              {!targetTokenMappings.length
+                                ? 'No mappings discovered'
+                                : targetTokenMappings.map((token) => (
+                                    <NiceAddress
+                                      address={token.address}
+                                      copyable
+                                    />
+                                  ))}
+                            </Card>
+                          )}
                           <Card
                             className="max-h-36 p-0"
                             bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
                             heading={
                               <p className="font-medium text-[var(--primary)]">
-                                Origin: {chain?.name}
+                                Mapped from {selectedOriginChain?.name}
                               </p>
                             }
                           >
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
-                          </Card>
-                          <Card
-                            className="max-h-36 p-0"
-                            bodyClass="p-4 pt-4 bg-[var(--slate)] rounded-lg flex flex-col gap-2"
-                            heading={
-                              <p className="font-medium text-[var(--primary)]">
-                                Target: {name}
-                              </p>
-                            }
-                          >
-                            <NiceAddress
-                              address="0xad0e07a58BcA9678d654903d0b1b43dD08fc21c1"
-                              copyable
-                            />
+                            {!originTokenMappings.length
+                              ? 'No mappings discovered'
+                              : originTokenMappings.map((token) => (
+                                  <NiceAddress
+                                    address={token.address}
+                                    copyable
+                                  />
+                                ))}
                           </Card>
                         </div>
                       ),
