@@ -105,135 +105,6 @@ This directly enables:
 1. Portability of client-agnostic stateful features, and submodules.
 2. Portability of stateful screens (react).
 
----
-
-// EXAMPLE SECTION TO BE REVISED
-
-## Use via screens @ react
-
-Dependency: `react-redux`, `tailwindcss`
-
-**`store.js`**
-
-```ts
-import { context as analytics } from '@/screens/ChainAnalytics/ChainAnalytics';
-
-export const store = configureStore({
-  reducer: {
-    ...analytics,
-  },
-});
-```
-
-**`view.jsx`**
-
-```tsx
-import ChainAnalytics from '@/screens/ChainAnalytics/ChainAnalytics';
-import { store } from './store';
-
-function View() {
-  return (
-    <Provider store={store}>
-      <ChainAnalytics />
-    </Provider>
-  );
-}
-```
-
-> Note: This can potentially evolve to zero-config with implicit reducer injection if in favor of usability
-
-## [WIP] Use directly @ react
-
-◼️ Within `react-redux` `<Provider store={store}>` context
-
-```jsx
-import { context, useAnalytics } from '@/features/analytics';
-
-const { scope, reducers } = context;
-
-export const store = configureStore({
-  reducer: {
-    ...reducers,
-  },
-});
-
-function View() {
-  useAnalytics(); // loads into store
-  return <Provider store={store}></Provider>;
-}
-```
-
-◼️ The submodules without any external store
-
-```jsx
-import { useBlockHistory, useWalletHistory } from '@/features/analytics';
-```
-
----
-
-# Concept: Managing access control
-
-Existing primary
-
-```ts
-export type ContractDetail = {
-  type: ContractType;
-  key: string;
-  name: string;
-  address: `0x${string}`;
-};
-
-export const CONTRACT = {
-  [:ContractManifestId]: ContractDetail
-} as const satisfies ContractManifest;
-```
-
-Precedent
-
-```ts
-// ~ pseudo-ts
-
-export const ABI = {...} as const
-satisfies { [key in ContractManifestId]: Abi }
-```
-
-Proposed extension
-
-**`role.ts`**
-
-```ts
-// ~ pseudo-ts
-
-type RoleFromContract<TContractId extends ContractId>; // extract from ts ABI (const)
-
-type RoleId<TContractId extends ContractId> = Array<[TContractId, RoleFromContract<TContractId>]>
-
-type RoleDetail = {
-  key: string; // making role another possible vector in requests caching layer
-  name: string; // basically RoleKey but not implicitly
-  description: string;
-}
-
-// manfest const ROLE to be satisfied by
-type RoleManifest = {
-  [contractId as ContractId]: {
-    [contractRoleId as RoleFromContract<contractId>]: RoleDetail
-  }
-}
-```
-
-> Note: Keys across the constants and types represent getters on contracts
-
-### Advanced ACL rules (scope-overflow):
-
-Identify members of contracts
-
-```matlab
-AddressableMember[] ⊆ filter(type:function && output*.type:address)`
-```
-
-`AddressibleMember` is a single or multi-address getter, which becomes candidate for `RoleDetail.owners[]`, `RoleDetail.granters[]` and `RoleDetail.grantees[]`. Each set could have further conditions, demanding an ACL tree, manually maintained or statically generated from contracts (modifier analysis).
-
 # @next
 
 `@/features/icm`
@@ -242,6 +113,16 @@ Among features, ICM (inter-chain messaging) is a domain that would horizontally 
 
 Diagram highlighting typical cross-chain interaction. On the contrary, arbitrary message passing is more suitable for `icm` whereas `multsig` could be one of the consumers of `icm` when supporting foreign multisigs.
 ![](./public/icm.png)
+
+# Advanced ACL rules (scope-overflow)
+
+Identify members of contracts
+
+```matlab
+AddressableMember[] ⊆ filter(type:function && output*.type:address)`
+```
+
+`AddressibleMember` is a single or multi-address getter, which becomes candidate for `RoleDetail.owners[]`, `RoleDetail.granters[]` and `RoleDetail.grantees[]`. Each set could have further conditions, demanding an ACL tree, manually maintained or statically generated from contracts (modifier analysis).
 
 # Links
 
