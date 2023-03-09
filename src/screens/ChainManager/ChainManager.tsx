@@ -79,7 +79,7 @@ export const WidgetConfigFcd = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isLoading, isError } = useMtm();
+  const { toggle, isEnabled, isSuccess, isLoading, isError } = useFcd();
   const status = !connected
     ? 'disabled'
     : isLoading
@@ -139,7 +139,7 @@ export const WidgetConfigMtm = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isError, isLoading } = useFcd();
+  const { toggle, isEnabled, isSuccess, isError, isLoading } = useMtm();
   const status = !connected
     ? 'disabled'
     : isLoading

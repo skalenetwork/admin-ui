@@ -198,15 +198,15 @@ export function useSContractRead<
   },
 ) {
   const { abi, address } = useSContract({ id });
-  const response = useContractRead({
+  const query = useContractRead({
     ...params,
     abi,
     address,
     functionName: name,
   });
   return {
-    ...response,
-  } as typeof response & { data?: TReturnData };
+    ...query,
+  } as typeof query & { data?: TReturnData };
 }
 
 /**
@@ -246,12 +246,13 @@ export function useSContractReads<
 ) {
   const { abi, address } = useSContract({ id: id });
   const contracts = reads.map(({ name, ...oneRead }) => {
-    return {
+    const params: TBaseParams = {
       abi,
       address,
       functionName: name,
       ...oneRead,
     };
+    return params;
   });
   const response = useContractReads({
     ...params,
@@ -546,7 +547,7 @@ export function useChainMetadata({
   networkType?: NetworkType;
 }) {
   const { chain } = useNetwork();
-  return useQuery({
+  const query = useQuery({
     enabled: networkType !== undefined && !!chain,
     queryKey: ['offchain', `metadata:${networkType}`] as const,
     queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
@@ -558,6 +559,11 @@ export function useChainMetadata({
         });
     },
   });
+  useEffect(() => {
+    query.refetch();
+  }, [chain.id]);
+
+  return query;
 }
 
 export function useAbi<T extends ContractIdWithAbi>(id: T) {
