@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import FileStorageReserve from './FileStorageReserve';
 
+import Hoverover from '@/components/Hoverover/Hoverover';
 import { useChainMetadata } from '@/features/network/hooks';
 import { useStorageSpace } from '@/features/storage/hooks';
 import { useQuery } from '@tanstack/react-query';
@@ -247,17 +248,24 @@ export const WidgetManageChainlist = () => {
  * @todo complete status implementation, requires chain hyphenated label discovery
  */
 export const WidgetManageMetadata = () => {
-  const status = false;
-  const { data } = useChainMetadata({
-    networkType: 'staging',
+  const { chain } = useNetwork();
+  const chainMetadata = useChainMetadata({
+    networkType: chain && (chain.testnet ? 'staging' : 'mainnet'),
   });
+  console.log('metadata', chainMetadata);
+
+  const status =
+    chainMetadata.data === null
+      ? [false, 'Not Submitted']
+      : [true, 'Submitted'];
+
   return (
     <Card
       full
       heading={
         <>
           <h4 className="inline">Submit Chain Metadata</h4>{' '}
-          <FormattedStatus status={[status, 'Not Submitted']} />
+          <FormattedStatus status={status} />
         </>
       }
       tooltip={
@@ -277,7 +285,26 @@ export const WidgetManageMetadata = () => {
           Submit metadata to display in the SKALE network UI
         </p>
         <center>
-          <button className="btn btn-wide w-5/6">View & Submit PR</button>
+          <Hoverover
+            title="Chain Metadata"
+            trigger={<>View & Submit PR</>}
+            triggerClass="btn w-5/6"
+          >
+            <div className="w-[320px]">
+              <pre className="p-4 my-4 font-mono w-full overflow-auto text-left">
+                {chainMetadata.data
+                  ? JSON.stringify(chainMetadata.data, undefined, 2)
+                  : '// none found \n{}'}
+              </pre>
+              <a
+                className="btn btn-outline"
+                target="blank"
+                href="https://github.com/skalenetwork/skale-network/compare"
+              >
+                Submit PR
+              </a>
+            </div>
+          </Hoverover>
         </center>
       </div>
     </Card>

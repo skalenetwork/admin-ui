@@ -3,6 +3,7 @@
 @layer utilities {
   ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
   /* Scroll track styles (Background) */
   ::-webkit-scrollbar-track {

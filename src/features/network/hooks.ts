@@ -543,15 +543,21 @@ export function useEvents<
 export function useChainMetadata({
   networkType,
 }: {
-  networkType: NetworkType;
+  networkType?: NetworkType;
 }) {
-  const { data, isError } = useQuery({
+  const { chain } = useNetwork();
+  return useQuery({
+    enabled: networkType !== undefined && !!chain,
     queryKey: ['offchain', `metadata:${networkType}`] as const,
     queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
-      return fetch(chainMetadataUrl(networkType)).then((res) => res.json());
+      return fetch(chainMetadataUrl(networkType))
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('allmeta', data);
+          return data[chain?.name] || null;
+        });
     },
   });
-  return { data, isError };
 }
 
 export function useAbi<T extends ContractIdWithAbi>(id: T) {

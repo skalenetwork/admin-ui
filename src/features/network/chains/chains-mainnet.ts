@@ -16,6 +16,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/round-hasty-alsafi' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/round-hasty-alsafi' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/round-hasty-alsafi' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/round-hasty-alsafi' ]
+      },
       filestorage: {
         http: [ 'https://mainnet.skalenodes.com/fs/round-hasty-alsafi' ]
       }
@@ -35,6 +39,14 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://mainnet.skalenodes.com/v1/affectionate-immediate-pollux'
+        ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/affectionate-immediate-pollux'
+        ]
+      },
+      public: {
         http: [
           'https://mainnet.skalenodes.com/v1/affectionate-immediate-pollux'
         ],
@@ -70,6 +82,14 @@ export const mainnet = {
           'https://mainnet.skalenodes.com/v1/ws/gargantuan-wealthy-zosma'
         ]
       },
+      public: {
+        http: [
+          'https://mainnet.skalenodes.com/v1/gargantuan-wealthy-zosma'
+        ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/gargantuan-wealthy-zosma'
+        ]
+      },
       filestorage: {
         http: [
           'https://mainnet.skalenodes.com/fs/gargantuan-wealthy-zosma'
@@ -91,6 +111,14 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://mainnet.skalenodes.com/v1/portly-passionate-sirius'
+        ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/portly-passionate-sirius'
+        ]
+      },
+      public: {
         http: [
           'https://mainnet.skalenodes.com/v1/portly-passionate-sirius'
         ],
@@ -122,6 +150,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/harsh-alsuhail' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/harsh-alsuhail' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/harsh-alsuhail' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/harsh-alsuhail' ]
+      },
       filestorage: { http: [ 'https://mainnet.skalenodes.com/fs/harsh-alsuhail' ] }
     },
     blockExplorers: {
@@ -139,6 +171,12 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/haunting-devoted-deneb' ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/haunting-devoted-deneb'
+        ]
+      },
+      public: {
         http: [ 'https://mainnet.skalenodes.com/v1/haunting-devoted-deneb' ],
         webSocket: [
           'https://mainnet.skalenodes.com/v1/ws/haunting-devoted-deneb'
@@ -166,6 +204,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/plain-rotanev' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/plain-rotanev' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/plain-rotanev' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/plain-rotanev' ]
+      },
       filestorage: { http: [ 'https://mainnet.skalenodes.com/fs/plain-rotanev' ] }
     },
     blockExplorers: {
@@ -183,6 +225,12 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/parallel-stormy-spica' ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/parallel-stormy-spica'
+        ]
+      },
+      public: {
         http: [ 'https://mainnet.skalenodes.com/v1/parallel-stormy-spica' ],
         webSocket: [
           'https://mainnet.skalenodes.com/v1/ws/parallel-stormy-spica'
@@ -210,6 +258,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/fit-betelgeuse' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/fit-betelgeuse' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/fit-betelgeuse' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/fit-betelgeuse' ]
+      },
       filestorage: { http: [ 'https://mainnet.skalenodes.com/fs/fit-betelgeuse' ] }
     },
     blockExplorers: {
@@ -230,6 +282,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/wan-red-ain' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/wan-red-ain' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/wan-red-ain' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/wan-red-ain' ]
+      },
       filestorage: { http: [ 'https://mainnet.skalenodes.com/fs/wan-red-ain' ] }
     },
     blockExplorers: {
@@ -247,6 +303,12 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/turbulent-unique-scheat' ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/turbulent-unique-scheat'
+        ]
+      },
+      public: {
         http: [ 'https://mainnet.skalenodes.com/v1/turbulent-unique-scheat' ],
         webSocket: [
           'https://mainnet.skalenodes.com/v1/ws/turbulent-unique-scheat'
@@ -278,6 +340,14 @@ export const mainnet = {
           'https://mainnet.skalenodes.com/v1/ws/adorable-quaint-bellatrix'
         ]
       },
+      public: {
+        http: [
+          'https://mainnet.skalenodes.com/v1/adorable-quaint-bellatrix'
+        ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/adorable-quaint-bellatrix'
+        ]
+      },
       filestorage: {
         http: [
           'https://mainnet.skalenodes.com/fs/adorable-quaint-bellatrix'
@@ -299,6 +369,10 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/wary-teeming-mizar' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/wary-teeming-mizar' ]
+      },
+      public: {
         http: [ 'https://mainnet.skalenodes.com/v1/wary-teeming-mizar' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/wary-teeming-mizar' ]
       },
@@ -324,6 +398,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/light-vast-diphda' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/light-vast-diphda' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/light-vast-diphda' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/light-vast-diphda' ]
+      },
       filestorage: {
         http: [ 'https://mainnet.skalenodes.com/fs/light-vast-diphda' ]
       }
@@ -343,6 +421,10 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/green-giddy-denebola' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/green-giddy-denebola' ]
+      },
+      public: {
         http: [ 'https://mainnet.skalenodes.com/v1/green-giddy-denebola' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/green-giddy-denebola' ]
       },
@@ -368,6 +450,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/elated-tan-skat' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/elated-tan-skat' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/elated-tan-skat' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/elated-tan-skat' ]
+      },
       filestorage: { http: [ 'https://mainnet.skalenodes.com/fs/elated-tan-skat' ] }
     },
     blockExplorers: {
@@ -385,6 +471,14 @@ export const mainnet = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://mainnet.skalenodes.com/v1/honorable-steel-rasalhague'
+        ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/honorable-steel-rasalhague'
+        ]
+      },
+      public: {
         http: [
           'https://mainnet.skalenodes.com/v1/honorable-steel-rasalhague'
         ],
@@ -418,6 +512,12 @@ export const mainnet = {
           'https://mainnet.skalenodes.com/v1/ws/frayed-decent-antares'
         ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/frayed-decent-antares' ],
+        webSocket: [
+          'https://mainnet.skalenodes.com/v1/ws/frayed-decent-antares'
+        ]
+      },
       filestorage: {
         http: [ 'https://mainnet.skalenodes.com/fs/frayed-decent-antares' ]
       }
@@ -440,6 +540,10 @@ export const mainnet = {
         http: [ 'https://mainnet.skalenodes.com/v1/curly-red-alterf' ],
         webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/curly-red-alterf' ]
       },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/curly-red-alterf' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/curly-red-alterf' ]
+      },
       filestorage: {
         http: [ 'https://mainnet.skalenodes.com/fs/curly-red-alterf' ]
       }
@@ -448,6 +552,32 @@ export const mainnet = {
       default: {
         name: 'SKALE Explorer',
         url: 'https://curly-red-alterf.explorer.mainnet.skalenodes.com/'
+      }
+    },
+    testnet: false
+  },
+  'fussy-smoggy-megrez': {
+    id: 644937893,
+    name: 'fussy-smoggy-megrez',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/fussy-smoggy-megrez' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/fussy-smoggy-megrez' ]
+      },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/fussy-smoggy-megrez' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/fussy-smoggy-megrez' ]
+      },
+      filestorage: {
+        http: [ 'https://mainnet.skalenodes.com/fs/fussy-smoggy-megrez' ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://fussy-smoggy-megrez.explorer.mainnet.skalenodes.com/'
       }
     },
     testnet: false

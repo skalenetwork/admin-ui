@@ -50,6 +50,14 @@ export function buildRpcUrls(
         urlFrom('wss', host, subdomain, wsPath),
       ),
     },
+    public: {
+      http: params.map(({ host = dhost, subdomain, path }) =>
+        urlFrom('https', host, subdomain, path),
+      ),
+      webSocket: params.map(({ host = dhost, subdomain, wsPath }) =>
+        urlFrom('wss', host, subdomain, wsPath),
+      ),
+    },
     filestorage: {
       http: params.map(({ host = dhost, subdomain, fsPath }) =>
         urlFrom('https', host, subdomain, fsPath),

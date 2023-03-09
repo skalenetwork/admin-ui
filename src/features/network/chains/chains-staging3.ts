@@ -20,6 +20,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-legal-crazy-castor'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-legal-crazy-castor'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-legal-crazy-castor'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-legal-crazy-castor'
@@ -41,6 +49,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-purple-arctic-talitha'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-purple-arctic-talitha'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-purple-arctic-talitha'
         ],
@@ -76,6 +92,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-generous-flowery-elnath'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-generous-flowery-elnath'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-generous-flowery-elnath'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-generous-flowery-elnath'
@@ -97,6 +121,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-faint-slimy-achird'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-faint-slimy-achird'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-faint-slimy-achird'
         ],
@@ -132,6 +164,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-perfect-parallel-gacrux'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-perfect-parallel-gacrux'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-perfect-parallel-gacrux'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-perfect-parallel-gacrux'
@@ -153,6 +193,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-severe-violet-wezen'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-severe-violet-wezen'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-severe-violet-wezen'
         ],
@@ -188,6 +236,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-utter-unripe-menkar'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-utter-unripe-menkar'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-utter-unripe-menkar'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-utter-unripe-menkar'
@@ -209,6 +265,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-aware-chief-gianfar'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-aware-chief-gianfar'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-aware-chief-gianfar'
         ],
@@ -244,6 +308,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-awesome-grave-subra'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-awesome-grave-subra'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-awesome-grave-subra'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-awesome-grave-subra'
@@ -265,6 +337,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-famous-winding-tyl'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-famous-winding-tyl'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-famous-winding-tyl'
         ],
@@ -300,6 +380,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-lost-likely-aludra'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-lost-likely-aludra'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-lost-likely-aludra'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-lost-likely-aludra'
@@ -321,6 +409,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-woozy-frizzy-merga'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-woozy-frizzy-merga'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-woozy-frizzy-merga'
         ],
@@ -356,6 +452,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-weepy-fitting-caph'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-weepy-fitting-caph'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-weepy-fitting-caph'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-weepy-fitting-caph'
@@ -377,6 +481,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-costly-stale-albali'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-costly-stale-albali'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-costly-stale-albali'
         ],
@@ -412,6 +524,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-fast-active-bellatrix'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-fast-active-bellatrix'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-fast-active-bellatrix'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-fast-active-bellatrix'
@@ -433,6 +553,14 @@ export const staging = {
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-numb-spotted-albaldah'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-spotted-albaldah'
+        ]
+      },
+      public: {
         http: [
           'https://staging-v3.skalenodes.com/v1/staging-numb-spotted-albaldah'
         ],
@@ -468,6 +596,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-obvious-pointed-asellus-australis'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-obvious-pointed-asellus-australis'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-obvious-pointed-asellus-australis'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-obvious-pointed-asellus-australis'
@@ -496,6 +632,14 @@ export const staging = {
           'https://staging-v3.skalenodes.com/v1/ws/staging-offbeat-scornful-alderamin'
         ]
       },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-offbeat-scornful-alderamin'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-offbeat-scornful-alderamin'
+        ]
+      },
       filestorage: {
         http: [
           'https://staging-v3.skalenodes.com/fs/staging-offbeat-scornful-alderamin'
@@ -506,6 +650,42 @@ export const staging = {
       default: {
         name: 'SKALE Explorer',
         url: 'https://staging-offbeat-scornful-alderamin.explorer.staging-v3.skalenodes.com/'
+      }
+    },
+    testnet: true
+  },
+  'staging-numb-flawless-skat': {
+    id: 1342442987,
+    name: 'staging-numb-flawless-skat',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-numb-flawless-skat'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-flawless-skat'
+        ]
+      },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-numb-flawless-skat'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-flawless-skat'
+        ]
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-numb-flawless-skat'
+        ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://staging-numb-flawless-skat.explorer.staging-v3.skalenodes.com/'
       }
     },
     testnet: true

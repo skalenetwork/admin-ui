@@ -78,7 +78,11 @@ export default function RoleList({}: Props) {
   );
 
   return (
-    <Hoverover title="Chain Roles" trigger={<RoleIcon />}>
+    <Hoverover
+      title="Chain Roles"
+      trigger={<RoleIcon />}
+      triggerClass="p-0 text-inherit"
+    >
       {filteredContracts.map((contract, index) => (
         <RoleQuickView id={contract.contractId} key={index} />
       ))}

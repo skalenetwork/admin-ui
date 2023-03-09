@@ -4,15 +4,21 @@ import { tw } from 'twind';
 
 type PopoverProps = PropsWithChildren<{
   trigger: JSX.Element;
+  triggerClass?: string;
   title: string;
 }>;
 
-const Hoverover = ({ trigger, title, children }: PopoverProps) => {
+const Hoverover = ({
+  trigger,
+  triggerClass,
+  title,
+  children,
+}: PopoverProps) => {
   return (
-    <div className="relative inline-block w-max text-left">
+    <div className="">
       <HoverCardPrimitive.Root>
         <HoverCardPrimitive.Trigger asChild>
-          <button className="p-0 text-inherit">{trigger}</button>
+          <button className={tw(triggerClass)}>{trigger}</button>
         </HoverCardPrimitive.Trigger>
         <HoverCardPrimitive.Content
           align="center"
