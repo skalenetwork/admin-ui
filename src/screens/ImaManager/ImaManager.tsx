@@ -203,6 +203,7 @@ const SelectedPeerChainItem = ({
                     });
                 }}
                 className="btn btn-outline m-auto w-2/3 rounded-full"
+                disabled={!connect.writeAsync}
               >
                 Accept request
               </button>

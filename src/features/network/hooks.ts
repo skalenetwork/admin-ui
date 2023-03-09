@@ -43,6 +43,16 @@ import {
 
 const { chainMetadataUrl } = build;
 
+export type RoleFragment = {
+  type: 'function';
+  name: `${string}_ROLE`;
+} & (
+  | {
+      stateMutability: 'view';
+    }
+  | { constant: true }
+);
+
 const MODULES = [
   'account',
   'stats',
@@ -133,11 +143,6 @@ export function useSContract<
  */
 export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
   const { chain } = useNetwork();
-  // const {
-  //   data: signer,
-  //   isError: signerIsError,
-  //   isLoading: signerIsLoading,
-  // } = useSigner();
   const { address } = useAccount();
   const { provider, signer } = useSContractProvider({ id });
   const connected = chain ? chain.network === NETWORK.SKALE : false;
@@ -151,13 +156,6 @@ export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
         })
       : undefined;
   }, [id, connected, chain?.id, signer, provider]);
-
-  useEffect(() => {
-    try {
-      // @ts-ignore
-      address && api?.setSigner?.({ signer });
-    } catch (e) {}
-  }, [address, api]);
 
   return { connected, chainId: chain?.id, signer, api };
 }
@@ -281,9 +279,6 @@ export function useSContractWrite<
   TBaseParams extends Parameters<
     typeof usePrepareContractWrite<TAbi, TFunctionName>
   >[0],
-  TReturnData extends AbiTypeToPrimitiveType<
-    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
-  >,
 >(
   id: TContractId,
   {
@@ -305,10 +300,6 @@ export function useSContractWrite<
   const { config } = usePrepareContractWrite(args);
 
   return useContractWrite(config);
-  // return {
-  //   ...response,
-  //   data: response.data && Array.from(response.data),
-  // } as typeof response & { data?: TReturnData[] };
 }
 
 /**
@@ -368,16 +359,36 @@ export function useSContracts<T extends ContractIdWithAbi>({
   );
 }
 
-export function useSContractRoles<T extends ContractId>(id: T) {
-  const { address } = useAccount();
-  const abi = getAbi(id);
+export function useSContractRole<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
+>(id: TContractId, role: TRoleName) {
+  const { data, ...rest } = useSContractRoles(id, [role]);
+  return {
+    data: data[0],
+    ...rest,
+  };
+}
 
-  const roles = (abi || [])
+export function useSContractRoles<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
+>(id: TContractId, roleList?: TRoleName[]) {
+  const { address } = useAccount();
+  const abi = getAbi(id) || [];
+
+  const rolesOfContract = abi
     .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
-    .map((fragment) => fragment.name) as string[];
+    .map((fragment) => fragment.name) as TRoleName[];
+
+  const roles = roleList
+    ? roleList.filter((role) => rolesOfContract.includes(role))
+    : rolesOfContract;
 
   const roleHash = useSContractReads(id, {
-    reads: roles.map((role) => ({
+    reads: roles.map((role: TRoleName) => ({
       name: role,
     })),
   });
