@@ -446,6 +446,11 @@ export function useSContractRoles<T extends ContractId>(id: T) {
       ofSigner.isLoading ||
       ofMarionette.isLoading ||
       roleAdmin.isLoading,
+    isFetching:
+      roleHash.isFetching ||
+      ofSigner.isFetching ||
+      ofMarionette.isFetching ||
+      roleAdmin.isFetching,
     data,
   };
 }

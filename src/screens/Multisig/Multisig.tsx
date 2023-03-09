@@ -1,13 +1,8 @@
 import Card from '@/components/Card/Card';
+import { PeopleIcon } from '@/components/Icons/Icons';
 import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useFetchMultisigs, useMultisig } from '@/features/multisig/hooks';
-import { BigNumber, ethers } from 'ethers';
-import { useCallback, useState } from 'react';
-import { useLocalStorage } from 'react-use';
-import { Address, useNetwork } from 'wagmi';
-
-import { PeopleIcon } from '@/components/Icons/Icons';
+import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
 import { CONTRACT } from '@/features/network/contract';
 import { NETWORK } from '@/features/network/literals';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
@@ -16,14 +11,19 @@ import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
 import { Cross2Icon, DiscIcon } from '@radix-ui/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
+import { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useLocalStorage } from 'react-use';
+import { Address, useNetwork } from 'wagmi';
 import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
 import {
   DataOut as NewTransaction,
   FlowAddNewTransaction,
 } from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
+
 export function EventSummary({
   id,
   events = [],
@@ -96,7 +96,7 @@ export function WalletSelect({
   active,
   onActiveChange,
 }: {
-  wallets: Address[];
+  wallets: { address: Address; name: string }[];
   active: Address;
   onActiveChange: (value: string) => void;
 }) {
@@ -107,9 +107,16 @@ export function WalletSelect({
         listClass="z-50 w-full bg-[var(--white)] rounded-3xl text-[var(--black)]"
         listItemClass="shadow-sm p-1 hover:bg[var(--slate)] text-[var(--black)]"
         onValueChange={onActiveChange}
-        items={wallets.map((address) => ({
+        items={wallets.map(({ address, name }) => ({
           value: address,
-          renderer: () => <NiceAddress className="py-1" address={address} />,
+          renderer: () => (
+            <NiceAddress
+              className="py-1"
+              label={name}
+              address={address}
+              labelOnly
+            />
+          ),
         }))}
         value={active}
       />
@@ -118,10 +125,11 @@ export function WalletSelect({
 }
 
 export default function Multisig() {
-  // @todo: get from higher context:: multisigs+owners and filter those where signer is owner
-  const { data: allWallets } = useFetchMultisigs();
+  const { value: walletList } = useCacheWallet();
+
   const activeWalletAddress =
-    allWallets[0]?.address || CONTRACT['MULTISIG_WALLET'].address;
+    Object.entries(walletList)[0][1]?.address ||
+    CONTRACT['MULTISIG_WALLET'].address;
 
   const contractKey = CONTRACT['MULTISIG_WALLET'].key;
 
@@ -230,7 +238,9 @@ export default function Multisig() {
       <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
         <div className="flex h-full w-full items-center gap-2">
           <WalletSelect
-            wallets={allWallets.map((wallet) => wallet.address)}
+            wallets={Object.entries(walletList).map(
+              ([address, wallet]) => wallet,
+            )}
             active={activeWalletAddress}
             onActiveChange={(val) => {
               // @todo switch wallet of state

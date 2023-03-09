@@ -8,7 +8,12 @@ import {
 } from '@/features/network/hooks';
 import { ACRONYMS } from '@/features/network/literals';
 import { CONTRACT, ContractId } from '@/features/network/manifest';
-import { CheckIcon, CircleIcon, Cross2Icon } from '@radix-ui/react-icons';
+import {
+  CheckIcon,
+  CircleIcon,
+  Cross2Icon,
+  MinusCircledIcon,
+} from '@radix-ui/react-icons';
 import { Address, useAccount, useNetwork } from 'wagmi';
 import { snakeToSentenceCase } from '../../utils';
 
@@ -17,7 +22,7 @@ type Props = {};
 const RoleQuickView = ({ id }: { id: ContractId }) => {
   const account = useAccount();
   const contractName = getSContractProp(id, 'name');
-  const { data, isLoading } = useSContractRoles(id);
+  const { data, isLoading, isFetching } = useSContractRoles(id);
   const puppeteerRoleHash = useSContractRead('MARIONETTE', {
     name: 'PUPPETEER_ROLE',
   });
@@ -41,10 +46,11 @@ const RoleQuickView = ({ id }: { id: ContractId }) => {
           <div className="flex flex-row" key={index}>
             {snakeToSentenceCase(name, ACRONYMS)}{' '}
             <div className="ml-auto">
-              {isLoading ||
+              {signer === undefined ||
+              marionette === undefined ||
               isMultisigPuppeteer.isLoading ||
               isSignerMultisigOwner.isLoading ? (
-                '?'
+                <MinusCircledIcon className="text-[var(--gray11)] animate-spin" />
               ) : signer === true ? (
                 <CheckIcon className="text-[var(--green11)]" />
               ) : isSignerMultisigOwner.data === true &&

@@ -12,6 +12,7 @@ export function NiceAddress({
   balance,
   copyable = false,
   iconUrl,
+  labelOnly = false,
 }: {
   className?: string;
   address: string;
@@ -19,6 +20,7 @@ export function NiceAddress({
   balance?: string;
   copyable?: boolean;
   iconUrl?: string;
+  labelOnly?: boolean;
 }) {
   const [copied, copy] = useCopyToClipboard();
 
@@ -43,7 +45,7 @@ export function NiceAddress({
       )}
       <div className="flex justify-start gap-4">
         {label && <span className="font-semibold">{label}</span>}{' '}
-        <span>{address}</span>
+        {!(label && labelOnly) && <span>{address}</span>}
       </div>
       <div className="flex items-center gap-2">
         {copyable && (

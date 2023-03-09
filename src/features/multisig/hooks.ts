@@ -17,6 +17,7 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
+import { useLocalStorage } from 'react-use';
 import { useBalance, useContractRead, useNetwork } from 'wagmi';
 import { scope } from './core';
 
@@ -29,6 +30,86 @@ function liteEncodeAbiFunctions(abi) {
   return abi
     .filter((a) => a.type === 'function')
     .map((i) => `${i.name};${i.inputs?.length};${i.outputs?.length}`);
+}
+
+type NamedAddressStorage = {
+  [key: string]: {
+    address: string;
+    name: string;
+  };
+};
+
+export function useCacheWallet() {
+  const defaultAddress = getSContractProp('MULTISIG_WALLET', 'address');
+  const [value, setValue] = useLocalStorage<NamedAddressStorage>(
+    `SKL_MULTISIG_LIST`,
+    {},
+  );
+  const add = useCallback(
+    (payload: NamedAddressStorage[number]) => {
+      setValue({
+        ...value,
+        [payload.address]: {
+          address: payload.address,
+          name: payload.name,
+        },
+      });
+    },
+    [value],
+  );
+  const remove = useCallback(
+    (payload: NamedAddressStorage[number]['address']) => {
+      const copy: NamedAddressStorage = JSON.parse(JSON.stringify(value));
+      delete copy[payload];
+      setValue(copy);
+    },
+    [value],
+  );
+  return {
+    value: {
+      ...value,
+      [defaultAddress]: {
+        name: `Predeployed Multisig ${defaultAddress.slice(0, 5)}`,
+        address: defaultAddress,
+      },
+    },
+    add,
+    remove,
+  };
+}
+
+export function useCacheWalletOwners({ address }: { address: Address }) {
+  const [value, setValue] = useLocalStorage<NamedAddressStorage>(
+    `SKL_MULTISIG_OWNERS:${address}`,
+    {},
+  );
+  const add = useCallback(
+    (payload: NamedAddressStorage[number]) => {
+      setValue({
+        ...value,
+        [payload.address]: {
+          address: payload.address,
+          name: payload.name,
+        },
+      });
+    },
+    [value],
+  );
+  const remove = useCallback(
+    (payload: NamedAddressStorage[number]['address']) => {
+      const copy: NamedAddressStorage = JSON.parse(JSON.stringify(value));
+      delete copy[payload];
+      setValue(copy);
+    },
+    [value],
+  );
+  return {
+    value: {
+      ...value,
+    },
+    add,
+    remove,
+  };
 }
 
 export function useFetchMultisigs(): {

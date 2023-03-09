@@ -1,7 +1,14 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
+import { useCacheWallet } from '@/features/multisig/hooks';
+import { getAbi } from '@/features/network/abi/abi';
+import {
+  ExclamationTriangleIcon,
+  MinusCircledIcon,
+} from '@radix-ui/react-icons';
 import { useCallback, useLayoutEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Address, useAccount, useContractRead } from 'wagmi';
 import { AlertProps } from '../types';
 
 export type DataOut = {
@@ -17,12 +24,15 @@ export function FlowAddNewWallet({
 }: AlertProps & { onSubmit: (data: DataOut) => void }) {
   const [step, setStep] = useState(1);
 
+  const { address } = useAccount();
+
   // reset
   useLayoutEffect(() => {
     if (alertKey !== id) {
       window.setTimeout(() => {
         setStep(1);
         // add forms reset here
+        form.reset();
       }, 1000);
     }
   }, [alertKey]);
@@ -37,13 +47,27 @@ export function FlowAddNewWallet({
     shouldUnregister: false,
   });
 
+  const { add: addWallet } = useCacheWallet();
+
+  const walletAddress = form.watch('address') as Address;
+
   const handleFinalSubmit = useCallback(
     (data) => {
-      onSubmit(data);
+      addWallet({ name: form.getValues('name'), address: walletAddress });
       toggleAlert(id)(false);
     },
     [form],
   );
+
+  const multisigAbi = getAbi('MULTISIG_WALLET');
+
+  const maybeMultisigOwner = useContractRead({
+    enabled: form.formState.isValid,
+    address: walletAddress,
+    abi: multisigAbi,
+    functionName: 'isOwner',
+    args: [address],
+  });
 
   return (
     <Dialog
@@ -67,7 +91,9 @@ export function FlowAddNewWallet({
               type="submit"
               className={`${className}`}
               value="Submit"
-              disabled={!form.formState.isValid}
+              disabled={
+                !form.formState.isValid || maybeMultisigOwner.data !== true
+              }
             />
           ),
           content: (
@@ -91,6 +117,30 @@ export function FlowAddNewWallet({
                     message: 'Address is invalid',
                   }}
                 />
+                {maybeMultisigOwner.isLoading && (
+                  <p className="text-sm text-center align-middle">
+                    <span className="text-[var(--gray11)] align-middle">
+                      <MinusCircledIcon className="animate-spin" />
+                    </span>{' '}
+                    Fetching and validating contract and ownership...
+                  </p>
+                )}
+                {maybeMultisigOwner.isError && (
+                  <p className="text-sm text-center">
+                    <span className="text-[var(--red10)]">
+                      <ExclamationTriangleIcon />
+                    </span>{' '}
+                    Address does not belong to a multisig contract.
+                  </p>
+                )}
+                {maybeMultisigOwner.data === false && (
+                  <p className="text-sm text-center">
+                    <span className="text-[var(--red10)]">
+                      <ExclamationTriangleIcon />
+                    </span>{' '}
+                    You do not have ownership to the multisig contract.
+                  </p>
+                )}
               </div>
             </FormProvider>
           ),
