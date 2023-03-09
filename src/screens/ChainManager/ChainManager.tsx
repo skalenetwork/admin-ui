@@ -1,7 +1,7 @@
 import Card from '@/components/Card/Card';
 
 import { useConfigController, useFcd, useMtm } from '@/features/interim/hooks';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import FileStorageReserve from './FileStorageReserve';
@@ -9,6 +9,7 @@ import FileStorageReserve from './FileStorageReserve';
 import Hoverover from '@/components/Hoverover/Hoverover';
 import { useChainMetadata } from '@/features/network/hooks';
 import { useStorageSpace } from '@/features/storage/hooks';
+import { MinusCircledIcon } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
@@ -23,9 +24,19 @@ import type { WidgetWithAlertProps } from '../types';
 const FormattedStatus = ({
   status,
 }: {
-  status: 'disabled' | 'no-auth' | 'pending' | [true, string] | [false, string];
+  status:
+    | 'loading'
+    | 'disabled'
+    | 'no-auth'
+    | 'pending'
+    | [true, string]
+    | [false, string];
 }) => {
-  return status === 'disabled' || status === 'no-auth' ? (
+  return status === 'loading' ? (
+    <span className="ml-6 text-sm text-[var(--gray11)]">
+      <MinusCircledIcon className="animate-spin" />
+    </span>
+  ) : status === 'disabled' || status === 'no-auth' ? (
     <span className="ml-6 text-sm text-[var(--gray8)]">Not Supported</span>
   ) : status === 'pending' ? (
     <span className="ml-6 text-sm text-[var(--yellow10)]">Pending Change</span>
@@ -80,11 +91,14 @@ export const WidgetConfigFcd = ({
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
   const { toggle, isEnabled, isSuccess, isLoading, isError } = useFcd();
-  const status = !connected
-    ? 'disabled'
-    : isLoading
-    ? 'pending'
-    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
+  const status =
+    isEnabled === undefined
+      ? 'loading'
+      : !connected
+      ? 'disabled'
+      : isLoading
+      ? 'pending'
+      : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
 
   return (
     <Card
@@ -198,16 +212,20 @@ const chainListsDirectory =
  */
 export const WidgetManageChainlist = () => {
   const { chain } = useNetwork();
-  const { data, isSuccess, isError, isFetching } = useQuery({
+  const { data, isSuccess, isError, isLoading, refetch } = useQuery({
     queryKey: [chain?.id],
     queryFn: () =>
       fetch(`${chainListsDirectory}/eip155-${chain?.id}.json`).then((res) =>
         res.json(),
       ),
+    refetchOnWindowFocus: false,
   });
+  useEffect(() => {
+    chain && refetch();
+  }, [chain?.id]);
 
-  const status = isFetching
-    ? 'disabled'
+  const status = isLoading
+    ? 'loading'
     : ([isSuccess, isError ? 'Not Registered' : 'Registered'] as [
         boolean,
         string,

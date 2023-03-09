@@ -558,6 +558,7 @@ export function useChainMetadata({
           return data[chain?.name] || null;
         });
     },
+    refetchOnWindowFocus: false,
   });
   useEffect(() => {
     query.refetch();
