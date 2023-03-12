@@ -12,6 +12,7 @@ import {
   ContractId,
   ContractIdByAddress,
   getSContractDetails,
+  getSContractProp,
 } from '@/features/network/contract';
 import { getSContractProvider } from '@/features/network/core';
 import { NETWORK } from '@/features/network/literals';
@@ -166,40 +167,52 @@ export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
  * @param param1
  * @returns
  */
+
+// these types are created because abitype doesn't support ABIs without stateMutability
+
+export type SContractFunctionName<TAbi extends (typeof ABI)[keyof typeof ABI]> =
+  Extract<
+    TAbi[number],
+    | { type: 'function'; stateMutability: 'view' }
+    | { type: 'function'; constant: true }
+  >['name'];
+
+export type SContractReadParams<
+  TAbi extends (typeof ABI)[keyof typeof ABI],
+  TFunctionName extends SContractFunctionName<TAbi>,
+  TBaseParams = Parameters<typeof useContractRead>[0],
+  TArgs = AbiParametersToPrimitiveTypes<
+    Extract<TAbi[number], { name: TFunctionName }>['inputs']
+  >,
+> = {
+  [K in keyof TBaseParams as Exclude<
+    K,
+    'args' | 'functionName' | 'abi' | 'address'
+  >]: TBaseParams[K];
+} & {
+  name: TFunctionName;
+  args?: TArgs;
+};
+
 export function useSContractRead<
   TContractId extends ContractId,
   TAbi extends (typeof ABI)[TContractId],
   TBaseParams extends Parameters<typeof useContractRead>[0],
-  TFunctionName extends Extract<
-    TAbi[number],
-    | { type: 'function'; stateMutability: 'view' }
-    | { type: 'function'; constant: true }
-  >['name'],
+  TFunctionName extends SContractFunctionName<TAbi>,
   TReturnData extends AbiTypeToPrimitiveType<
-    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
+    ExtractAbiFunction<TAbi, { name: TFunctionName }>['outputs'][number]['type']
   >,
 >(
   id: TContractId,
-  {
-    name,
-    ...params
-  }: {
-    [K in keyof TBaseParams as Exclude<
-      K,
-      'args' | 'functionName' | 'abi' | 'address'
-    >]: TBaseParams[K];
-  } & {
-    name: TFunctionName;
-    args?: AbiParametersToPrimitiveTypes<
-      ExtractAbiFunction<TAbi, TFunctionName>['inputs']
-    >;
-  },
+  { name, ...params }: SContractReadParams<TAbi, TFunctionName>,
 ) {
-  const { abi, address } = useSContract({ id });
-  const query = useContractRead({
+  // implementation
+  const address = getSContractProp(id, 'address') as Address;
+  const abi = getAbi(id);
+  const query = useContractRead<TAbi, TFunctionName, TReturnData>({
     ...params,
-    abi,
     address,
+    abi,
     functionName: name,
   });
   return {
@@ -244,7 +257,7 @@ export function useSContractReads<
 ) {
   const { abi, address } = useSContract({ id: id });
   const contracts = reads.map(({ name, ...oneRead }) => {
-    const params: TBaseParams = {
+    const params = {
       abi,
       address,
       functionName: name,
@@ -258,8 +271,8 @@ export function useSContractReads<
   });
   return {
     ...response,
-    data: response.data && Array.from(response.data),
-  } as typeof response & { data?: TReturnData[] };
+    data: response.data ? response.data : Array(reads.length),
+  } as typeof response & { data: (TReturnData | undefined)[] };
 }
 
 /**

@@ -1,4 +1,8 @@
-import { useExplorer } from '@/features/network/hooks';
+import {
+  useExplorer,
+  useSContractRead,
+  useSContractReads,
+} from '@/features/network/hooks';
 import { NETWORK } from './../network/literals';
 /**
  * @namespace Multisig
@@ -13,12 +17,11 @@ import {
   useSContract,
   useSContractApi,
 } from '@/features/network/hooks';
-import { useQueries, useQuery } from '@tanstack/react-query';
 import { Address } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
 import { useLocalStorage } from 'react-use';
-import { useBalance, useContractRead, useNetwork } from 'wagmi';
+import { useBalance, useNetwork } from 'wagmi';
 import { scope } from './core';
 
 const multisigContract = {
@@ -189,120 +192,73 @@ export function useMultisig({
 
   const balance = useBalance({ address: address });
 
-  const countsEnabled = Boolean(api && contract);
-
-  const countsQueries = [
-    {
-      ...defaultParams,
-      enabled: countsEnabled,
-      queryKey: queryKey(['countTotalTrx']),
-      queryFn: () =>
-        api
-          ?.getTransactionCount({
-            pending: true,
-            executed: true,
-          })
-          .then((val) => val.toNumber()),
+  const countReads = useSContractReads('MULTISIG_WALLET', {
+    select: (data) => {
+      return data.map((value) => value.toNumber()) as number[];
     },
-    {
-      ...defaultParams,
-      enabled: countsEnabled,
-      initialData: 0,
-      queryKey: queryKey(['countPendingTrx']),
-      queryFn: () =>
-        api
-          ?.getTransactionCount({
-            pending: true,
-            executed: false,
-          })
-          .then((val) => val.toNumber()),
-    },
-    {
-      ...defaultParams,
-      enabled: countsEnabled,
-      initialData: 0,
-      queryKey: queryKey(['countExecutedTrx']),
-      queryFn: () =>
-        api
-          ?.getTransactionCount({
-            pending: false,
-            executed: true,
-          })
-          .then((val) => val.toNumber()),
-    },
-    {
-      ...defaultParams,
-      enabled: countsEnabled,
-      initialData: 0,
-      queryKey: queryKey(['countReqConfirms']),
-      queryFn: () => api?.getRequired(),
-    },
-  ];
-
-  const [countTotalTrx, countPendingTrx, countExecutedTrx, countReqConfirms] =
-    useQueries({
-      queries: countsQueries,
-    });
-
+    reads: [
+      {
+        name: 'getTransactionCount',
+        args: [true, true],
+      },
+      {
+        name: 'getTransactionCount',
+        args: [true, false],
+      },
+      {
+        name: 'getTransactionCount',
+        args: [false, true],
+      },
+      {
+        name: 'required',
+      },
+    ],
+  });
+  const [countTotalTrx, countPendingTrx, countExecutedTrx, countReqdConfirms] =
+    countReads.data as (number | undefined)[];
   const counts = {
-    countTotalTrx,
-    countPendingTrx,
-    countExecutedTrx,
-    countReqConfirms,
+    ...countReads,
+    data: {
+      countTotalTrx,
+      countPendingTrx,
+      countExecutedTrx,
+      countReqdConfirms,
+    },
   };
 
-  // Derviatives
-
-  const owners = useContractRead({
-    address: contract.address,
-    abi: contract.abi,
-    functionName: 'getOwners',
+  const owners = useSContractRead('MULTISIG_WALLET', {
+    name: 'getOwners',
   });
 
-  // useQuery({
-  //   ...defaultParams,
-  //   enabled: Boolean(api),
-  //   queryKey: queryKey(['getOwners']),
-  //   initialData: () => [],
-  //   queryFn: () => {
-  //     return api?.getOwners();
-  //   },
-  // });
-
-  const pendingTrxIds = useQuery({
-    ...defaultParams,
-    enabled: Boolean(api && counts['countPendingTrx']?.data),
-    queryKey: queryKey(['pendingTrxIds']),
-    initialData: () => [],
-    queryFn: () => {
-      return api
-        ?.getTransactionIds({
-          from: ethers.BigNumber.from(0),
-          to: ethers.BigNumber.from(counts['countPendingTrx'].data),
-          pending: true,
-          executed: false,
-        })
-        .then((trxIds) => trxIds.map((trxId) => trxId.toNumber()));
+  const pendingTrxIds = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!counts.data.countPendingTrx,
+    name: 'getTransactionIds',
+    args: [
+      ethers.BigNumber.from(0),
+      ethers.BigNumber.from(counts.data.countPendingTrx || 0),
+      true,
+      false,
+    ],
+    select: (data) => {
+      return data.map((trxId) => trxId.toNumber()) as number[];
     },
   });
 
-  const executedTrxIds = useQuery({
-    ...defaultParams,
-    enabled: Boolean(api && counts.countExecutedTrx.data),
-    queryKey: queryKey(['executedTrxIds']),
-    initialData: () => [],
-    queryFn: () =>
-      api
-        ? api
-            .getTransactionIds({
-              from: ethers.BigNumber.from(0),
-              to: ethers.BigNumber.from(counts.countExecutedTrx.data),
-              pending: false,
-              executed: true,
-            })
-            .then((val) => val.map((v) => v.toNumber()))
-        : [],
+  const executedTrxIds = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!counts.data.countExecutedTrx,
+    name: 'getTransactionIds',
+    args: [
+      ethers.BigNumber.from(0),
+      ethers.BigNumber.from(counts.data.countExecutedTrx || 0),
+      false,
+      true,
+    ],
+    select: (data) => {
+      return data.map((trxId) => trxId.toNumber());
+    },
   });
+
+  console.log('AUDIT', pendingTrxIds, executedTrxIds);
 
   const { pastEvents } = useEvents({
     address: CONTRACT['MULTISIG_WALLET'].address,
@@ -317,33 +273,15 @@ export function useMultisig({
       return (prevEvents || []).concat(currEvents || []);
     });
 
-  // const pendingTrxs = useQueries({
-  //   queries: !pendingTrxIds.data
-  //     ? []
-  //     : pendingTrxIds.data.map((trx) => ({
-  //         enabled: Boolean(api && trx),
-  //         queryKey: queryKey(['pendingTrxIds', trx]),
-  //         initialData: () => [],
-  //         queryFn: () =>
-  //           api?.getTransaction({
-  //             transactionId: ethers.BigNumber.from(trx),
-  //           }),
-  //       })),
-  // });
-
   return {
     queryKey,
-    api,
-    connected,
-    chainId,
     contract,
-    data: {
-      ...counts,
-      balance,
-      owners,
-      pendingTrxIds,
-      executedTrxIds,
-      events,
-    },
+    api,
+    counts,
+    balance,
+    owners,
+    pendingTrxIds,
+    executedTrxIds,
+    events,
   };
 }

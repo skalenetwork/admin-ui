@@ -138,25 +138,23 @@ export default function Multisig() {
   const {
     queryKey,
     api: multisigApi,
-    connected,
-    chainId,
     contract,
-    data,
-  } = useMultisig({
-    address: activeWalletAddress,
-  });
-
-  const {
     balance,
     owners,
-    countTotalTrx,
-    countPendingTrx,
-    countExecutedTrx,
-    countReqConfirms,
+    counts: {
+      data: {
+        countTotalTrx,
+        countPendingTrx,
+        countExecutedTrx,
+        countReqdConfirms,
+      },
+    },
     pendingTrxIds,
     executedTrxIds,
     events,
-  } = data;
+  } = useMultisig({
+    address: activeWalletAddress,
+  });
 
   const [cachedOwners, setCachedOwners] = useLocalStorage<{
     [key: string]: {
@@ -277,7 +275,7 @@ export default function Multisig() {
             bodyClass="flex items-center"
           >
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {countReqConfirms?.data} conf
+              {countReqdConfirms} conf
             </p>
           </Card>
         </div>
@@ -293,7 +291,7 @@ export default function Multisig() {
         <div data-id="count_txs" data-s="2">
           <Card full heading="Total transactions" bodyClass="flex items-center">
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {countTotalTrx?.data} Txs
+              {countTotalTrx} Txs
             </p>
           </Card>
         </div>
@@ -305,7 +303,7 @@ export default function Multisig() {
             bodyClass="flex items-center"
           >
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {countPendingTrx?.data} Txs
+              {countPendingTrx} Txs
             </p>
           </Card>
         </div>
@@ -317,7 +315,7 @@ export default function Multisig() {
             bodyClass="flex items-center"
           >
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {countExecutedTrx?.data} Txs
+              {countExecutedTrx} Txs
             </p>
           </Card>
         </div>
@@ -351,11 +349,9 @@ export default function Multisig() {
               </div>
             }
           >
-            {!connected ? (
-              'Not Available'
-            ) : !owners ? (
+            {!owners ? (
               '...'
-            ) : owners.isFetching ? (
+            ) : owners.isLoading ? (
               <Prelay>
                 <span className="animate-bounce px-2">
                   <BoltIcon className="h-5" />
@@ -423,7 +419,7 @@ export default function Multisig() {
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
-              {!connected ? (
+              {chain.network !== NETWORK.SKALE ? (
                 <Prelay>Not supported by the network.</Prelay>
               ) : !pendingTrxIds ? (
                 <Prelay>...</Prelay>
@@ -458,9 +454,7 @@ export default function Multisig() {
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
-              {!connected
-                ? 'Not Available'
-                : !executedTrxIds
+              {!executedTrxIds
                 ? '...'
                 : executedTrxIds.isError
                 ? 'Failed to retrieve history'
