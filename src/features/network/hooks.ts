@@ -27,6 +27,7 @@ import {
   ExtractAbiEventNames,
   ExtractAbiFunction,
 } from 'abitype';
+import { ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { useAsyncFn } from 'react-use';
 import {
@@ -289,30 +290,93 @@ export function useSContractWrite<
     | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
     | { type: 'function'; constant: false }
   >['name'],
-  TBaseParams extends Parameters<
+  TBaseParams = Parameters<
     typeof usePrepareContractWrite<TAbi, TFunctionName>
   >[0],
 >(
   id: TContractId,
   {
     name,
+    autoConfirm = true,
     ...params
   }: Exclude<TBaseParams, 'abi' | 'address' | 'functionName'> & {
     name: TFunctionName;
+    autoConfirm?: boolean;
   },
 ) {
-  const { abi, address } = build.addressAbiPair(id);
+  const { address, abi } = build.addressAbiPair(id);
+  console.log('[audit] useSContractWrite, incoming', id, name, params);
 
-  const args = {
-    ...params,
-    abi,
-    address: address as Address,
-    functionName: name,
+  const iface = new ethers.utils.Interface(abi);
+  let destMethodEncoded;
+  try {
+    destMethodEncoded = iface.encodeFunctionData(
+      name,
+      params.args,
+    ) as `0x${string}`;
+  } catch (e) {}
+
+  const m = build.addressAbiPair('MARIONETTE');
+  const marionette = {
+    ...m,
+    interface: new ethers.utils.Interface(m.abi),
   };
+  let marionetteExecEncoded;
+  try {
+    const args = [address, 0, destMethodEncoded];
+    marionetteExecEncoded = marionette.interface.encodeFunctionData(
+      'execute',
+      args,
+    ) as `0x${string}`;
+  } catch (e) {}
 
-  const { config } = usePrepareContractWrite(args);
+  console.log(
+    '[audit] useSContractWrite, encoded::',
+    'marionette',
+    marionetteExecEncoded,
+    'dest',
+    destMethodEncoded,
+  );
 
-  return useContractWrite(config);
+  // transaction from EOA directly to destination contract
+  const { config: eoaConfig } = usePrepareContractWrite({
+    ...params,
+    address: address as Address,
+    abi,
+    functionName: name,
+  });
+
+  // transaction initiated by EOA on multisig to marionette through to destination contract
+  const multisig = build.addressAbiPair('MULTISIG_WALLET');
+  const { config: mnmConfig } = usePrepareContractWrite({
+    ...params,
+    address: multisig.address,
+    abi: multisig.abi,
+    ...params,
+    functionName: 'submitTransaction',
+    args: [marionette.address, 0, marionetteExecEncoded],
+    overrides: {
+      ...params.overrides,
+      gasLimit: Math.max(3000000, Number(params?.overrides?.gasLimit || 0)),
+    },
+  });
+
+  false &&
+    console.log(
+      '[audit] useSContractWrite',
+      'eoaConfig',
+      eoaConfig,
+      'mnmConfig',
+      mnmConfig,
+    );
+
+  const eoa = useContractWrite(eoaConfig);
+  const mnm = useContractWrite(mnmConfig);
+  return {
+    ...(eoa.write ? eoa : mnm),
+    eoa,
+    mnm,
+  };
 }
 
 /**
