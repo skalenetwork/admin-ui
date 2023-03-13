@@ -9,6 +9,7 @@ import { BigNumber } from 'ethers';
 import prettyBytes from 'pretty-bytes';
 import { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { tw } from 'twind';
 
 import type { WidgetWithAlertProps } from '../types';
@@ -75,11 +76,9 @@ export default function FileStorageReserve({
   const amount =
     Number(form.watch('reserveSpaceAmount')) * Math.pow(1024, multiplier);
 
-  const args = [form.watch('reserveSpaceAddress'), BigNumber.from(amount)];
-
-  const { write: reserveSpace, isLoading } = useSContractWrite('FILESTORAGE', {
+  const reserveSpace = useSContractWrite('FILESTORAGE', {
     name: 'reserveSpace',
-    args,
+    args: [form.watch('reserveSpaceAddress'), BigNumber.from(amount)],
   });
 
   return (
@@ -102,9 +101,8 @@ export default function FileStorageReserve({
                 <button
                   className={tw(
                     'btn btn-wide w-5/6 m-auto',
-                    isLoading ? 'loading' : '',
+                    reserveSpace.isLoading ? 'loading' : '',
                   )}
-                  disabled={isLoading}
                 >
                   Reserve file space
                 </button>
@@ -116,10 +114,17 @@ export default function FileStorageReserve({
               {
                 onSubmit: form.handleSubmit(
                   (data) => {
-                    reserveSpace?.();
+                    reserveSpace.writeAsync &&
+                      toast.promise(reserveSpace.writeAsync?.(), {
+                        pending: 'Reserving space',
+                        success: 'Space reserved',
+                        error: 'Failed to reserve space',
+                      });
                     toggleAlert(id)(false);
                   },
-                  (err) => {},
+                  (err) => {
+                    console.error(err);
+                  },
                 ),
                 content: (
                   <div className="w-2/3 m-auto">
@@ -156,7 +161,14 @@ export default function FileStorageReserve({
                   </div>
                 ),
                 actionElement({ className }) {
-                  return <button className={className}>Reserve</button>;
+                  return (
+                    <button
+                      className={className}
+                      disabled={reserveSpace.isLoading || !reserveSpace.write}
+                    >
+                      Reserve
+                    </button>
+                  );
                 },
               },
             ]}

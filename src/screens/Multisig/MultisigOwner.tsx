@@ -1,9 +1,9 @@
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useSContract } from '@/features/network/hooks';
+import { useSContractWrite } from '@/features/network/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { Address } from 'wagmi';
 
 export function MultisigOwner({
   name,
@@ -14,17 +14,10 @@ export function MultisigOwner({
   address: Address;
   showControls?: boolean;
 }) {
-  const { abi, address: contractAddress } = useSContract({
-    id: 'MULTISIG_WALLET',
-  });
-
-  const { config: deleteOwner } = usePrepareContractWrite({
-    abi,
-    address: contractAddress,
-    functionName: 'removeOwner',
+  const { writeAsync } = useSContractWrite('MULTISIG_WALLET', {
+    name: 'removeOwner',
     args: [address],
   });
-  const { writeAsync } = useContractWrite(deleteOwner);
 
   return (
     <motion.div

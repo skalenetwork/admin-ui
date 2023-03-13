@@ -69,14 +69,6 @@ export default function RoleAssigner() {
     return foundRole ? foundRole.description : '';
   }, [role, contractAddress]);
 
-  // const { config } = usePrepareContractWrite({
-  //   abi,
-  //   address: contractAddress,
-  //   functionName: 'grantRole',
-  //   args: [roleHash, assigneeAddress],
-  // });
-  // const { writeAsync } = useContractWrite(config);
-
   const { writeAsync } = useSContractWrite(selectedContractId, {
     enabled: !!(roleHash && assigneeAddress),
     name: 'grantRole',
