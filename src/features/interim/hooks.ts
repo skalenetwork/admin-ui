@@ -63,9 +63,10 @@ export function useMtm() {
 
   return {
     ...writer,
-    isEnabled: flags?.mtmEnabled,
     toggle: writer.write,
     toggleAsync: writer.writeAsync,
+    isEnabled: flags?.mtmEnabled,
+    refetch,
   };
 }
 
@@ -74,7 +75,7 @@ export function useMtm() {
  * @returns
  */
 export function useFcd() {
-  const { flags, connected } = useConfigController();
+  const { flags, connected, refetch } = useConfigController();
 
   const writer = useSContractWrite('CONFIG_CONTROLLER', {
     enabled: !!connected,
@@ -88,5 +89,6 @@ export function useFcd() {
     isEnabled: flags?.fcdEnabled,
     toggle: writer.write,
     toggleAsync: writer.writeAsync,
+    refetch,
   };
 }
