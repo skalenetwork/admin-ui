@@ -9,7 +9,7 @@ import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { Cross2Icon, DiscIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
@@ -414,12 +414,12 @@ export default function Multisig() {
         >
           <Card
             lean
-            heading={`Queue ( ${pendingTrxIds?.data?.length} )`}
+            heading={`Queue ( ${pendingTrxIds?.data?.length || ''} )`}
             className="h-1/2 !bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
-              {chain.network !== NETWORK.SKALE ? (
+              {chain?.network !== NETWORK.SKALE ? (
                 <Prelay>Not supported by the network.</Prelay>
               ) : !pendingTrxIds ? (
                 <Prelay>...</Prelay>
@@ -441,40 +441,41 @@ export default function Multisig() {
                   />
                 ))
               ) : (
-                <Prelay>
-                  <DiscIcon />
-                </Prelay>
+                <></>
               )}
             </div>
           </Card>
           <Card
             lean
-            heading={`History ( ${executedTrxIds?.data?.length} )`}
+            heading={`History ( ${executedTrxIds?.data?.length || ''} )`}
             className="h-1/2 !bg-[var(--slate)]"
             bodyClass="scrollbar"
           >
             <div className="flex flex-col gap-2">
-              {!executedTrxIds
-                ? '...'
-                : executedTrxIds.isError
-                ? 'Failed to retrieve history'
-                : executedTrxIds.data
-                ? executedTrxIds.data.map((id, i) => (
-                    <EventSummary
-                      key={id}
-                      id={id}
-                      events={
-                        !events
-                          ? []
-                          : events.filter(
-                              (event) =>
-                                event?.args?.['transactionId']?.toNumber() ===
-                                id,
-                            )
-                      }
-                    />
-                  ))
-                : 'Loading'}
+              {chain?.network !== NETWORK.SKALE ? (
+                <Prelay>Not supported by the network.</Prelay>
+              ) : !executedTrxIds ? (
+                <Prelay>...</Prelay>
+              ) : executedTrxIds.isError ? (
+                <Prelay>Failed to retrieve queue</Prelay>
+              ) : executedTrxIds.data ? (
+                executedTrxIds.data.map((id, i) => (
+                  <EventSummary
+                    key={id}
+                    id={id}
+                    events={
+                      !events
+                        ? []
+                        : events.filter(
+                            (event) =>
+                              event?.args?.['transactionId']?.toNumber() === id,
+                          )
+                    }
+                  />
+                ))
+              ) : (
+                <></>
+              )}
             </div>
           </Card>
         </Card>

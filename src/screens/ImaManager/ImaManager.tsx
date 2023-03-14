@@ -114,7 +114,7 @@ const SelectedPeerChainItem = ({
     network: selectedOriginChain?.network,
   });
   const mappingsLength = useQuery({
-    enabled: !!(tokenManager?.api && chain),
+    enabled: false && !!(tokenManager?.api && chain),
     queryKey: ['CUSTOM:tokenMappings'],
     queryFn: async () => {
       console.log('tokenManager', tokenManager);
@@ -133,19 +133,21 @@ const SelectedPeerChainItem = ({
   const ethereumMappingLength = useSContractRead(
     contractId as 'DEPOSIT_BOX_ERC20',
     {
-      enabled: !!(
-        chain &&
-        contractId &&
-        selectedOriginChain?.network === NETWORK.ETHEREUM &&
-        selectedStandard
-      ),
+      enabled:
+        false &&
+        !!(
+          chain &&
+          contractId &&
+          selectedOriginChain?.network === NETWORK.ETHEREUM &&
+          selectedStandard
+        ),
       name: `getSchainToAll${selectedStandard?.name.toUpperCase()}Length`,
       args: [chain?.name],
       chainId: selectedOriginChain?.id,
     },
   );
   const ethereumMappings = useSContractRead(contractId as 'DEPOSIT_BOX_ERC20', {
-    enabled: !!(ethereumMappingLength.data?.gt(0) && selectedStandard),
+    enabled: false && !!(ethereumMappingLength.data?.gt(0) && selectedStandard),
     name: `getSchainToAll${selectedStandard?.name.toUpperCase()}`,
     args: [chain?.name, BigNumber.from(0), ethereumMappingLength.data],
     chainId: selectedOriginChain?.id,
@@ -416,15 +418,17 @@ export default function ImaManager() {
             ) : chain?.network !== NETWORK.SKALE ? (
               <Prelay>Switch to an SChain to view connected chains</Prelay>
             ) : (
-              chains.map(({ name }) => (
-                <PeerChainItem
-                  key={name}
-                  name={name}
-                  tokenList={[]}
-                  selected={selectedChain === name}
-                  onSelect={() => setSelectedChain(name)}
-                />
-              ))
+              chains
+                .filter((c) => c.network === NETWORK.SKALE)
+                .map(({ name }) => (
+                  <PeerChainItem
+                    key={name}
+                    name={name}
+                    tokenList={[]}
+                    selected={selectedChain === name}
+                    onSelect={() => setSelectedChain(name)}
+                  />
+                ))
             )}
           </div>
           <div>

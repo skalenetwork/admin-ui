@@ -387,6 +387,7 @@ export function useSContractWrite<
         }[]
       ).findIndex((trx) => {
         return (
+          !!trx &&
           trx.destination === marionette.address.toLowerCase() &&
           trx.data === marionetteExecEncoded
         );
