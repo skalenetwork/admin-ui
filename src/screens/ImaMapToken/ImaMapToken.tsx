@@ -313,7 +313,7 @@ export default function ImaMapToken() {
 
   const { address } = useAccount();
 
-  const toBeDeployedData = ERC20Standard.bytecode + constructorParams;
+  const toBeDeployedData = ERC20Standard.bytecode + constructorParams.slice(2);
 
   const { config } = usePrepareSendTransaction({
     request: {

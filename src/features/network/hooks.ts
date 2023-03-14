@@ -388,8 +388,9 @@ export function useSContractWrite<
       ).findIndex((trx) => {
         return (
           !!trx &&
-          trx.destination === marionette.address.toLowerCase() &&
-          trx.data === marionetteExecEncoded
+          !!marionetteExecEncoded &&
+          trx.destination.toLowerCase() === marionette.address.toLowerCase() &&
+          trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase()
         );
       });
   const existingTrxId: undefined | number =
@@ -410,15 +411,15 @@ export function useSContractWrite<
       return data && (data as BigNumber).toNumber();
     },
   });
+
   false &&
-    console.log(
-      '[audit]',
-      'pendingTrxs',
+    console.log('[audit] useSContractWrite', id, name, {
       pendingTrxIds,
       pendingTrxs,
+      existingTrxIndex,
       existingTrxId,
       existingTrxConfirmCount,
-    );
+    });
 
   // create a confirm writer if transaction is duplicate
 
