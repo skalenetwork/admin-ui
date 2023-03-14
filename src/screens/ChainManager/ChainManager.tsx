@@ -12,6 +12,7 @@ import { useStorageSpace } from '@/features/storage/hooks';
 import { MinusCircledIcon } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useNetwork } from 'wagmi';
 import type { WidgetWithAlertProps } from '../types';
 
@@ -29,6 +30,7 @@ const FormattedStatus = ({
     | 'disabled'
     | 'no-auth'
     | 'pending'
+    | 'executing'
     | [true, string]
     | [false, string];
 }) => {
@@ -40,6 +42,10 @@ const FormattedStatus = ({
     <span className="ml-6 text-sm text-[var(--gray8)]">Not Supported</span>
   ) : status === 'pending' ? (
     <span className="ml-6 text-sm text-[var(--yellow10)]">Pending Change</span>
+  ) : status === 'executing' ? (
+    <span className="ml-6 text-sm text-[var(--yellow10)]">
+      Executing Change
+    </span>
   ) : status[0] === true ? (
     <span className="ml-6 text-sm text-[var(--green10)]">
       {status[1] || 'Disabled'}
@@ -90,7 +96,16 @@ export const WidgetConfigFcd = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isLoading, isError } = useFcd();
+  const {
+    toggle,
+    writeAsync,
+    isEnabled,
+    isSuccess,
+    isLoading,
+    isError,
+    confirmed,
+    refetch,
+  } = useFcd();
   const status =
     isEnabled === undefined
       ? 'loading'
@@ -131,7 +146,19 @@ export const WidgetConfigFcd = ({
             } Free Contract Deployment?`}
             description="Please confirm this action"
             onAction={async () => {
-              toggle?.();
+              writeAsync &&
+                toast.promise(
+                  async () => {
+                    const { wait } = await writeAsync?.();
+                    await wait();
+                    return refetch();
+                  },
+                  {
+                    pending: 'Toggling FCD',
+                    success: 'FCD status changed',
+                    error: 'Failed to change FCD ',
+                  },
+                );
               return {
                 status: 'success',
               };

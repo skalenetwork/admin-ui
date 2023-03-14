@@ -1,3 +1,4 @@
+import { useMultisig } from '@/features/multisig/hooks';
 /**
  * @namespace Network
  * @module NetworkHooks
@@ -27,6 +28,7 @@ import {
   ExtractAbiEventNames,
   ExtractAbiFunction,
 } from 'abitype';
+import { BigNumber, ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { useAsyncFn } from 'react-use';
 import {
@@ -40,6 +42,7 @@ import {
   usePrepareContractWrite,
   useProvider,
   useSigner,
+  useWaitForTransaction,
 } from 'wagmi';
 
 const { chainMetadataUrl } = build;
@@ -289,30 +292,220 @@ export function useSContractWrite<
     | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
     | { type: 'function'; constant: false }
   >['name'],
-  TBaseParams extends Parameters<
+  TBaseParams = Parameters<
     typeof usePrepareContractWrite<TAbi, TFunctionName>
   >[0],
 >(
   id: TContractId,
   {
     name,
+    autoConfirm = true,
     ...params
   }: Exclude<TBaseParams, 'abi' | 'address' | 'functionName'> & {
     name: TFunctionName;
+    autoConfirm?: boolean;
   },
 ) {
-  const { abi, address } = build.addressAbiPair(id);
+  const { address, abi } = build.addressAbiPair(id);
+  console.log('[audit] useSContractWrite, incoming', id, name, params);
 
-  const args = {
+  const iface = new ethers.utils.Interface(abi);
+  let destMethodEncoded;
+  try {
+    destMethodEncoded = iface.encodeFunctionData(
+      name,
+      params.args,
+    ) as `0x${string}`;
+  } catch (e) {}
+
+  const m = build.addressAbiPair('MARIONETTE');
+  const marionette = {
+    ...m,
+    interface: new ethers.utils.Interface(m.abi),
+  };
+  let marionetteExecEncoded: `0x${string}`;
+  try {
+    const args = [address, 0, destMethodEncoded];
+    marionetteExecEncoded = marionette.interface.encodeFunctionData(
+      'execute',
+      args,
+    ) as `0x${string}`;
+  } catch (e) {}
+
+  false &&
+    console.log(
+      '[audit] useSContractWrite, encoded::',
+      'marionette',
+      marionetteExecEncoded,
+      'dest',
+      destMethodEncoded,
+    );
+
+  // transaction from EOA directly to destination contract
+
+  const { config: eoaConfig } = usePrepareContractWrite({
     ...params,
-    abi,
     address: address as Address,
+    abi,
     functionName: name,
+  });
+
+  // transaction initiated by EOA on multisig to marionette through to destination contract
+
+  const multisig = build.addressAbiPair('MULTISIG_WALLET');
+  const { config: mnmConfig } = usePrepareContractWrite({
+    ...params,
+    address: multisig.address,
+    abi: multisig.abi,
+    functionName: 'submitTransaction',
+    args: [marionette.address, 0, marionetteExecEncoded],
+    overrides: {
+      ...params.overrides,
+      gasLimit: Math.max(3000000, Number(params?.overrides?.gasLimit || 0)),
+    },
+  });
+
+  // from args: evaluate if transaction is duplicate of unconfirmed transaction
+
+  const { pendingTrxIds, counts } = useMultisig();
+  const requiredConfirmations = counts.data.countReqdConfirms;
+  const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
+    enabled: pendingTrxIds.isSuccess,
+    reads: (pendingTrxIds.data || []).map((trxId) => ({
+      name: 'transactions',
+      args: [ethers.BigNumber.from(trxId)] as const,
+    })),
+  });
+  const existingTrxIndex: undefined | number = !pendingTrxs.data
+    ? undefined
+    : (
+        pendingTrxs.data as {
+          data: `0x${string}`;
+          destination: `0x${string}`;
+          executed: boolean;
+          value: BigNumber;
+        }[]
+      ).findIndex((trx) => {
+        return (
+          trx.destination === marionette.address.toLowerCase() &&
+          trx.data === marionetteExecEncoded
+        );
+      });
+  const existingTrxId: undefined | number =
+    !pendingTrxIds.data || existingTrxIndex === undefined
+      ? undefined
+      : existingTrxIndex < 0
+      ? existingTrxIndex
+      : (pendingTrxIds.data[existingTrxIndex as number] as number);
+
+  const existingTrxConfirmCount = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!(existingTrxId && existingTrxId >= 0),
+    name: 'getConfirmationCount',
+    args:
+      existingTrxId && existingTrxId >= 0
+        ? [BigNumber.from(existingTrxId)]
+        : undefined,
+    select: (data) => {
+      return data && (data as BigNumber).toNumber();
+    },
+  });
+  false &&
+    console.log(
+      '[audit]',
+      'pendingTrxs',
+      pendingTrxIds,
+      pendingTrxs,
+      existingTrxId,
+      existingTrxConfirmCount,
+    );
+
+  // create a confirm writer if transaction is duplicate
+
+  const { config: confirmConfig } = usePrepareContractWrite({
+    address: multisig.address,
+    abi: multisig.abi,
+    functionName: 'confirmTransaction',
+    args:
+      existingTrxId && existingTrxId >= 0
+        ? [BigNumber.from(existingTrxId)]
+        : undefined,
+  });
+  const mnmConfirmTx = useContractWrite(confirmConfig);
+  const mnmConfirmTxWait = useWaitForTransaction({
+    hash: mnmConfirmTx.data?.hash,
+    onSuccess: () => {
+      existingTrxConfirmCount.refetch();
+    },
+  });
+
+  const _eoa = useContractWrite(eoaConfig);
+  const _eoaWait = useWaitForTransaction({
+    hash: _eoa.data?.hash,
+  });
+  const _mnm = useContractWrite(mnmConfig);
+  const _mnmWait = useWaitForTransaction({
+    hash: _mnm.data?.hash,
+  });
+
+  false &&
+    console.log(
+      '[audit] useSContractWrite',
+      '_eoa',
+      _eoa,
+      '_mnm',
+      _mnm,
+      'mnmConfirmTx',
+      mnmConfirmTx,
+    );
+
+  // expose redundant interface with sufficient states and finality data
+
+  const mnmAction = mnmConfirmTx.write ? 'confirm' : 'submit';
+  const mnmConfirms = {
+    required: requiredConfirmations,
+    confirmed: existingTrxConfirmCount.data,
+  };
+  // @todo include executed state
+  const mnmIsFinalized =
+    !!(mnmConfirms.confirmed && mnmConfirms.required) &&
+    mnmConfirms.confirmed >= mnmConfirms.required;
+
+  const returnData = {
+    eoa: {
+      confirmed: _eoaWait.isSuccess,
+      failed: _eoaWait.isError,
+      receipt: _eoaWait.data,
+      isFinalized: !!_eoaWait.data,
+      ..._eoa,
+    },
+    mnm:
+      mnmAction === 'confirm'
+        ? {
+            mnmAction: 'confirm',
+            mnmConfirms,
+            confirmed: mnmConfirmTxWait.isSuccess,
+            failed: mnmConfirmTxWait.isError,
+            receipt: mnmConfirmTxWait.data,
+            isFinalized: mnmIsFinalized,
+            ...mnmConfirmTx,
+          }
+        : {
+            mnmAction: 'submit',
+            mnmConfirms,
+            confirmed: _mnmWait.isSuccess,
+            failed: _mnmWait.isError,
+            receipt: _mnmWait.data,
+            isFinalized: mnmIsFinalized,
+            ..._mnm,
+          },
   };
 
-  const { config } = usePrepareContractWrite(args);
+  const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;
 
-  return useContractWrite(config);
+  return {
+    ...defaultWrite,
+    ...returnData,
+  };
 }
 
 /**
