@@ -34,7 +34,7 @@ export const build = {
     address: TAddress,
   ): ContractIdByAddress<TAddress> {
     return Object.keys(CONTRACT).find(
-      (key) => CONTRACT[key].address === address,
+      (key) => CONTRACT[key].address.toLowerCase() === address.toLowerCase(),
     ) as ContractIdByAddress<TAddress>;
   },
 };

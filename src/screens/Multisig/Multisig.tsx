@@ -3,18 +3,23 @@ import { PeopleIcon } from '@/components/Icons/Icons';
 import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
-import { CONTRACT } from '@/features/network/contract';
+import { CONTRACT, getSContractProp } from '@/features/network/contract';
 import { useSContractWrite } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
+import { build } from '@/features/network/manifest';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { CircleBackslashIcon, PlusCircledIcon } from '@radix-ui/react-icons';
+import {
+  CircleBackslashIcon,
+  MinusCircledIcon,
+  PlusCircledIcon,
+} from '@radix-ui/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useLocalStorage } from 'react-use';
 import { Address, useNetwork } from 'wagmi';
@@ -34,6 +39,10 @@ export function EventSummary({
 }) {
   const confirmTx = useSContractWrite('MULTISIG_WALLET', {
     name: 'confirmTransaction',
+    args: id ? [BigNumber.from(id)] : undefined,
+  });
+  const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
+    name: 'revokeConfirmation',
     args: id ? [BigNumber.from(id)] : undefined,
   });
 
@@ -62,13 +71,29 @@ export function EventSummary({
       return submitEvent?.getBlock();
     },
   });
-  const elapsed = block
-    ? humanizeDuration(
-        (Number(block.timestamp) - Math.floor(new Date().getTime() / 1000)) *
-          1000,
-        { largest: 1 },
-      )
-    : 0;
+
+  const elapsed = useMemo(() => {
+    return block
+      ? humanizeDuration(
+          (Number(block.timestamp) - Math.floor(new Date().getTime() / 1000)) *
+            1000,
+          { largest: 1 },
+        )
+      : 0;
+  }, [block]);
+
+  const destAddress =
+    transaction?.data && '0x' + transaction?.data.slice(34, 34 + 40);
+
+  const [destName, destMethod] = useMemo(() => {
+    const contractId = destAddress && build.contractIdFromAddress(destAddress);
+    const destName = contractId
+      ? getSContractProp(contractId, 'name')
+      : destAddress?.slice(0, 4);
+    const destMethod =
+      transaction?.data && transaction.data.slice(264, 264 + 10);
+    return [destName, destMethod];
+  }, [destAddress]);
 
   return (
     <Card
@@ -78,22 +103,44 @@ export function EventSummary({
           <h5 className="flex items-center justify-between">
             <span>
               {id} -{' '}
-              {transaction
-                ? transaction.data.slice(264, 264 + 10)
-                : 'Contract Interacion <>'}{' '}
+              {destName ? (
+                <>
+                  {destName.length <= 12
+                    ? destName
+                    : destName.slice(0, 6) +
+                      '..' +
+                      destName.slice(destName.length - 6)}{' '}
+                  <code className="text-xs">{destMethod}</code>
+                </>
+              ) : (
+                'Contract Interacion <>'
+              )}{' '}
             </span>
-            {failed && (
+            {failed && false && (
               <CircleBackslashIcon className="align-middle text-[var(--red10)]" />
             )}
-            {!executed && !failed && (
-              <button
-                className="align-middle"
-                disabled={!confirmTx.write}
-                onClick={() => confirmTx.write()}
-              >
-                <PlusCircledIcon className="align-middle text-[var(--green10)]" />
-              </button>
-            )}
+            {!executed &&
+              (confirmTx.write ? (
+                <button
+                  className="align-middle"
+                  disabled={!confirmTx.write}
+                  onClick={() => confirmTx.write?.()}
+                  title="Confirm"
+                >
+                  <PlusCircledIcon className="align-middle text-[var(--green10)]" />
+                </button>
+              ) : revokeConfirmTx.write ? (
+                <button
+                  className="align-middle"
+                  disabled={!revokeConfirmTx.write}
+                  onClick={() => revokeConfirmTx.write?.()}
+                  title="Revoke Confirmation"
+                >
+                  <MinusCircledIcon className="align-middle text-[var(--red10)]" />
+                </button>
+              ) : (
+                <></>
+              ))}
           </h5>
           <span className="text-sm text-[var(--gray10)]">
             {elapsed ? `About ${elapsed} ago` : '. . .'}
