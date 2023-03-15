@@ -481,7 +481,9 @@ export function useSContractWrite<
       ..._eoa,
     },
     mnm:
-      mnmAction === 'confirm'
+      id === 'MULTISIG_WALLET'
+        ? undefined
+        : mnmAction === 'confirm'
         ? {
             mnmAction: 'confirm',
             mnmConfirms,
@@ -502,7 +504,10 @@ export function useSContractWrite<
           },
   };
 
-  const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;
+  const defaultWrite =
+    returnData.eoa.write || id === 'MULTISIG_WALLET'
+      ? returnData.eoa
+      : returnData.mnm;
 
   return {
     ...defaultWrite,

@@ -240,7 +240,7 @@ export function useMultisig({
       false,
     ],
     select: (data) => {
-      return data.map((trxId) => trxId.toNumber()) as number[];
+      return data.map((trxId) => trxId.toNumber()).reverse() as number[];
     },
   });
 
@@ -254,7 +254,7 @@ export function useMultisig({
       true,
     ],
     select: (data) => {
-      return data.map((trxId) => trxId.toNumber());
+      return data.map((trxId) => trxId.toNumber()).reverse() as number[];
     },
   });
 

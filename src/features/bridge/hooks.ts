@@ -108,8 +108,8 @@ export function useChainConnect({ chainName }: { chainName: string }) {
     name: 'connectSchain',
     args: [chainName],
     overrides: {
-      gasPrice: ethers.BigNumber.from(100000000000),
-      gasLimit: ethers.BigNumber.from(8000000),
+      gasPrice: 100000,
+      gasLimit: 8000000,
     },
   });
 

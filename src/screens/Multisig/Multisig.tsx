@@ -4,12 +4,13 @@ import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
 import { CONTRACT } from '@/features/network/contract';
+import { useSContractWrite } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { Cross2Icon } from '@radix-ui/react-icons';
+import { CircleBackslashIcon, PlusCircledIcon } from '@radix-ui/react-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
@@ -31,12 +32,21 @@ export function EventSummary({
   id: any;
   events: ethers.Event[];
 }) {
+  const confirmTx = useSContractWrite('MULTISIG_WALLET', {
+    name: 'confirmTransaction',
+    args: id ? [BigNumber.from(id)] : undefined,
+  });
+
+  // evaluate multisig tx state
+
   const countConfirmations = events.filter(
     (e) => e.event === 'Confirmation',
   ).length;
   const submitEvent = events.find((e) => e.event === 'Submission');
   const failed = events.some((e) => e.event === 'ExecutionFailure');
   const executed = events.some((e) => e.event === 'Execution');
+
+  // evaluate time elapsed
 
   const { data: transaction } = useQuery({
     enabled: Boolean(!executed && submitEvent),
@@ -45,7 +55,6 @@ export function EventSummary({
       return submitEvent?.getTransaction();
     },
   });
-
   const { data: block } = useQuery({
     enabled: Boolean(submitEvent),
     queryKey: ['block', submitEvent?.blockNumber],
@@ -53,7 +62,6 @@ export function EventSummary({
       return submitEvent?.getBlock();
     },
   });
-
   const elapsed = block
     ? humanizeDuration(
         (Number(block.timestamp) - Math.floor(new Date().getTime() / 1000)) *
@@ -74,14 +82,21 @@ export function EventSummary({
                 ? transaction.data.slice(264, 264 + 10)
                 : 'Contract Interacion <>'}{' '}
             </span>
-            {failed ? (
-              <Cross2Icon className="align-middle text-[var(--red10)]" />
-            ) : (
-              ''
+            {failed && (
+              <CircleBackslashIcon className="align-middle text-[var(--red10)]" />
+            )}
+            {!executed && !failed && (
+              <button
+                className="align-middle"
+                disabled={!confirmTx.write}
+                onClick={() => confirmTx.write()}
+              >
+                <PlusCircledIcon className="align-middle text-[var(--green10)]" />
+              </button>
             )}
           </h5>
           <span className="text-sm text-[var(--gray10)]">
-            About {elapsed} ago
+            {elapsed ? `About ${elapsed} ago` : '. . .'}
           </span>
         </div>
       }
