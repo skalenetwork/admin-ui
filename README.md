@@ -105,6 +105,98 @@ This directly enables:
 1. Portability of client-agnostic stateful features, and submodules.
 2. Portability of stateful screens (react).
 
+# SDK Usage
+
+@ v0.3 packages are unbundled exports i.e. they can only be used as direct imports into TS projects. [TO BE TESTED]
+
+## Install
+
+```sh
+yarn add skalenetwork/admin-ui
+```
+
+## Setup
+
+All react hooks are operational only within `wagmi` context.
+
+```tsx
+/** in your entrypoint file **/
+
+// within main renderer
+<WagmiConfig client={wagmiClient}>
+  <App />
+</WagmiConfig>
+```
+
+Refer to [wagmi docs](https://wagmi.sh/react/getting-started) for complete setup example.
+
+## Examples
+
+- **Read** from pre-deployed contract
+
+```tsx
+// single-read
+
+// multi-read fits best with TS for similarly typed return values
+```
+
+- **Write** to pre-deployed contract
+
+```ts
+import { useSContractWrite } from '@skalenetwork/admin-ui/features';
+
+const writer = useSContractWrite('TOKEN_MANAGER_LINKER', {
+  name: 'connectSChain',
+  args: ['staging-aware-chief-gianfar']
+});
+
+const handleSubmit = useCallback(() => {
+  write?.write();
+}. [writer.write]);
+
+const handleSubmitWithConfirm = useCallback(async () => {
+  if(!writer.writeAsync) return;
+  const { wait } = await writer.writeAsync();
+  await wait();
+}, [writer.writeAsync]);
+
+```
+
+What's in the writer?
+
+```tsx
+// writer exposes full state through lifecycle of contract mutation
+
+const { eoa, mnm, ...rest } = writer;
+
+// eoa = writer with Externally Owned Account as signer
+// mnm = writer with Multisig Owner as signer
+
+// rest is copy of either eoa or mnm depending on current authorization
+
+// exposing default outputs of useContractWrite from wagmi and some extras
+
+const { mnmAction, mnmConfirms, receipt, isConfirmed, isFailed } = rest;
+
+const isUsingMultisig = mnmAction;
+const isUsingMultisigConfirm = mnmAction === 'confirm';
+const isUsingMultisigSubmit = mnmAction === 'submit';
+
+const countMultisigConfirmations = mnmConfirms?.confirmed;
+const countMultisigRequiredConfirmations = mnmConfirms?.required;
+```
+
+- **Guard** UI actions from unready writer
+
+```jsx
+// SButton serves as a convenience button only for reactive feedback
+// action is to be explicitly initiated with button handlers or form submit
+
+<SButton className="btn" writer={writer} onClick={() => handleSubmit()}>
+  Very smart submit
+</SButton>
+```
+
 # @next
 
 `@/features/icm`
@@ -113,16 +205,6 @@ Among features, ICM (inter-chain messaging) is a domain that would horizontally 
 
 Diagram highlighting typical cross-chain interaction. On the contrary, arbitrary message passing is more suitable for `icm` whereas `multsig` could be one of the consumers of `icm` when supporting foreign multisigs.
 ![](./public/icm.png)
-
-# Advanced ACL rules (scope-overflow)
-
-Identify members of contracts
-
-```matlab
-AddressableMember[] ⊆ filter(type:function && output*.type:address)`
-```
-
-`AddressibleMember` is a single or multi-address getter, which becomes candidate for `RoleDetail.owners[]`, `RoleDetail.granters[]` and `RoleDetail.grantees[]`. Each set could have further conditions, demanding an ACL tree, manually maintained or statically generated from contracts (modifier analysis).
 
 # Links
 
