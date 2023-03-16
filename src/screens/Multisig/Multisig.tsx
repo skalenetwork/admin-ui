@@ -3,23 +3,16 @@ import { PeopleIcon } from '@/components/Icons/Icons';
 import Select from '@/components/Select/Select';
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
-import { CONTRACT, getSContractProp } from '@/features/network/contract';
-import { useSContractWrite } from '@/features/network/hooks';
+import { getAbi } from '@/features/network/abi/abi';
+import { CONTRACT } from '@/features/network/contract';
 import { NETWORK } from '@/features/network/literals';
-import { build } from '@/features/network/manifest';
 import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import {
-  CircleBackslashIcon,
-  MinusCircledIcon,
-  PlusCircledIcon,
-} from '@radix-ui/react-icons';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
-import humanizeDuration from 'humanize-duration';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useLocalStorage } from 'react-use';
 import { Address, useNetwork } from 'wagmi';
@@ -29,129 +22,11 @@ import {
   FlowAddNewTransaction,
 } from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
+import { WidgetMultisigTx } from './WidgetMultisigTx';
 
-export function EventSummary({
-  id,
-  events = [],
-}: {
-  id: any;
-  events: ethers.Event[];
-}) {
-  const confirmTx = useSContractWrite('MULTISIG_WALLET', {
-    name: 'confirmTransaction',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
-  const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
-    name: 'revokeConfirmation',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
-
-  // evaluate multisig tx state
-
-  const countConfirmations = events.filter(
-    (e) => e.event === 'Confirmation',
-  ).length;
-  const submitEvent = events.find((e) => e.event === 'Submission');
-  const failed = events.some((e) => e.event === 'ExecutionFailure');
-  const executed = events.some((e) => e.event === 'Execution');
-
-  // evaluate time elapsed
-
-  const { data: transaction } = useQuery({
-    enabled: Boolean(!executed && submitEvent),
-    queryKey: ['transaction', submitEvent?.transactionHash],
-    queryFn: () => {
-      return submitEvent?.getTransaction();
-    },
-  });
-  const { data: block } = useQuery({
-    enabled: Boolean(submitEvent),
-    queryKey: ['block', submitEvent?.blockNumber],
-    queryFn: () => {
-      return submitEvent?.getBlock();
-    },
-  });
-
-  const elapsed = useMemo(() => {
-    return block
-      ? humanizeDuration(
-          (Number(block.timestamp) - Math.floor(new Date().getTime() / 1000)) *
-            1000,
-          { largest: 1 },
-        )
-      : 0;
-  }, [block]);
-
-  const destAddress =
-    transaction?.data && '0x' + transaction?.data.slice(34, 34 + 40);
-
-  const [destName, destMethod] = useMemo(() => {
-    const contractId = destAddress && build.contractIdFromAddress(destAddress);
-    const destName = contractId
-      ? getSContractProp(contractId, 'name')
-      : destAddress?.slice(0, 4);
-    const destMethod =
-      transaction?.data && transaction.data.slice(264, 264 + 10);
-    return [destName, destMethod];
-  }, [destAddress]);
-
-  return (
-    <Card
-      lean
-      heading={
-        <div>
-          <h5 className="flex items-center justify-between">
-            <span>
-              {id} -{' '}
-              {destName ? (
-                <>
-                  {destName.length <= 12
-                    ? destName
-                    : destName.slice(0, 6) +
-                      '..' +
-                      destName.slice(destName.length - 6)}{' '}
-                  <code className="text-xs">{destMethod}</code>
-                </>
-              ) : (
-                'Contract Interacion <>'
-              )}{' '}
-            </span>
-            {failed && false && (
-              <CircleBackslashIcon className="align-middle text-[var(--red10)]" />
-            )}
-            {!executed &&
-              (confirmTx.write ? (
-                <button
-                  className="align-middle"
-                  disabled={!confirmTx.write}
-                  onClick={() => confirmTx.write?.()}
-                  title="Confirm"
-                >
-                  <PlusCircledIcon className="align-middle text-[var(--green10)]" />
-                </button>
-              ) : revokeConfirmTx.write ? (
-                <button
-                  className="align-middle"
-                  disabled={!revokeConfirmTx.write}
-                  onClick={() => revokeConfirmTx.write?.()}
-                  title="Revoke Confirmation"
-                >
-                  <MinusCircledIcon className="align-middle text-[var(--red10)]" />
-                </button>
-              ) : (
-                <></>
-              ))}
-          </h5>
-          <span className="text-sm text-[var(--gray10)]">
-            {elapsed ? `About ${elapsed} ago` : '. . .'}
-          </span>
-        </div>
-      }
-    >
-      <p className="text-sm">{countConfirmations} Confirmations</p>
-    </Card>
-  );
-}
+const marionetteExecArgs = getAbi('MARIONETTE')
+  .find((f) => f.name === 'execute')
+  .inputs.map((i) => i.type);
 
 export function WalletSelect({
   wallets,
@@ -489,9 +364,10 @@ export default function Multisig() {
                 <Prelay>Failed to retrieve queue</Prelay>
               ) : pendingTrxIds.data ? (
                 pendingTrxIds.data.map((id, i) => (
-                  <EventSummary
+                  <WidgetMultisigTx
                     key={id}
                     id={id}
+                    reqdConfirmations={countReqdConfirms}
                     events={
                       !events
                         ? []
@@ -522,9 +398,10 @@ export default function Multisig() {
                 <Prelay>Failed to retrieve queue</Prelay>
               ) : executedTrxIds.data ? (
                 executedTrxIds.data.map((id, i) => (
-                  <EventSummary
+                  <WidgetMultisigTx
                     key={id}
                     id={id}
+                    reqdConfirmations={countReqdConfirms}
                     events={
                       !events
                         ? []
