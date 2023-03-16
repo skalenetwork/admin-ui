@@ -31,7 +31,7 @@ export const build = {
     };
   },
   contractIdFromAddress<TAddress extends ContractDetailList['address']>(
-    address: TAddress,
+    address: TAddress extends Address ? Address : TAddress,
   ): ContractIdByAddress<TAddress> {
     return Object.keys(CONTRACT).find(
       (key) => CONTRACT[key].address.toLowerCase() === address.toLowerCase(),

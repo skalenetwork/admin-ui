@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { PropsWithChildren } from 'react';
 import { tw } from 'twind';
 import { InfoIcon } from '../Icons/Icons';
@@ -28,7 +27,7 @@ export default function Card({
 }: Props) {
   const paddingClass = `${lean ? 'p-2' : 'p-4'}`;
   return (
-    <motion.div
+    <div
       className={tw`
       flex flex-col overflow-hidden
       rounded-lg bg-[var(--white)] text-[var(--gray12)]
@@ -36,15 +35,6 @@ export default function Card({
       ${full ? 'h-full w-full' : ''}
       `}
       role="combobox"
-      transition={{
-        duration: 0.1,
-      }}
-      initial={{
-        opacity: 0,
-      }}
-      whileInView={{
-        opacity: 1,
-      }}
     >
       <div
         className={tw`flex justify-between ${paddingClass} rounded-t-lg pb-0`}
@@ -76,6 +66,6 @@ export default function Card({
       >
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 }

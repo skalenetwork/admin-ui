@@ -278,6 +278,12 @@ export function useSContractReads<
   } as typeof response & { data: (TReturnData | undefined)[] };
 }
 
+const m = build.addressAbiPair('MARIONETTE');
+const marionette = {
+  ...m,
+  interface: new ethers.utils.Interface(m.abi),
+};
+
 /**
  * Write to a network contract
  * @param id ContractId
@@ -307,39 +313,32 @@ export function useSContractWrite<
   },
 ) {
   const { address, abi } = build.addressAbiPair(id);
-  console.log('[audit] useSContractWrite, incoming', id, name, params);
 
-  const iface = new ethers.utils.Interface(abi);
-  let destMethodEncoded;
-  try {
-    destMethodEncoded = iface.encodeFunctionData(
-      name,
-      params.args,
-    ) as `0x${string}`;
-  } catch (e) {}
+  const destMethodEncoded = useMemo(() => {
+    if (!(abi && params.args && name) || id === 'MULTISIG_WALLET') return;
+    const iface = new ethers.utils.Interface(abi);
+    let destMethodEncoded;
+    try {
+      destMethodEncoded = iface.encodeFunctionData(
+        name,
+        params.args,
+      ) as `0x${string}`;
+    } catch (e) {}
+    return destMethodEncoded;
+  }, [abi, params.args, name]);
 
-  const m = build.addressAbiPair('MARIONETTE');
-  const marionette = {
-    ...m,
-    interface: new ethers.utils.Interface(m.abi),
-  };
-  let marionetteExecEncoded: `0x${string}`;
-  try {
-    const args = [address, 0, destMethodEncoded];
-    marionetteExecEncoded = marionette.interface.encodeFunctionData(
-      'execute',
-      args,
-    ) as `0x${string}`;
-  } catch (e) {}
-
-  false &&
-    console.log(
-      '[audit] useSContractWrite, encoded::',
-      'marionette',
-      marionetteExecEncoded,
-      'dest',
-      destMethodEncoded,
-    );
+  const marionetteExecEncoded = useMemo(() => {
+    if (!(address && destMethodEncoded) || id === 'MULTISIG_WALLET') return;
+    let marionetteExecEncoded;
+    try {
+      const args = [address, 0, destMethodEncoded] as const;
+      marionetteExecEncoded = marionette.interface.encodeFunctionData(
+        'execute',
+        args,
+      ) as `0x${string}`;
+    } catch (e) {}
+    return marionetteExecEncoded;
+  }, [destMethodEncoded, address]);
 
   // transaction from EOA directly to destination contract
 
@@ -358,7 +357,9 @@ export function useSContractWrite<
     address: multisig.address,
     abi: multisig.abi,
     functionName: 'submitTransaction',
-    args: [marionette.address, 0, marionetteExecEncoded],
+    args: marionetteExecEncoded
+      ? [marionette.address, 0, marionetteExecEncoded]
+      : undefined,
     overrides: {
       ...params.overrides,
       gasLimit: Math.max(3000000, Number(params?.overrides?.gasLimit || 0)),
@@ -412,15 +413,6 @@ export function useSContractWrite<
     },
   });
 
-  false &&
-    console.log('[audit] useSContractWrite', id, name, {
-      pendingTrxIds,
-      pendingTrxs,
-      existingTrxIndex,
-      existingTrxId,
-      existingTrxConfirmCount,
-    });
-
   // create a confirm writer if transaction is duplicate
 
   const { config: confirmConfig } = usePrepareContractWrite({
@@ -449,17 +441,6 @@ export function useSContractWrite<
     hash: _mnm.data?.hash,
   });
 
-  false &&
-    console.log(
-      '[audit] useSContractWrite',
-      '_eoa',
-      _eoa,
-      '_mnm',
-      _mnm,
-      'mnmConfirmTx',
-      mnmConfirmTx,
-    );
-
   // expose redundant interface with sufficient states and finality data
 
   const mnmAction = mnmConfirmTx.write ? 'confirm' : 'submit';
@@ -474,8 +455,8 @@ export function useSContractWrite<
 
   const returnData = {
     eoa: {
-      confirmed: _eoaWait.isSuccess,
-      failed: _eoaWait.isError,
+      isConfirmed: _eoaWait.isSuccess,
+      isFailed: _eoaWait.isError,
       receipt: _eoaWait.data,
       isFinalized: !!_eoaWait.data,
       ..._eoa,
@@ -487,8 +468,8 @@ export function useSContractWrite<
         ? {
             mnmAction: 'confirm',
             mnmConfirms,
-            confirmed: mnmConfirmTxWait.isSuccess,
-            failed: mnmConfirmTxWait.isError,
+            isConfirmed: mnmConfirmTxWait.isSuccess,
+            isFailed: mnmConfirmTxWait.isError,
             receipt: mnmConfirmTxWait.data,
             isFinalized: mnmIsFinalized,
             ...mnmConfirmTx,
@@ -496,8 +477,8 @@ export function useSContractWrite<
         : {
             mnmAction: 'submit',
             mnmConfirms,
-            confirmed: _mnmWait.isSuccess,
-            failed: _mnmWait.isError,
+            isConfirmed: _mnmWait.isSuccess,
+            isFailed: _mnmWait.isError,
             receipt: _mnmWait.data,
             isFinalized: mnmIsFinalized,
             ..._mnm,
