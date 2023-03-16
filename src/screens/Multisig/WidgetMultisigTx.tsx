@@ -2,7 +2,11 @@ import Card from '@/components/Card/Card';
 import { getSContractProp } from '@/features/network/contract';
 import { useSContractWrite } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
-import { MinusCircledIcon, PlusCircledIcon } from '@radix-ui/react-icons';
+import {
+  MinusCircledIcon,
+  PlusCircledIcon,
+  StackIcon,
+} from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
@@ -24,7 +28,7 @@ const TxAction = ({
       {!executed &&
         (confirmTx.write ? (
           <button
-            className="align-middle"
+            className="align-middle hover:scale-110 transition-all"
             disabled={!confirmTx.write}
             onClick={() => confirmTx.write?.()}
             title="Confirm"
@@ -33,7 +37,7 @@ const TxAction = ({
           </button>
         ) : revokeConfirmTx.write ? (
           <button
-            className="align-middle"
+            className="align-middle hover:scale-110 transition-all"
             disabled={!revokeConfirmTx.write}
             onClick={() => revokeConfirmTx.write?.()}
             title="Revoke Confirmation"
@@ -113,7 +117,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     transaction?.data &&
     (('0x' + transaction?.data.slice(34, 34 + 40)) as Address);
 
-  const [toName, toMethod, destName, destMethod] = useMemo(() => {
+  const [toContractId, toName, toMethod, destName, destMethod] = useMemo(() => {
     const toContractId = toAddress && build.contractIdFromAddress(toAddress);
     const toName = toContractId
       ? getSContractProp(toContractId, 'name')
@@ -133,7 +137,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
       destMethod = '-';
     }
 
-    return [toName, toMethod, destName, destMethod];
+    return [toContractId, toName, toMethod, destName, destMethod];
   }, [toAddress]);
 
   const name = destName || toName;
@@ -144,16 +148,24 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
       lean
       heading={
         <div>
-          <h5 className="flex items-center justify-between">
-            <span>
-              {id} -{' '}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <div className="text-sm">
+                {id}
+                <span className="text-[var(--gray10)]">-</span>{' '}
+              </div>
               {name && method ? (
                 <>
-                  {name.length <= 12
-                    ? name
-                    : name.slice(0, 6) +
-                      '..' +
-                      name.slice(name.length - 6)}{' '}
+                  {toContractId === 'MARIONETTE' && (
+                    <span>
+                      <StackIcon />
+                    </span>
+                  )}
+                  <span>
+                    {name.length <= 12
+                      ? name
+                      : name.slice(0, 6) + '..' + name.slice(name.length - 6)}
+                  </span>
                   <code
                     className={tw('text-xs', failed ? 'bg-[var(--red2)]' : '')}
                   >
@@ -163,13 +175,17 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
               ) : (
                 'Contract Interaction <>'
               )}{' '}
-            </span>
-            <TxAction
-              executed={!!executed}
-              confirmTx={confirmTx}
-              revokeConfirmTx={revokeConfirmTx}
-            />
-          </h5>
+            </div>
+            <div>
+              {!executed && (
+                <TxAction
+                  executed={executed}
+                  confirmTx={confirmTx}
+                  revokeConfirmTx={revokeConfirmTx}
+                />
+              )}
+            </div>
+          </div>
           <span className="text-sm text-[var(--gray10)]">
             {elapsed ? `About ${elapsed} ago` : '. . .'}
           </span>

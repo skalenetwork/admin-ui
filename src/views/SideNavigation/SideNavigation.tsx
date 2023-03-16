@@ -25,12 +25,6 @@ export default function SideNavigation() {
   const [navOpen, setNavOpen] = useState(true);
   const { darkMode, setDarkMode } = useTheme();
 
-  // useEffect(() => {
-  //   document.documentElement.classList[darkMode ? 'add' : 'remove'](
-  //     'dark-theme',
-  //   );
-  // }, [darkMode]);
-
   const linkProps = useMemo(() => {
     return {
       className: `flex items-center gap-2 p-4 rounded-lg transition-all hover:bg-[var(--slate)] my-1 ${
@@ -47,7 +41,7 @@ export default function SideNavigation() {
       onOpenChange={setNavOpen}
       className="grid h-full bg-[var(--white)] py-4 text-[var(--black)]"
       style={{
-        width: navOpen ? '25vw' : '7rem',
+        width: navOpen ? '24vw' : '7rem',
         gridTemplateRows: 'min-content 1fr min-content',
         transition: 'width 0.3s ease',
       }}
