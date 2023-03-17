@@ -177,7 +177,7 @@ export function useMultisig({
     id: 'MULTISIG_WALLET',
   });
 
-  const { connected, api, chainId, signer } = useSContractApi({
+  const { api, chainId } = useSContractApi({
     id: 'MULTISIG_WALLET',
   });
 

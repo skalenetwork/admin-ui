@@ -315,7 +315,7 @@ export function useSContractWrite<
   const { address, abi } = build.addressAbiPair(id);
 
   const destMethodEncoded = useMemo(() => {
-    if (!(abi && params.args && name) || id === 'MULTISIG_WALLET') return;
+    if (!(abi && name) || id === 'MULTISIG_WALLET') return;
     const iface = new ethers.utils.Interface(abi);
     let destMethodEncoded;
     try {
@@ -747,7 +747,7 @@ export function useEvents<
 }
 
 export function useChainMetadata({
-  networkType,
+  networkType = 'staging',
 }: {
   networkType?: NetworkType;
 }) {
@@ -755,19 +755,20 @@ export function useChainMetadata({
   const query = useQuery({
     enabled: networkType !== undefined && !!chain,
     queryKey: ['offchain', `metadata:${networkType}`] as const,
-    queryFn: (): Promise<{ [key: string]: ChainManifestItem }> => {
-      return fetch(chainMetadataUrl(networkType))
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('allmeta', data);
-          return data[chain?.name] || null;
-        });
+    queryFn: (): Promise<{ [key: string]: ChainManifestItem }> | undefined => {
+      return !chain
+        ? undefined
+        : fetch(chainMetadataUrl(networkType))
+            .then((res) => res.json())
+            .then((data) => {
+              return data[chain.name] || null;
+            });
     },
     refetchOnWindowFocus: false,
   });
   useEffect(() => {
-    query.refetch();
-  }, [chain.id]);
+    chain?.network === NETWORK.SKALE && query.refetch();
+  }, [chain?.id]);
 
   return query;
 }

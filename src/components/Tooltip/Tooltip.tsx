@@ -5,9 +5,10 @@ import { tw } from 'twind';
 interface Props {
   trigger: React.ReactNode;
   content: string | React.ReactNode;
+  className?: string;
 }
 
-const Tooltip = ({ trigger, content }: Props) => {
+const Tooltip = ({ trigger, content, className = '' }: Props) => {
   return (
     <TooltipPrimitive.Provider skipDelayDuration={0} delayDuration={20}>
       <TooltipPrimitive.Root>
@@ -17,6 +18,7 @@ const Tooltip = ({ trigger, content }: Props) => {
           className={tw(
             'z-50 inline-flex items-center rounded-full px-4 py-2.5',
             'bg-[var(--black)]',
+            className,
           )}
         >
           <TooltipPrimitive.Arrow className="fill-current text-[var(--black)]" />

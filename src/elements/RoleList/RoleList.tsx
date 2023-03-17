@@ -1,5 +1,6 @@
 import Hoverover from '@/components/Hoverover/Hoverover';
-import { RoleIcon } from '@/components/Icons/Icons';
+import { InfoIcon, RoleIcon } from '@/components/Icons/Icons';
+import Tooltip from '@/components/Tooltip/Tooltip';
 import { getSContractProp } from '@/features/network/contract';
 import {
   useSContractRead,
@@ -68,6 +69,7 @@ const RoleQuickView = ({ id }: { id: ContractId }) => {
 };
 
 export default function RoleList({}: Props) {
+  const account = useAccount();
   const { chain } = useNetwork();
   const allContracts = useSContracts({
     id: Object.keys(CONTRACT) as ContractId[],
@@ -76,6 +78,11 @@ export default function RoleList({}: Props) {
     (contract) =>
       contract.abi && CONTRACT[contract.contractId].network === chain?.network,
   );
+  const isSignerMultisigOwner = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!account.address,
+    name: 'isOwner',
+    args: [account.address as Address],
+  });
 
   return (
     <Hoverover
@@ -83,6 +90,32 @@ export default function RoleList({}: Props) {
       trigger={<RoleIcon />}
       triggerClass="p-0 text-inherit"
     >
+      <div className="absolute top-2 right-2">
+        <Tooltip
+          trigger={
+            <div className="cursor-pointer transition-all hover:-translate-x-1">
+              <InfoIcon color={'var(--gray8)'} />
+            </div>
+          }
+          content={
+            <>
+              {isSignerMultisigOwner.data ? (
+                <>
+                  <CircleIcon className="text-[var(--green8)]" /> Multisig
+                  ownership with role access via marionette.
+                </>
+              ) : (
+                !isSignerMultisigOwner.isLoading && (
+                  <>You may have limited access to administrative functions.</>
+                )
+              )}
+              <br />
+              <CheckIcon className="text-[var(--green8)]" /> Direct access to
+              role on target contract.
+            </>
+          }
+        />
+      </div>
       {filteredContracts.map((contract, index) => (
         <RoleQuickView id={contract.contractId} key={index} />
       ))}

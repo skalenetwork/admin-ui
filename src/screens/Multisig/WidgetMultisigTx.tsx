@@ -3,6 +3,8 @@ import { getSContractProp } from '@/features/network/contract';
 import { useSContractWrite } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
 import {
+  CheckCircledIcon,
+  CircleIcon,
   MinusCircledIcon,
   PlusCircledIcon,
   StackIcon,
@@ -18,34 +20,47 @@ const TxAction = ({
   executed,
   confirmTx,
   revokeConfirmTx,
+  remainingConfirms,
 }: {
   executed: boolean;
   confirmTx: ReturnType<typeof useSContractWrite>;
   revokeConfirmTx: ReturnType<typeof useSContractWrite>;
+  remainingConfirms: number;
 }) => {
+  const isFinalSigner = remainingConfirms === 1 && confirmTx?.write;
   return (
     <>
       {!executed &&
         (confirmTx.write ? (
           <button
-            className="align-middle hover:scale-110 transition-all"
-            disabled={!confirmTx.write}
+            className={tw(
+              'align-middle hover:scale-110 transition-all',
+              confirmTx.isLoading ? 'animate-bounce' : '',
+            )}
+            disabled={!confirmTx.write || confirmTx.isLoading}
             onClick={() => confirmTx.write?.()}
-            title="Confirm"
+            title={isFinalSigner ? 'Confirm & Execute' : 'Confirm'}
           >
-            <PlusCircledIcon className="align-middle text-[var(--green10)]" />
+            {isFinalSigner ? (
+              <CheckCircledIcon className="align-middle text-[var(--green10)]" />
+            ) : (
+              <PlusCircledIcon className="align-middle text-[var(--green10)]" />
+            )}
           </button>
         ) : revokeConfirmTx.write ? (
           <button
-            className="align-middle hover:scale-110 transition-all"
-            disabled={!revokeConfirmTx.write}
+            className={tw(
+              'align-middle hover:scale-110 transition-all',
+              revokeConfirmTx.isLoading ? 'animate-bounce' : '',
+            )}
+            disabled={!revokeConfirmTx.write || revokeConfirmTx.isLoading}
             onClick={() => revokeConfirmTx.write?.()}
             title="Revoke Confirmation"
           >
             <MinusCircledIcon className="align-middle text-[var(--red10)]" />
           </button>
         ) : (
-          <></>
+          <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
         ))}
     </>
   );
@@ -143,6 +158,11 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   const name = destName || toName;
   const method = destName ? destMethod : toMethod;
 
+  const remainingConfirmations = Math.max(
+    0,
+    (reqdConfirmations || 0) - (countConfirmations || 0),
+  );
+
   return (
     <Card
       lean
@@ -179,9 +199,10 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
             <div>
               {!executed && (
                 <TxAction
-                  executed={executed}
+                  executed={!!executed}
                   confirmTx={confirmTx}
                   revokeConfirmTx={revokeConfirmTx}
+                  remainingConfirms={remainingConfirmations}
                 />
               )}
             </div>
@@ -192,10 +213,12 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
         </div>
       }
     >
-      <p className="text-sm">
-        Confirmations: {countConfirmations}{' '}
-        {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
-      </p>
+      <div className="flex justify-between items-center">
+        <div className="text-sm">
+          Confirmations: {countConfirmations}{' '}
+          {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
+        </div>
+      </div>
     </Card>
   );
 });
