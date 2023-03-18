@@ -30,21 +30,6 @@ type ArgProps = {
   name: string;
 };
 
-// for audit
-// console.log(
-//         '\ntokenManager::audit',
-//         '\nprovider',
-//         provider,
-//         '\nsigner:',
-//         signer,
-//         '\nsigner.provider',
-//         signer?.provider,
-//         '\nsigner.provider instanceof Web3Provider?',
-//         signer?.provider instanceof ethers.providers.Web3Provider,
-//         '\nsigner.provider.getSigner !== undefined',
-//         signer?.provider?.getSigner !== undefined,
-//       );
-
 /**
  * Utility class instantiator
  * @description Allows type forwarding of class and mapping of general chain context
@@ -162,7 +147,6 @@ export function getApi<I extends keyof typeof API>(
       signer,
       name,
     };
-    false && console.log('[getApi]', props);
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
     console.error(e);

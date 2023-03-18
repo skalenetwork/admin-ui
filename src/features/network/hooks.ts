@@ -190,7 +190,7 @@ export type SContractReadParams<
 > = {
   [K in keyof TBaseParams as Exclude<
     K,
-    'args' | 'functionName' | 'abi' | 'address'
+    'args' | 'functionName' | 'abi' | 'address' | 'select'
   >]: TBaseParams[K];
 } & {
   name: TFunctionName;
@@ -203,11 +203,18 @@ export function useSContractRead<
   TBaseParams extends Parameters<typeof useContractRead>[0],
   TFunctionName extends SContractFunctionName<TAbi>,
   TReturnData extends AbiTypeToPrimitiveType<
-    ExtractAbiFunction<TAbi, { name: TFunctionName }>['outputs'][number]['type']
+    Extract<
+      TAbi[number],
+      { type: 'function'; name: TFunctionName }
+    >['outputs'][number]['type']
   >,
+  TSelect extends (data: TReturnData) => any,
 >(
   id: TContractId,
-  { name, ...params }: SContractReadParams<TAbi, TFunctionName>,
+  {
+    name,
+    ...params
+  }: SContractReadParams<TAbi, TFunctionName> & { select?: TSelect },
 ) {
   // implementation
   const address = getSContractProp(id, 'address') as Address;
@@ -220,7 +227,11 @@ export function useSContractRead<
   });
   return {
     ...query,
-  } as typeof query & { data?: TReturnData };
+  } as {
+    [K in keyof typeof query as Exclude<K, 'data'>]: (typeof query)[K];
+  } & {
+    data?: TSelect extends undefined ? TReturnData : ReturnType<TSelect>;
+  };
 }
 
 /**
@@ -239,16 +250,24 @@ export function useSContractReads<
     | { type: 'function'; constant: true }
   >['name'],
   TReturnData extends AbiTypeToPrimitiveType<
-    ExtractAbiFunction<TAbi, TFunctionName>['outputs'][number]['type']
+    Extract<
+      TAbi[number],
+      { type: 'function'; name: TFunctionName }
+    >['outputs'][number]['type']
   >,
+  TSelect extends (data: (TReturnData | undefined | null)[]) => any,
 >(
   id: TContractId,
   {
     reads,
     ...params
   }: {
-    [K in keyof TBaseParams as Exclude<K, 'contracts'>]: TBaseParams[K];
+    [K in keyof TBaseParams as Exclude<
+      K,
+      'contracts' | 'select'
+    >]: TBaseParams[K];
   } & {
+    select?: TSelect;
     reads: Array<{
       name: TFunctionName;
       args?: AbiParametersToPrimitiveTypes<
@@ -275,7 +294,13 @@ export function useSContractReads<
   return {
     ...response,
     data: response.data ? response.data : Array(reads.length),
-  } as typeof response & { data: (TReturnData | undefined)[] };
+  } as {
+    [K in keyof typeof response as Exclude<K, 'data'>]: (typeof response)[K];
+  } & {
+    data?: TSelect extends undefined
+      ? (TReturnData | undefined)[]
+      : ReturnType<TSelect>;
+  };
 }
 
 const m = build.addressAbiPair('MARIONETTE');
@@ -354,6 +379,7 @@ export function useSContractWrite<
   const multisig = build.addressAbiPair('MULTISIG_WALLET');
   const { config: mnmConfig } = usePrepareContractWrite({
     ...params,
+    enabled: !!marionetteExecEncoded && params.enabled !== false,
     address: multisig.address,
     abi: multisig.abi,
     functionName: 'submitTransaction',
@@ -409,13 +435,14 @@ export function useSContractWrite<
         ? [BigNumber.from(existingTrxId)]
         : undefined,
     select: (data) => {
-      return data && (data as BigNumber).toNumber();
+      return data?.toNumber();
     },
   });
 
   // create a confirm writer if transaction is duplicate
 
   const { config: confirmConfig } = usePrepareContractWrite({
+    enabled: !!(existingTrxId && existingTrxId >= 0),
     address: multisig.address,
     abi: multisig.abi,
     functionName: 'confirmTransaction',
@@ -632,20 +659,6 @@ export function useSContractRoles<
     },
   }));
 
-  false &&
-    console.log(
-      'useRoles:data',
-      data,
-      'roleHash',
-      roleHash,
-      'ofSigner',
-      ofSigner,
-      'ofMarionette',
-      ofMarionette,
-      'roleAdmin',
-      roleAdmin,
-    );
-
   return {
     isLoading:
       roleHash.isLoading ||
@@ -724,7 +737,11 @@ export function useEvents<
   const contractId = build.contractIdFromAddress(address);
   const { contract, abi } = useSContract({ id: contractId });
 
-  const [streamEvents, setStreamEvents] = useState([]);
+  const [streamEvents, setStreamEvents] = useState(
+    new Array(eventNames.length),
+  );
+
+  const [streeamEvents, setStreeamEvents] = useState([]);
 
   const pastEvents = useQueries({
     queries: eventNames.map((eventName) => {
@@ -741,8 +758,10 @@ export function useEvents<
   });
 
   return {
-    pastEvents,
-    streamEvents,
+    isLoading: pastEvents.every((event) => event.isLoading),
+    events: pastEvents.map((event, index) => {
+      return { eventName: eventNames[index], ...event };
+    }),
   };
 }
 

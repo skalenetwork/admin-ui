@@ -109,15 +109,10 @@ const SelectedPeerChainItem = ({
   });
 
   // pending ima-js release
-  console.log('tokenManager', tokenManager, {
-    standard: standardName.toUpperCase(),
-    network: selectedOriginChain?.network,
-  });
   const mappingsLength = useQuery({
     enabled: false && !!(tokenManager?.api && chain),
     queryKey: ['CUSTOM:tokenMappings'],
     queryFn: async () => {
-      console.log('tokenManager', tokenManager);
       const { api } = tokenManager;
       const length = await api?.getTokenMappingsLength(chain.name);
       const mapping = await api?.getTokenMappings(
@@ -160,14 +155,6 @@ const SelectedPeerChainItem = ({
         })
       : [];
   const originTokenMappings: { name?: string; address: Address }[] = [];
-
-  console.log(
-    '[audit] ethereum mappings',
-    'length',
-    ethereumMappingLength,
-    'mappings',
-    ethereumMappings,
-  );
 
   return (
     <motion.div

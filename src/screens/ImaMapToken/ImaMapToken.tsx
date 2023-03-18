@@ -336,6 +336,7 @@ export default function ImaMapToken() {
   }, [deployment.isSuccess]);
 
   const registerMainnetToken = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
+    enabled: form[0].formState.isValid && !!targetChain,
     name: `add${standard}TokenByOwner`,
     args: [targetChain?.name, form[0].getValues('originContractAddress')],
   });
@@ -755,8 +756,6 @@ export default function ImaMapToken() {
             await new Promise((resolve, reject) =>
               window.setTimeout(() => resolve(0), 4000),
             );
-            false &&
-              console.log('[audit] tokenManagerApi.api', tokenManagerApi.api);
             const addTokenByOwnerResponse =
               await registerMainnetToken.writeAsync?.();
           } catch (e) {

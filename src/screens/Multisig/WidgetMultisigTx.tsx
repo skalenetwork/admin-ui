@@ -1,6 +1,6 @@
 import Card from '@/components/Card/Card';
 import { getSContractProp } from '@/features/network/contract';
-import { useSContractWrite } from '@/features/network/hooks';
+import { useSContractRead, useSContractWrite } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
 import {
   CheckCircledIcon,
@@ -12,22 +12,45 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
 import humanizeDuration from 'humanize-duration';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { toast } from 'react-toastify';
 import { tw } from 'twind';
 import { Address, useTransaction } from 'wagmi';
 
 const TxAction = ({
+  id,
   executed,
   confirmTx,
   revokeConfirmTx,
   remainingConfirms,
+  onAction,
 }: {
+  id: number;
   executed: boolean;
   confirmTx: ReturnType<typeof useSContractWrite>;
   revokeConfirmTx: ReturnType<typeof useSContractWrite>;
   remainingConfirms: number;
+  onAction?: () => void;
 }) => {
   const isFinalSigner = remainingConfirms === 1 && confirmTx?.write;
+  const handleSubmit = useCallback(async () => {
+    const action = (confirmTx || revokeConfirmTx).writeAsync;
+    if (!action) return;
+    toast.promise(
+      async () => {
+        const { wait } = await action();
+        await wait();
+        onAction?.();
+      },
+      {
+        pending: `Confirming multisig transaction #${id}`,
+        success: `Multisig transaction #${id} ${
+          isFinalSigner ? 'executed' : 'confirmed'
+        }`,
+        error: `Failed to confirm multisig transaction #${id}`,
+      },
+    );
+  }, [confirmTx.write, revokeConfirmTx.write]);
   return (
     <>
       {!executed &&
@@ -38,7 +61,7 @@ const TxAction = ({
               confirmTx.isLoading ? 'animate-bounce' : '',
             )}
             disabled={!confirmTx.write || confirmTx.isLoading}
-            onClick={() => confirmTx.write?.()}
+            onClick={handleSubmit}
             title={isFinalSigner ? 'Confirm & Execute' : 'Confirm'}
           >
             {isFinalSigner ? (
@@ -54,7 +77,7 @@ const TxAction = ({
               revokeConfirmTx.isLoading ? 'animate-bounce' : '',
             )}
             disabled={!revokeConfirmTx.write || revokeConfirmTx.isLoading}
-            onClick={() => revokeConfirmTx.write?.()}
+            onClick={handleSubmit}
             title="Revoke Confirmation"
           >
             <MinusCircledIcon className="align-middle text-[var(--red10)]" />
@@ -70,38 +93,45 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   id,
   events = [],
   reqdConfirmations,
+  onAction,
 }: {
   id: any;
   events: ethers.Event[];
   reqdConfirmations?: number;
+  onAction?: () => void;
 }) {
   const confirmTx = useSContractWrite('MULTISIG_WALLET', {
+    enabled: !!id,
     name: 'confirmTransaction',
     args: id ? [BigNumber.from(id)] : undefined,
   });
   const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
+    enabled: !!id,
     name: 'revokeConfirmation',
     args: id ? [BigNumber.from(id)] : undefined,
   });
 
   // evaluate multisig tx state
 
-  // @later for scale, implement useMultisigTx: fetch submitEvent, rest contract calls
   const {
-    countConfirmations,
     submitEvent,
     isFailed: failed,
     isExecuted: executed,
   } = useMemo(() => {
     if (!(events && events.length)) return {};
     return {
-      countConfirmations: events.filter((e) => e.event === 'Confirmation')
-        .length,
       submitEvent: events.find((e) => e.event === 'Submission'),
       isFailed: events.some((e) => e.event === 'ExecutionFailure'),
       isExecuted: events.some((e) => e.event === 'Execution'),
     };
   }, [events]);
+
+  const countConfirmations = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!id,
+    name: 'getConfirmationCount',
+    args: [BigNumber.from(id)] as const,
+    select: (data) => data.toNumber(),
+  });
 
   // evaluate time elapsed
 
@@ -111,7 +141,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   });
 
   const { data: block } = useQuery({
-    enabled: Boolean(submitEvent),
+    enabled: !!submitEvent,
     queryKey: ['block', submitEvent?.blockNumber],
     queryFn: () => {
       return submitEvent?.getBlock();
@@ -160,7 +190,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 
   const remainingConfirmations = Math.max(
     0,
-    (reqdConfirmations || 0) - (countConfirmations || 0),
+    (reqdConfirmations || 0) - (countConfirmations.data || 0),
   );
 
   return (
@@ -197,12 +227,17 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
               )}{' '}
             </div>
             <div>
-              {!executed && (
+              {executed === false && (
                 <TxAction
-                  executed={!!executed}
+                  id={id}
+                  executed={executed}
                   confirmTx={confirmTx}
                   revokeConfirmTx={revokeConfirmTx}
                   remainingConfirms={remainingConfirmations}
+                  onAction={() => {
+                    countConfirmations.refetch();
+                    onAction?.();
+                  }}
                 />
               )}
             </div>
@@ -215,7 +250,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     >
       <div className="flex justify-between items-center">
         <div className="text-sm">
-          Confirmations: {countConfirmations}{' '}
+          Confirmations: {countConfirmations.data}{' '}
           {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
         </div>
       </div>

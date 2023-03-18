@@ -297,7 +297,6 @@ export const WidgetManageMetadata = () => {
   const chainMetadata = useChainMetadata({
     networkType: chain && (chain.testnet ? 'staging' : 'mainnet'),
   });
-  console.log('metadata', chainMetadata);
 
   const status =
     chainMetadata.data === null

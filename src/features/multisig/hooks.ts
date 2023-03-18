@@ -194,7 +194,7 @@ export function useMultisig({
 
   const countReads = useSContractReads('MULTISIG_WALLET', {
     select: (data) => {
-      return data.map((value) => value.toNumber()) as number[];
+      return data.map((value) => value?.toNumber()) as number[];
     },
     reads: [
       {
@@ -215,7 +215,7 @@ export function useMultisig({
     ],
   });
   const [countTotalTrx, countPendingTrx, countExecutedTrx, countReqdConfirms] =
-    countReads.data as (number | undefined)[];
+    countReads.data;
   const counts = {
     ...countReads,
     data: {
@@ -258,20 +258,21 @@ export function useMultisig({
     },
   });
 
-  console.log('AUDIT', pendingTrxIds, executedTrxIds);
-
-  const { pastEvents } = useEvents({
+  const allEvents = useEvents({
     address: CONTRACT['MULTISIG_WALLET'].address,
     fromBlock: 0,
     toBlock: 'latest',
     eventNames: ['Submission', 'Execution', 'ExecutionFailure', 'Confirmation'],
   });
 
-  const events = pastEvents
-    .map((x) => x.data)
-    .reduce((prevEvents, currEvents) => {
-      return (prevEvents || []).concat(currEvents || []);
-    });
+  const combinedEvents = {
+    ...allEvents,
+    data: allEvents.events
+      .map((event) => event.data)
+      .reduce((prevEvents, currEvents) => {
+        return (prevEvents || []).concat(currEvents || []);
+      }),
+  };
 
   return {
     queryKey,
@@ -282,6 +283,6 @@ export function useMultisig({
     owners,
     pendingTrxIds,
     executedTrxIds,
-    events,
+    events: combinedEvents.data,
   };
 }

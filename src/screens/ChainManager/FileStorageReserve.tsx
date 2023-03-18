@@ -77,6 +77,7 @@ export default function FileStorageReserve({
     Number(form.watch('reserveSpaceAmount')) * Math.pow(1024, multiplier);
 
   const reserveSpace = useSContractWrite('FILESTORAGE', {
+    enabled: form.formState.isValid,
     name: 'reserveSpace',
     args: [form.watch('reserveSpaceAddress'), BigNumber.from(amount)],
   });

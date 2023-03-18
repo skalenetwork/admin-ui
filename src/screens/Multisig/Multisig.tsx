@@ -85,6 +85,7 @@ export default function Multisig() {
         countExecutedTrx,
         countReqdConfirms,
       },
+      refetch: countsRefetch,
     },
     pendingTrxIds,
     executedTrxIds,
@@ -376,6 +377,11 @@ export default function Multisig() {
                               event?.args?.['transactionId']?.toNumber() === id,
                           )
                     }
+                    onAction={() => {
+                      executedTrxIds.refetch();
+                      pendingTrxIds.refetch();
+                      countsRefetch();
+                    }}
                   />
                 ))
               ) : (

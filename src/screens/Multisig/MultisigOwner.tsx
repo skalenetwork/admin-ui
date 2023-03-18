@@ -15,6 +15,7 @@ export function MultisigOwner({
   showControls?: boolean;
 }) {
   const { writeAsync } = useSContractWrite('MULTISIG_WALLET', {
+    enabled: !!address,
     name: 'removeOwner',
     args: [address],
   });
