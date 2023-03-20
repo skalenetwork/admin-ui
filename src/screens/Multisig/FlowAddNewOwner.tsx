@@ -1,7 +1,9 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
+import { useSContractWrite } from '@/features/network/hooks';
 import { useCallback, useLayoutEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { AlertProps } from '../types';
 import { MultisigOwner } from './MultisigOwner';
 
@@ -50,22 +52,24 @@ export function FlowAddNewOwner({
     }),
   ] as const;
 
-  // const addOwner = useSContractWrite('MULTISIG_WALLET', {
-  //   name: 'addOwner',
-  //   args: [form[0].watch('ownerAddress') as `0x{string}`],
-  //   overrides: {
-  //     gasLimit: BigNumber.from(375000),
-  //   },
-  // });
+  const addOwner = useSContractWrite('MULTISIG_WALLET', {
+    name: 'addOwner',
+    args: [form[0].watch('ownerAddress') as `0x{string}`],
+  });
 
   const handleFinalSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      // await addOwner.writeAsync?.();
       const data = {
         ...form[0].getValues(),
         ...form[1].getValues(),
       };
+      addOwner.writeAsync &&
+        toast.promise(addOwner.writeAsync(), {
+          pending: `Adding owner - ${data.ownerName}`,
+          success: `Added owner - ${data.ownerName}`,
+          error: `Failed to add owner - ${data.ownerName}`,
+        });
       onSubmit(data);
       toggleAlert(id)(false);
     },

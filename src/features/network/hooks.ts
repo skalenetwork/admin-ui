@@ -27,6 +27,7 @@ import {
   AbiTypeToPrimitiveType,
   ExtractAbiEventNames,
   ExtractAbiFunction,
+  ExtractAbiFunctionNames,
 } from 'abitype';
 import { BigNumber, ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
@@ -309,6 +310,43 @@ const marionette = {
   interface: new ethers.utils.Interface(m.abi),
 };
 
+const EOA_TO_MULTISIG_MIN_GAS_LIMIT = 375000;
+const MNM_MIN_GAS_LIMIT = 3000000;
+const MULTISIG_ONLY_WALLET_FUNCTIONS = [
+  'removeOwner',
+  'addOwner',
+  'replaceOwner',
+  'changeRequirement',
+] satisfies ExtractAbiFunctionNames<(typeof ABI)['MULTISIG_WALLET']>[];
+
+const wrapWriteAsync = <
+  TWriteAsync extends NonNullable<
+    ReturnType<typeof useContractWrite>['writeAsync']
+  >,
+  TReceipt = Awaited<ReturnType<Awaited<ReturnType<TWriteAsync>>['wait']>>,
+>(
+  writeAsync?: TWriteAsync,
+) => {
+  if (!writeAsync) return;
+  return async (
+    confirmations: boolean | number = false,
+    overrideConfig?: Parameters<TWriteAsync>[0],
+  ) => {
+    if (confirmations === false) {
+      return writeAsync?.(overrideConfig);
+    } else {
+      const { wait, hash } = await (writeAsync as TWriteAsync)?.(
+        overrideConfig,
+      );
+      const receipt = await wait(confirmations === true ? 1 : confirmations);
+      return {
+        hash,
+        receipt,
+      };
+    }
+  };
+};
+
 /**
  * Write to a network contract
  * @param id ContractId
@@ -337,10 +375,17 @@ export function useSContractWrite<
     autoConfirm?: boolean;
   },
 ) {
-  const { address, abi } = build.addressAbiPair(id);
+  const { address, abi } = build.addressAbiPair(id) || {};
+
+  const isMultisigOnlyWalletWrite =
+    id === 'MULTISIG_WALLET' && MULTISIG_ONLY_WALLET_FUNCTIONS.includes(name);
 
   const destMethodEncoded = useMemo(() => {
-    if (!(abi && name) || id === 'MULTISIG_WALLET') return;
+    if (
+      !(abi && name) &&
+      (id === 'MULTISIG_WALLET' ?? !isMultisigOnlyWalletWrite)
+    )
+      return;
     const iface = new ethers.utils.Interface(abi);
     let destMethodEncoded;
     try {
@@ -350,7 +395,7 @@ export function useSContractWrite<
       ) as `0x${string}`;
     } catch (e) {}
     return destMethodEncoded;
-  }, [abi, params.args, name]);
+  }, [abi, params.args, name, isMultisigOnlyWalletWrite]);
 
   const marionetteExecEncoded = useMemo(() => {
     if (!(address && destMethodEncoded) || id === 'MULTISIG_WALLET') return;
@@ -367,11 +412,34 @@ export function useSContractWrite<
 
   // transaction from EOA directly to destination contract
 
+  const modifyOnlyForMultisig = isMultisigOnlyWalletWrite
+    ? {
+        functionName: 'submitTransaction',
+        args: [address, params.value || 0, destMethodEncoded],
+      }
+    : {};
+
   const { config: eoaConfig } = usePrepareContractWrite({
     ...params,
+    enabled: !!(address && abi && name) && params.enabled !== false,
     address: address as Address,
     abi,
     functionName: name,
+    ...modifyOnlyForMultisig,
+    overrides: {
+      ...params.overrides,
+      gasLimit:
+        id === 'MULTISIG_WALLET'
+          ? Math.max(
+              EOA_TO_MULTISIG_MIN_GAS_LIMIT,
+              Number(params?.overrides?.gasLimit || 0),
+            )
+          : params.overrides?.gasLimit,
+    },
+    onError: (err) => {
+      console.error('[write:eoa]', id, name, err.data.code, err.data.message);
+      params.onError?.(err);
+    },
   });
 
   // transaction initiated by EOA on multisig to marionette through to destination contract
@@ -388,7 +456,20 @@ export function useSContractWrite<
       : undefined,
     overrides: {
       ...params.overrides,
-      gasLimit: Math.max(3000000, Number(params?.overrides?.gasLimit || 0)),
+      gasLimit: Math.max(
+        MNM_MIN_GAS_LIMIT,
+        Number(params?.overrides?.gasLimit || 0),
+      ),
+    },
+    onError: (err) => {
+      console.error(
+        '[write:mnm_submit]',
+        id,
+        name,
+        err.data.code,
+        err.data.message,
+      );
+      params.onError?.(err);
     },
   });
 
@@ -396,6 +477,7 @@ export function useSContractWrite<
 
   const { pendingTrxIds, counts } = useMultisig();
   const requiredConfirmations = counts.data.countReqdConfirms;
+
   const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
     enabled: pendingTrxIds.isSuccess,
     reads: (pendingTrxIds.data || []).map((trxId) => ({
@@ -450,6 +532,23 @@ export function useSContractWrite<
       existingTrxId && existingTrxId >= 0
         ? [BigNumber.from(existingTrxId)]
         : undefined,
+    overrides: {
+      ...params.overrides,
+      gasLimit: Math.max(
+        MNM_MIN_GAS_LIMIT,
+        Number(params?.overrides?.gasLimit || 0),
+      ),
+    },
+    onError: (err) => {
+      console.error(
+        '[write:mnm_confirm]',
+        id,
+        name,
+        err.data.code,
+        err.data.message,
+      );
+      params.onError?.(err);
+    },
   });
   const mnmConfirmTx = useContractWrite(confirmConfig);
   const mnmConfirmTxWait = useWaitForTransaction({
@@ -487,6 +586,7 @@ export function useSContractWrite<
       receipt: _eoaWait.data,
       isFinalized: !!_eoaWait.data,
       ..._eoa,
+      writeAsync: wrapWriteAsync(_eoa.writeAsync),
     },
     mnm:
       id === 'MULTISIG_WALLET'
@@ -500,6 +600,7 @@ export function useSContractWrite<
             receipt: mnmConfirmTxWait.data,
             isFinalized: mnmIsFinalized,
             ...mnmConfirmTx,
+            writeAsync: wrapWriteAsync(mnmConfirmTx.writeAsync),
           }
         : {
             mnmAction: 'submit',
@@ -509,6 +610,7 @@ export function useSContractWrite<
             receipt: _mnmWait.data,
             isFinalized: mnmIsFinalized,
             ..._mnm,
+            writeAsync: wrapWriteAsync(_mnm.writeAsync),
           },
   };
 

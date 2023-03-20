@@ -10,17 +10,11 @@ import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { useMutation } from '@tanstack/react-query';
-import { BigNumber, ethers } from 'ethers';
 import { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
 import { useLocalStorage } from 'react-use';
 import { Address, useNetwork } from 'wagmi';
-import { DataOut as NewOwner, FlowAddNewOwner } from './FlowAddNewOwner';
-import {
-  DataOut as NewTransaction,
-  FlowAddNewTransaction,
-} from './FlowAddNewTransaction';
+import { FlowAddNewOwner } from './FlowAddNewOwner';
+import { FlowAddNewTransaction } from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
 import { WidgetMultisigTx } from './WidgetMultisigTx';
 
@@ -101,50 +95,6 @@ export default function Multisig() {
     };
   }>(`SKL_MULTISIG_OWNERS:${activeWalletAddress}`, {});
 
-  const addOwner = useMutation({
-    mutationKey: queryKey([contractKey, 'addOwner']),
-    mutationFn:
-      multisigApi &&
-      (async (payload: NewOwner) => {
-        const txResponse = await contract.contract.addOwner(
-          payload.ownerAddress as Address,
-          {
-            gasLimit: BigNumber.from(375000),
-          },
-        );
-        setCachedOwners({
-          ...cachedOwners,
-          [payload.ownerAddress]: {
-            address: payload.ownerAddress,
-            name: payload.ownerName,
-          },
-        });
-        return txResponse;
-        // return multisigApi.addOwner({
-        //   address: payload.ownerAddress,
-        // });
-      }),
-  });
-
-  const submitTransaction = useMutation({
-    mutationKey: queryKey([contractKey, 'submitTransaction']),
-    mutationFn:
-      multisigApi &&
-      ((payload: NewTransaction) => {
-        const args = {
-          destination: multisigApi.contract.address as Address,
-          value: ethers.BigNumber.from(0),
-          data: payload.encoded as `0x${string}`,
-        };
-        // prepare tx here from multisig.lib
-        return contract.contract?.submitTransaction(
-          args.destination,
-          args.value,
-          args.data,
-        );
-      }),
-  });
-
   const [alertKey, setAlertKey] = useState('');
 
   const toggleAlert = useCallback(
@@ -185,9 +135,7 @@ export default function Multisig() {
           <FlowAddNewWallet
             alertKey={alertKey}
             toggleAlert={toggleAlert}
-            onSubmit={(data) => {
-              // false && addOwner.mutateAsync(data);
-            }}
+            onSubmit={(data) => {}}
           />
         </div>
       </div>
@@ -270,20 +218,20 @@ export default function Multisig() {
             heading={
               <div className="flex w-full justify-between">
                 <h4>Owners</h4>
-                {addOwner && (
-                  <FlowAddNewOwner
-                    alertKey={alertKey}
-                    toggleAlert={toggleAlert}
-                    owners={owners?.data || []}
-                    onSubmit={(data) => {
-                      toast.promise(addOwner.mutateAsync(data), {
-                        pending: `Adding owner - ${data.ownerName}`,
-                        success: `Added owner - ${data.ownerName}`,
-                        error: `Failed to add owner - ${data.ownerName}`,
-                      });
-                    }}
-                  />
-                )}
+                <FlowAddNewOwner
+                  alertKey={alertKey}
+                  toggleAlert={toggleAlert}
+                  owners={owners?.data || []}
+                  onSubmit={(data) => {
+                    setCachedOwners({
+                      ...cachedOwners,
+                      [data.ownerAddress]: {
+                        address: data.ownerAddress,
+                        name: data.ownerName,
+                      },
+                    });
+                  }}
+                />
               </div>
             }
           >
@@ -322,30 +270,11 @@ export default function Multisig() {
           heading={
             <div className="flex w-full justify-between">
               <h4>Transactions</h4>
-              {submitTransaction && (
-                <FlowAddNewTransaction
-                  alertKey={alertKey}
-                  toggleAlert={toggleAlert}
-                  onSubmit={(data) => {
-                    false &&
-                      alert(
-                        `to: ${data.contractAddress}\ndata: ${data.encoded}\nopts: {${data.nonce},${data.gasAmount}}`,
-                      );
-                    toast.promise(submitTransaction.mutateAsync(data), {
-                      pending: {
-                        render: ({ data }) => `Submitting transaction`,
-                      },
-                      success: {
-                        render: ({ data }) =>
-                          `Transaction submitted ${data?.hash}`,
-                      },
-                      error: {
-                        render: ({ data }) => `Transaction failed to submit`,
-                      },
-                    });
-                  }}
-                />
-              )}
+              <FlowAddNewTransaction
+                alertKey={alertKey}
+                toggleAlert={toggleAlert}
+                onSubmit={(data) => {}}
+              />
             </div>
           }
           bodyClass="flex flex-col gap-4"

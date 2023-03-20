@@ -26,7 +26,7 @@ export const build = {
   },
   addressAbiPair(contractId: ContractId, address?: Address) {
     return {
-      address: CONTRACT[contractId].address,
+      address: CONTRACT[contractId]?.address,
       abi: ABI[contractId],
     };
   },

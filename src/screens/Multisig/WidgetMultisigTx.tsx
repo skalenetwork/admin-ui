@@ -100,17 +100,6 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   reqdConfirmations?: number;
   onAction?: () => void;
 }) {
-  const confirmTx = useSContractWrite('MULTISIG_WALLET', {
-    enabled: !!id,
-    name: 'confirmTransaction',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
-  const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
-    enabled: !!id,
-    name: 'revokeConfirmation',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
-
   // evaluate multisig tx state
 
   const {
@@ -133,11 +122,26 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     select: (data) => data.toNumber(),
   });
 
+  // ready up writers
+
+  const confirmTx = useSContractWrite('MULTISIG_WALLET', {
+    enabled: !!(id && executed === false),
+    name: 'confirmTransaction',
+    args: id ? [BigNumber.from(id)] : undefined,
+  });
+  const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
+    enabled: !!(id && executed === false),
+    name: 'revokeConfirmation',
+    args: id ? [BigNumber.from(id)] : undefined,
+  });
+
   // evaluate time elapsed
 
   const { data: transaction } = useTransaction({
     enabled: !!submitEvent,
     hash: submitEvent?.transactionHash as `0x${string}`,
+    cacheTime: Infinity,
+    staleTime: Infinity,
   });
 
   const { data: block } = useQuery({
@@ -146,6 +150,8 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     queryFn: () => {
       return submitEvent?.getBlock();
     },
+    cacheTime: Infinity,
+    staleTime: Infinity,
   });
 
   const elapsed = useMemo(() => {

@@ -2,7 +2,7 @@
  * @description A featured form field around react-hook-form
  */
 
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { EraserIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import React, { BaseSyntheticEvent, PropsWithChildren } from 'react';
 import {
   Controller,
@@ -19,6 +19,7 @@ type Props<T extends FieldValues> = PropsWithChildren<{
   label?: string;
   placeholder?: string;
   control: (props: ControllerRenderProps) => JSX.Element;
+  showResetter?: boolean;
 }> &
   Parameters<ReturnType<typeof useFormContext>['register']>['1'];
 
@@ -27,6 +28,7 @@ function Field<T extends FieldValues>({
   name,
   label,
   control,
+  showResetter,
   placeholder,
   disabled,
   setValueAs,
@@ -38,7 +40,8 @@ function Field<T extends FieldValues>({
   const {
     register,
     control: formControl,
-    formState: { errors },
+    formState: { errors, defaultValues },
+    resetField,
   } = useFormContext<T>();
 
   const error = errors[name];
@@ -57,8 +60,23 @@ function Field<T extends FieldValues>({
     <>
       <fieldset className={`m-0 w-full ${className}`}>
         {label && (
-          <label>
-            {label} {rest.required && ' *'}
+          <label className="flex flex-row">
+            <span>
+              {label} {rest.required && ' *'}
+            </span>
+            {showResetter && (
+              <button
+                className="ml-auto text-[var(--gray10)]"
+                onClick={(e) => {
+                  e.preventDefault();
+                  resetField(name, {
+                    defaultValue: defaultValues?.[name],
+                  });
+                }}
+              >
+                <EraserIcon />
+              </button>
+            )}
           </label>
         )}
         <Controller

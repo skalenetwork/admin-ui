@@ -85,26 +85,30 @@ export function useChainConnect({ chainName }: { chainName: string }) {
   const { chain: originChain, chains } = useNetwork();
   const targetChain = chains.find((chain) => chain.name === chainName);
 
-  const { data } = useSContractReads('TOKEN_MANAGER_LINKER', {
-    enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
-    reads: [
-      {
-        name: 'hasSchain',
-        args: [targetChain?.name],
-      },
-      {
-        name: 'hasSchain',
-        args: [originChain?.name],
-        chainId: targetChain?.id,
-      },
-    ],
-  });
+  const { data, isLoading, isSuccess, isError } = useSContractReads(
+    'TOKEN_MANAGER_LINKER',
+    {
+      enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
+      reads: [
+        {
+          name: 'hasSchain',
+          args: [targetChain?.name],
+        },
+        {
+          name: 'hasSchain',
+          args: [originChain?.name],
+          chainId: targetChain?.id,
+        },
+      ],
+    },
+  );
   const originConnected =
     chainName.toLowerCase() === 'ethereum' ? true : data?.[0];
   const targetConnected =
     chainName.toLowerCase() === 'ethereum' ? true : data?.[1];
 
   const connect = useSContractWrite('TOKEN_MANAGER_LINKER', {
+    enabled: !!chainName,
     name: 'connectSchain',
     args: [chainName],
     overrides: {
@@ -123,6 +127,9 @@ export function useChainConnect({ chainName }: { chainName: string }) {
       : 'none';
 
   return {
+    isLoading,
+    isSuccess,
+    isError,
     connect,
     status,
   };

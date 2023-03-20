@@ -18,10 +18,21 @@ import Dialog from '@/components/Dialog/Dialog';
 import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress';
+import { useMultisig } from '@/features/multisig/hooks';
 import { getAbi } from '@/features/network/abi/abi';
-import { SContractEntries } from '@/features/network/contract';
+import { getSContractProp } from '@/features/network/contract';
+import { useSContractWrite } from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
+import { build } from '@/features/network/manifest';
 import { AlertProps } from '@/screens/types';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import * as Collapsible from '@radix-ui/react-collapsible';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ExclamationTriangleIcon,
+  InfoCircledIcon,
+} from '@radix-ui/react-icons';
+import { toast } from 'react-toastify';
 
 const { CONTRACT } = manifest;
 
@@ -54,7 +65,7 @@ export function FlowAddNewTransaction({
   const balance = useBalance({
     address: account.address,
   });
-
+  const { counts, pendingTrxIds } = useMultisig();
   // reset
   useLayoutEffect(() => {
     if (alertKey !== id) {
@@ -82,8 +93,7 @@ export function FlowAddNewTransaction({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
-        nonce: 1,
-        gasAmount: 450213,
+        nonce: counts.data.countTotalTrx,
       },
     }),
   ] as const;
@@ -91,6 +101,10 @@ export function FlowAddNewTransaction({
   const { fields, append, remove, insert, replace } = useFieldArray({
     control: form[0].control,
     name: 'parameters',
+  });
+
+  form[0].register('encoded', {
+    required: true,
   });
 
   const infoForm = form[0].watch();
@@ -147,14 +161,23 @@ export function FlowAddNewTransaction({
     } catch (e) {}
   }, [form[0].getFieldState('contractABI').invalid, contractABI]);
 
+  const contractId = build.contractIdFromAddress(
+    contractAddress as `0x${string}`,
+  );
+
+  const contractName = contractId && getSContractProp(contractId, 'name');
+
+  const contractFunctionArgs = useMemo(() => {
+    return parameters?.length
+      ? parameters.map((param) => param.value)
+      : undefined;
+  }, [JSON.stringify(parameters)]);
+
   /**
    * Set contract ABI if predeployed contract address used
    */
+
   useEffect(() => {
-    if (!contractAddress) return;
-    const contractId = SContractEntries.find(
-      ([id, { address }]) => address === contractAddress,
-    )?.[0];
     if (contractId) {
       try {
         const abi = getAbi(contractId);
@@ -169,11 +192,12 @@ export function FlowAddNewTransaction({
         );
       }
     }
-  }, [contractAddress]);
+  }, [contractId]);
 
   /**
    * Set fields based on contract function
    */
+
   useEffect(() => {
     replace([]); // clear params because reset won't
     form[0].resetField('parameters'); // this should clear array by itself, but doesn't
@@ -190,6 +214,7 @@ export function FlowAddNewTransaction({
   /**
    * Prepare final hex encoded data
    */
+
   const [encodedValue, encodedValueError] = useMemo(() => {
     let data;
     let error;
@@ -199,9 +224,7 @@ export function FlowAddNewTransaction({
         : contractMethod && contractInterface
         ? contractInterface.encodeFunctionData(
             contractMethod,
-            parameters?.length
-              ? parameters.map((param) => param.value)
-              : undefined,
+            contractFunctionArgs,
           )
         : '';
     } catch (e) {
@@ -213,11 +236,7 @@ export function FlowAddNewTransaction({
       };
     }
     return [data, error];
-  }, [hexMode, contractInterface, contractMethod, JSON.stringify(parameters)]);
-
-  form[0].register('encoded', {
-    required: true,
-  });
+  }, [hexMode, contractInterface, contractMethod, contractFunctionArgs]);
 
   useEffect(() => {
     if (!encodedValue) return;
@@ -235,12 +254,52 @@ export function FlowAddNewTransaction({
     }
   }, [encodedValueError]);
 
+  /**
+   * Create writer with accurate routing
+   */
+
+  const gasPrice = form[1].watch('gasAmount');
+  const nonce = form[1].watch('nonce');
+
+  const contractIdForWrite = contractId || 'MULTISIG_WALLET';
+  const submitTransaction = useSContractWrite(contractIdForWrite, {
+    enabled: !!(contractAddress && contractMethod && infoForm.encoded),
+    name: contractId ? contractFunction?.definition.name : 'submitTransaction',
+    args: contractId
+      ? contractFunctionArgs
+      : [contractAddress, 0, infoForm.encoded],
+    overrides: {
+      ...(gasPrice ? { gasPrice } : {}),
+      ...(nonce > counts.data.countTotalTrx ? { nonce } : {}),
+    },
+  });
+  const writeAsync =
+    contractIdForWrite === 'MULTISIG_WALLET'
+      ? submitTransaction.writeAsync
+      : submitTransaction.mnm?.writeAsync;
+
   const handleFinalSubmit = useCallback(
-    (lastFormData) => {
+    async (lastFormData) => {
       const data = {
         ...form[0].getValues(),
         ...form[1].getValues(),
       };
+      writeAsync &&
+        toast.promise(writeAsync(), {
+          pending: {
+            render: ({ data }) => `Submitting transaction`,
+          },
+          success: {
+            render: ({ data }) =>
+              `Transaction submitted ${data?.hash} ${
+                counts.data.countReqdConfirms > 1 &&
+                `| Pending ${counts.data.countReqdConfirms - 1} more confirm.`
+              }`,
+          },
+          error: {
+            render: ({ data }) => `Transaction failed to submit`,
+          },
+        });
       onSubmit(data);
       toggleAlert(id)(false);
     },
@@ -295,22 +354,39 @@ export function FlowAddNewTransaction({
                   )}
                 </div>
                 <div className="w-3/4">
+                  <datalist id="contract_list">
+                    {Object.values(CONTRACT)
+                      .filter((c) => c.network === NETWORK.SKALE)
+                      .map((contract) => (
+                        <option value={contract.address}>
+                          {contract.name}
+                        </option>
+                      ))}
+                  </datalist>
                   <Field<InfoFormData>
-                    control={() => <input type="text" />}
+                    control={() => (
+                      <input
+                        type="text"
+                        id="contract_list"
+                        list="contract_list"
+                      />
+                    )}
                     name="contractAddress"
                     label="Contract Address"
                     placeholder="Contract Address"
                     setValueAs={(val: string) =>
                       val.includes('0x')
                         ? val
-                        : Object.values(CONTRACT).find((c) => c.name === val)
-                            ?.address || val
+                        : Object.values(CONTRACT).find(
+                            (c) => c.name.toLowerCase() === val.toLowerCase(),
+                          )?.address || val
                     }
                     pattern={{
                       value: /^0x[a-fA-F0-9]{40}$/,
                       message: 'Address is invalid',
                     }}
                     required="Please provide a contract address"
+                    showResetter
                   />
                   <Field<InfoFormData>
                     control={() => (
@@ -419,7 +495,14 @@ export function FlowAddNewTransaction({
         {
           onSubmit: form[1].handleSubmit(handleFinalSubmit),
           actionElement: ({ className }) => (
-            <input type="submit" className={`${className}`} value="Submit" />
+            <input
+              type="submit"
+              className={`${className}`}
+              value="Submit"
+              disabled={
+                !(form[0].formState.isValid && form[1].formState.isValid)
+              }
+            />
           ),
           cancelElement: ({ className }) => (
             <div
@@ -434,7 +517,9 @@ export function FlowAddNewTransaction({
               <div className="grid w-full gap-y-2">
                 <p className="font-medium">Details:</p>
                 <div>
-                  <p className="text-[var(--gray10)]">Contract address</p>
+                  <p className="text-[var(--gray10)]">
+                    To {contractName || 'Destination'} Contract
+                  </p>
                   <NiceAddress
                     address={form[0].getValues('contractAddress')}
                     copyable
@@ -468,38 +553,44 @@ export function FlowAddNewTransaction({
                     spellCheck="false"
                     readOnly
                     className="scrollbar w-full bg-[var(--gray1)] p-2 font-mono text-[var(--black)]"
-                  >
-                    {form[0].watch('encoded')}
-                  </textarea>
+                    value={form[0].watch('encoded')}
+                  ></textarea>
                 </div>
-                <div>
-                  <FormProvider {...form[1]}>
+                <Collapsible.Root>
+                  <Collapsible.Trigger className="border p-2 w-full group">
                     <p className="text-[var(--gray10)]">Advanced parameters</p>
                     <div>
-                      <Field<AdvancedFormData>
-                        control={() => <input type="number" />}
-                        name="nonce"
-                        label="Nonce"
-                        placeholder="Nonce"
-                        min={1}
-                        required="Transaction nonce is required"
-                        valueAsNumber={true}
-                      />
-                      <Field<AdvancedFormData>
-                        control={() => <input type="number" />}
-                        name="gasAmount"
-                        label="Gas Amount"
-                        placeholder="Gas Amount"
-                        required="Gas amount is required"
-                        valueAsNumber={true}
-                      />
+                      <ArrowDownIcon className="group-radix-state-open:hidden" />
+                      <ArrowUpIcon className="group-radix-state-closed:hidden" />
                     </div>
-                  </FormProvider>
-                  <p className="center py-2 text-[var(--gray10)]">
-                    Please comfirm transaction creation with your currently
-                    connected wallet
-                  </p>
-                </div>
+                  </Collapsible.Trigger>
+                  <Collapsible.Content className="py-2">
+                    <FormProvider {...form[1]}>
+                      <div>
+                        <Field<AdvancedFormData>
+                          control={() => <input type="number" />}
+                          name="nonce"
+                          label="Nonce"
+                          placeholder="Nonce"
+                          min={counts.data.countTotalTrx}
+                          valueAsNumber={true}
+                          showResetter
+                        />
+                        <Field<AdvancedFormData>
+                          control={() => <input type="number" />}
+                          name="gasAmount"
+                          label="Gas Amount"
+                          placeholder="Gas Amount"
+                          valueAsNumber={true}
+                        />
+                      </div>
+                    </FormProvider>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+                <p className="center py-2 text-sm text-center text-[var(--primary)]">
+                  <InfoCircledIcon /> You are signing on MultiSigWallet
+                  {submitTransaction.mnm && ' through Marionette'}.
+                </p>
               </div>
             </div>
           ),

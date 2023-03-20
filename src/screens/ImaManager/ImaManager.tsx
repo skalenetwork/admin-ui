@@ -308,11 +308,20 @@ const PeerChainItem = ({
   selected?: boolean;
   onSelect?: () => void;
 }) => {
-  const { status: connectionStatus } = useChainConnect({
+  const { status: connectionStatus, isLoading } = useChainConnect({
     chainName: name,
   });
   return connectionStatus === 'none' ? (
     <></>
+  ) : isLoading ? (
+    <>
+      <button
+        className={tw`group flex justify-between
+      rounded-lg bg-[var(--slate)] px-6 py-2 text-left text-[var(--blue12)]
+      transition-all delay-100 h-1/2 animate-pulse
+      `}
+      ></button>
+    </>
   ) : (
     <button
       onClick={() => onSelect?.()}
