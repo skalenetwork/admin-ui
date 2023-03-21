@@ -1,10 +1,9 @@
-import { useBlockHistory, usePoolStats } from '@/features/analytics';
-import { useMemo } from 'react';
-
 import Card from '@/components/Card/Card';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
-
-// @ts-ignore
+import { useBlockHistory, useSkaleManagerStats } from '@/features/analytics';
+import { useSContractRead } from '@/features/network/hooks';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { useMemo } from 'react';
 import { AxisOptions, Chart } from 'react-charts';
 import { useTheme } from '../../hooks';
 
@@ -15,21 +14,42 @@ const fmtcurr = Intl.NumberFormat('en-US', {
 });
 
 function FormattedMetric({
+  reader,
   amount = 0,
   label,
   format = 'number',
 }: {
-  amount: number;
+  reader?: ReturnType<typeof useSContractRead>;
+  amount?: number;
   format?: 'currency' | 'number';
   label?: string;
 }) {
   const numeral = Number(Number(amount).toFixed(0));
-  let value = isNaN(amount)
+
+  const _amount =
+    amount !== undefined
+      ? amount
+      : reader?.data?._isBigNumber
+      ? reader.data.toNumber()
+      : reader?.data
+      ? reader.data
+      : 0;
+
+  let value = isNaN(_amount)
     ? '...'
     : (format === 'currency' ? fmtcurr : fmtnum).format(numeral);
+
   return (
     <div>
-      <p className="p-0 text-2xl font-semibold">{value}</p>
+      {reader?.isError ? (
+        <p className="p-1" title={reader.error?.reason}>
+          <ExclamationTriangleIcon className="text-[var(--red10)]" />
+        </p>
+      ) : reader?.isLoading ? (
+        <p className="p-0 text-2xl font-semibold animate-pulse">...</p>
+      ) : (
+        <p className="p-0 text-2xl font-semibold">{value}</p>
+      )}
       {label && <p className="text-sm text-[var(--gray9)]">{label}</p>}
     </div>
   );
@@ -45,7 +65,13 @@ export function ChainAnalytics() {
     includeLatest: true,
   });
 
-  const { walletBalance } = usePoolStats();
+  const stats = useSkaleManagerStats();
+  const {
+    schainWalletBalance,
+    exitsFromSchain,
+    transfersFromMainnet,
+    transfersFromSchains,
+  } = stats;
 
   const tx = Math.random() * 50000;
 
@@ -101,18 +127,30 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="ima_pool" data-s="1" className="mt-1">
+        <div data-id="ima_pool" data-s="2" className="mt-1">
           <Card
             full
             heading="IMA Community pool"
             bodyClass="h-full grid grid-rows-2 grid-cols-2"
           >
-            <FormattedMetric amount={980} label="Active users" />
-            <FormattedMetric amount={240} label="Inactive users" />
-            <FormattedMetric amount={420} label="Exists" />
             <FormattedMetric
-              amount={walletBalance}
-              label="sChain wallet balance"
+              reader={schainWalletBalance}
+              label="SchainWallet Balance"
+            />
+            <FormattedMetric
+              reader={transfersFromMainnet}
+              amount={transfersFromMainnet.data}
+              label="Transfers from Mainnet"
+            />
+            <FormattedMetric
+              reader={exitsFromSchain}
+              amount={exitsFromSchain.data}
+              label="Exits from Schain"
+            />
+            <FormattedMetric
+              reader={transfersFromSchains}
+              amount={transfersFromSchains.data}
+              label="Transfers from Schains"
             />
           </Card>
         </div>

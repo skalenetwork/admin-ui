@@ -10,6 +10,8 @@ export const ACRONYMS = ['IMA', 'ETH', 'MTM', 'FCD', 'ERC'];
  */
 export const NETWORK = {
   ETHEREUM: 'homestead',
+  RINKEBY: 'rinkeby',
+  GOERLI: 'goerli',
   SKALE: 'skale',
 } as const;
 

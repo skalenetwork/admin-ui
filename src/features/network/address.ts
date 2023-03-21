@@ -1,7 +1,7 @@
 /**
  * @module ConstantAddress
  * @description Network-wide preset addresses exported as constant types
- * @todo outdated addresses, to be recompiled
+ * @todo outdated addresses, to be recompiled https://github.com/skalenetwork/admin-ui/issues/9
  */
 
 export { ZERO_ADDRESS } from '@skaleproject/constants/lib/addresses/constants';

@@ -3,7 +3,13 @@
  * @module AnalyticsHooks
  */
 
-import { useExplorer, useSContractRead } from '@/features/network/hooks';
+import {
+  useExplorer,
+  useSContractRead,
+  useSContractReads,
+} from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
+import { ethers } from 'ethers';
 import { useMemo } from 'react';
 import { useAccount, useBlockNumber, useNetwork, useProvider } from 'wagmi';
 import { TimedBlocks } from './core/block';
@@ -22,6 +28,90 @@ export function usePoolStats() {
 
   return {
     walletBalance: data,
+  };
+}
+
+const ETHEREUM_MAINNET_HASH = ethers.utils
+  .id('Mainnet')
+  .toString() as `0x${string}`;
+
+console.log(ETHEREUM_MAINNET_HASH);
+
+export function useSkaleManagerStats() {
+  const { chain: originChain, chains } = useNetwork();
+
+  const originChainHash =
+    originChain && (ethers.utils.id(originChain.name) as `0x${string}`);
+
+  const sChains = chains.filter((c) => c.network === NETWORK.SKALE);
+
+  //1. Wallets.getSchainBalance(chainHash) (Ethereum)
+  // 2. MessageProxyForMainnet.getIncomingMessageCounter(chainHash) (Ethereum)
+
+  const schainWalletBalance = useSContractRead('MANAGER_WALLETS_ON_MAINNET', {
+    enabled: !!originChainHash,
+    name: 'getSchainBalance',
+    args: [originChainHash],
+    chainId: 1,
+  });
+
+  const exitsFromSchain = useSContractRead('MESSAGE_PROXY_MAINNET_ON_MAINNET', {
+    enabled: !!ETHEREUM_MAINNET_HASH,
+    name: 'getIncomingMessagesCounter',
+    args: [ETHEREUM_MAINNET_HASH],
+    chainId: 1,
+  });
+
+  const transfersFromMainnet = useSContractRead('MESSAGE_PROXY_SCHAIN', {
+    enabled: !!ETHEREUM_MAINNET_HASH,
+    name: 'getIncomingMessagesCounter',
+    args: [ETHEREUM_MAINNET_HASH],
+  });
+
+  const targetConnectedChains = useSContractReads('TOKEN_MANAGER_LINKER', {
+    enabled: !!(originChain && sChains?.length),
+    reads: sChains.map((targetChain) => ({
+      name: 'hasSchain',
+      args: [originChain?.name] as const,
+      chainId: targetChain?.id,
+    })),
+    select: (data) => {
+      let connectedChains = [] as (typeof originChain & {
+        chainHash: `0x${string}`;
+      })[];
+      data.forEach((isConnected, index) => {
+        const chain = sChains[index];
+        if (isConnected)
+          connectedChains.push({
+            ...chain,
+            chainHash: ethers.utils.id(chain.name).toString() as `0x${string}`,
+          });
+      });
+      return connectedChains;
+    },
+  });
+
+  const transfersFromSchains = useSContractReads('MESSAGE_PROXY_SCHAIN', {
+    enabled: !!targetConnectedChains.isSuccess,
+    reads: targetConnectedChains.data.map((chain) => ({
+      name: 'getIncomingMessagesCounter',
+      args: [chain.chainHash],
+    })),
+    select: (data) => {
+      const count = (data as number[]).reduce(
+        (curr, acc) => (curr || 0) + acc,
+        0,
+      );
+      return count;
+    },
+  });
+
+  return {
+    targetConnectedChains,
+    schainWalletBalance,
+    exitsFromSchain,
+    transfersFromMainnet,
+    transfersFromSchains,
   };
 }
 
