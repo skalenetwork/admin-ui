@@ -78,7 +78,7 @@ const SubmitButtonPair = ({
           <CaretLeftIcon />
         </button>
       )}
-      <button className="btn" type="submit" disabled={false}>
+      <button className="btn" type="submit" disabled={!isReady}>
         {text}
       </button>
     </div>
@@ -340,6 +340,20 @@ export default function ImaMapToken() {
     name: `add${standard}TokenByOwner`,
     args: [targetChain?.name, form[0].getValues('originContractAddress')],
   });
+
+  const addTokenByOwner = useSContractWrite(
+    `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20',
+    {
+      name: `add${standard}TokenByOwner`,
+      args: [
+        originChain?.network === NETWORK.ETHEREUM
+          ? 'Mainnet'
+          : originChain?.name,
+        form[0].watch('originContractAddress'),
+        form[1].watch('cloneContractAddress'),
+      ],
+    },
+  );
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
     ? [
@@ -694,16 +708,7 @@ export default function ImaMapToken() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                await tokenManagerApi.api?.addTokenByOwner(
-                  originChain?.network === NETWORK.ETHEREUM
-                    ? 'Mainnet'
-                    : originChain?.name,
-                  form[0].getValues('originContractAddress'),
-                  form[1].getValues('cloneContractAddress'),
-                  {
-                    address: account.address,
-                  },
-                );
+                await addTokenByOwner.writeAsync?.();
                 form.forEach((f) => f.reset());
                 markComplete();
               }}
@@ -733,7 +738,7 @@ export default function ImaMapToken() {
                   />
                 </fieldset>
                 <SubmitButtonPair
-                  isReady={true}
+                  isReady={!!addTokenByOwner.writeAsync}
                   text="Confirm"
                   stepPrev={stepPrev}
                   stepNext={stepNext}

@@ -109,10 +109,7 @@ export default function RoleAssigner() {
                     {Object.entries(CONTRACT)
                       .filter(([id, contract]) => {
                         return (
-                          !(
-                            contract.type === 'ima:bridge' &&
-                            contract.network === NETWORK.ETHEREUM
-                          ) &&
+                          contract.network === NETWORK.SKALE &&
                           !(['COMMUNITY_POOL'] as ContractId[]).includes(id)
                         );
                       })
