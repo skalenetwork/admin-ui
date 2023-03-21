@@ -225,6 +225,10 @@ export function useSContractRead<
     address,
     abi,
     functionName: name,
+    onError: (err) => {
+      console.error('[read]', id, name, err.data?.code, err.data?.reason);
+      params.onError?.(err);
+    },
   });
   return {
     ...query,
@@ -291,6 +295,10 @@ export function useSContractReads<
   const response = useContractReads({
     ...params,
     contracts,
+    onError: (err) => {
+      console.error('[reads]', id, '', err.data?.code, err.data?.reason);
+      params.onError?.(err);
+    },
   });
   return {
     ...response,

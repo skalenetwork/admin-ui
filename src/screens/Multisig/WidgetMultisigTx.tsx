@@ -15,31 +15,32 @@ import humanizeDuration from 'humanize-duration';
 import React, { useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { tw } from 'twind';
-import { Address, useTransaction } from 'wagmi';
+import { Address, useAccount, useTransaction } from 'wagmi';
 
 const TxAction = ({
   id,
   executed,
   confirmTx,
   revokeConfirmTx,
+  hasConfirmed,
   remainingConfirms,
   onAction,
 }: {
   id: number;
   executed: boolean;
   confirmTx: ReturnType<typeof useSContractWrite>;
+  hasConfirmed: boolean;
   revokeConfirmTx: ReturnType<typeof useSContractWrite>;
   remainingConfirms: number;
   onAction?: () => void;
 }) => {
-  const isFinalSigner = remainingConfirms === 1 && confirmTx?.write;
+  const isFinalSigner = remainingConfirms === 1 && !!confirmTx?.write;
   const handleSubmit = useCallback(async () => {
-    const action = (confirmTx || revokeConfirmTx).writeAsync;
+    const action = (revokeConfirmTx || confirmTx).writeAsync;
     if (!action) return;
     toast.promise(
       async () => {
-        const { wait } = await action();
-        await wait();
+        await action(true);
         onAction?.();
       },
       {
@@ -54,7 +55,9 @@ const TxAction = ({
   return (
     <>
       {!executed &&
-        (confirmTx.write ? (
+        (hasConfirmed === undefined ? (
+          <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
+        ) : hasConfirmed === false && !!confirmTx.write ? (
           <button
             className={tw(
               'align-middle hover:scale-110 transition-all',
@@ -70,7 +73,7 @@ const TxAction = ({
               <PlusCircledIcon className="align-middle text-[var(--green10)]" />
             )}
           </button>
-        ) : revokeConfirmTx.write ? (
+        ) : hasConfirmed === true && !!revokeConfirmTx.write ? (
           <button
             className={tw(
               'align-middle hover:scale-110 transition-all',
@@ -83,7 +86,7 @@ const TxAction = ({
             <MinusCircledIcon className="align-middle text-[var(--red10)]" />
           </button>
         ) : (
-          <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
+          <></>
         ))}
     </>
   );
@@ -102,6 +105,8 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 }) {
   // evaluate multisig tx state
 
+  const { address } = useAccount();
+
   const {
     submitEvent,
     isFailed: failed,
@@ -115,12 +120,18 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     };
   }, [events]);
 
-  const countConfirmations = useSContractRead('MULTISIG_WALLET', {
+  const ownersThatConfirmed = useSContractRead('MULTISIG_WALLET', {
     enabled: !!id,
-    name: 'getConfirmationCount',
+    name: 'getConfirmations',
     args: [BigNumber.from(id)] as const,
-    select: (data) => data.toNumber(),
   });
+
+  const countConfirmations = ownersThatConfirmed.data?.length;
+
+  const signerHasConfirmed =
+    address &&
+    ownersThatConfirmed?.data &&
+    ownersThatConfirmed.data.includes(address);
 
   // ready up writers
 
@@ -196,7 +207,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 
   const remainingConfirmations = Math.max(
     0,
-    (reqdConfirmations || 0) - (countConfirmations.data || 0),
+    (reqdConfirmations || 0) - (countConfirmations || 0),
   );
 
   return (
@@ -239,9 +250,10 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
                   executed={executed}
                   confirmTx={confirmTx}
                   revokeConfirmTx={revokeConfirmTx}
+                  hasConfirmed={signerHasConfirmed}
                   remainingConfirms={remainingConfirmations}
                   onAction={() => {
-                    countConfirmations.refetch();
+                    ownersThatConfirmed.refetch();
                     onAction?.();
                   }}
                 />
@@ -256,7 +268,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     >
       <div className="flex justify-between items-center">
         <div className="text-sm">
-          Confirmations: {countConfirmations.data}{' '}
+          Confirmations: {countConfirmations}{' '}
           {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
         </div>
       </div>
