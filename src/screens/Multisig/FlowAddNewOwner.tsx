@@ -65,11 +65,20 @@ export function FlowAddNewOwner({
         ...form[1].getValues(),
       };
       addOwner.writeAsync &&
-        toast.promise(addOwner.writeAsync(), {
-          pending: `Adding owner - ${data.ownerName}`,
-          success: `Added owner - ${data.ownerName}`,
-          error: `Failed to add owner - ${data.ownerName}`,
-        });
+        toast.promise(
+          async () => {
+            const response = await addOwner.writeAsync(true).finally(() => {
+              form[0].reset();
+              form[1].reset();
+            });
+            return response;
+          },
+          {
+            pending: `Adding owner - ${data.ownerName}`,
+            success: `Added owner - ${data.ownerName}`,
+            error: `Failed to add owner - ${data.ownerName}`,
+          },
+        );
       onSubmit(data);
       toggleAlert(id)(false);
     },

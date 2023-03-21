@@ -377,6 +377,8 @@ export function useSContractWrite<
 ) {
   const { address, abi } = build.addressAbiPair(id) || {};
 
+  const multisig = build.addressAbiPair('MULTISIG_WALLET');
+
   const isMultisigOnlyWalletWrite =
     id === 'MULTISIG_WALLET' && MULTISIG_ONLY_WALLET_FUNCTIONS.includes(name);
 
@@ -437,14 +439,13 @@ export function useSContractWrite<
           : params.overrides?.gasLimit,
     },
     onError: (err) => {
-      console.error('[write:eoa]', id, name, err.data.code, err.data.message);
+      console.error('[write:eoa]', id, name, err.data?.code, err.data?.message);
       params.onError?.(err);
     },
   });
 
   // transaction initiated by EOA on multisig to marionette through to destination contract
 
-  const multisig = build.addressAbiPair('MULTISIG_WALLET');
   const { config: mnmConfig } = usePrepareContractWrite({
     ...params,
     enabled: !!marionetteExecEncoded && params.enabled !== false,
@@ -466,8 +467,8 @@ export function useSContractWrite<
         '[write:mnm_submit]',
         id,
         name,
-        err.data.code,
-        err.data.message,
+        err.data?.code,
+        err.data?.message,
       );
       params.onError?.(err);
     },
@@ -544,8 +545,8 @@ export function useSContractWrite<
         '[write:mnm_confirm]',
         id,
         name,
-        err.data.code,
-        err.data.message,
+        err.data?.code,
+        err.data?.message,
       );
       params.onError?.(err);
     },
@@ -555,16 +556,29 @@ export function useSContractWrite<
     hash: mnmConfirmTx.data?.hash,
     onSuccess: () => {
       existingTrxConfirmCount.refetch();
+      window.setTimeout(() => {
+        mnmConfirmTx.reset();
+      }, 1000);
     },
   });
 
   const _eoa = useContractWrite(eoaConfig);
   const _eoaWait = useWaitForTransaction({
     hash: _eoa.data?.hash,
+    onSettled: (data, err) => {
+      window.setTimeout(() => {
+        _eoa.reset();
+      }, 1000);
+    },
   });
   const _mnm = useContractWrite(mnmConfig);
   const _mnmWait = useWaitForTransaction({
     hash: _mnm.data?.hash,
+    onSettled: (data, err) => {
+      window.setTimeout(() => {
+        _mnm.reset();
+      }, 1000);
+    },
   });
 
   // expose redundant interface with sufficient states and finality data

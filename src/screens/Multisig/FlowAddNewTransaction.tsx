@@ -285,21 +285,30 @@ export function FlowAddNewTransaction({
         ...form[1].getValues(),
       };
       writeAsync &&
-        toast.promise(writeAsync(), {
-          pending: {
-            render: ({ data }) => `Submitting transaction`,
+        toast.promise(
+          async () => {
+            const response = await writeAsync(true).finally(() => {
+              form[0].reset();
+              form[1].reset();
+            });
+            return response;
           },
-          success: {
-            render: ({ data }) =>
-              `Transaction submitted ${data?.hash} ${
-                counts.data.countReqdConfirms > 1 &&
-                `| Pending ${counts.data.countReqdConfirms - 1} more confirm.`
-              }`,
+          {
+            pending: {
+              render: ({ data }) => `Submitting transaction`,
+            },
+            success: {
+              render: ({ data }) =>
+                `Transaction submitted ${data?.hash} ${
+                  counts.data.countReqdConfirms > 1 &&
+                  `| Pending ${counts.data.countReqdConfirms - 1} more confirm.`
+                }`,
+            },
+            error: {
+              render: ({ data }) => `Transaction failed to submit`,
+            },
           },
-          error: {
-            render: ({ data }) => `Transaction failed to submit`,
-          },
-        });
+        );
       onSubmit(data);
       toggleAlert(id)(false);
     },
@@ -358,7 +367,7 @@ export function FlowAddNewTransaction({
                     {Object.values(CONTRACT)
                       .filter((c) => c.network === NETWORK.SKALE)
                       .map((contract) => (
-                        <option value={contract.address}>
+                        <option key={contract.key} value={contract.address}>
                           {contract.name}
                         </option>
                       ))}

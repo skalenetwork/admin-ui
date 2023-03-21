@@ -116,11 +116,21 @@ export default function FileStorageReserve({
                 onSubmit: form.handleSubmit(
                   (data) => {
                     reserveSpace.writeAsync &&
-                      toast.promise(reserveSpace.writeAsync?.(), {
-                        pending: 'Reserving space',
-                        success: 'Space reserved',
-                        error: 'Failed to reserve space',
-                      });
+                      toast.promise(
+                        async () => {
+                          const response = await reserveSpace
+                            .writeAsync(true)
+                            .finally(() => {
+                              form.reset();
+                            });
+                          return response;
+                        },
+                        {
+                          pending: 'Reserving space',
+                          success: 'Space reserved',
+                          error: 'Failed to reserve space',
+                        },
+                      );
                     toggleAlert(id)(false);
                   },
                   (err) => {

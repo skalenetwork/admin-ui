@@ -704,6 +704,7 @@ export default function ImaMapToken() {
                     address: account.address,
                   },
                 );
+                form.forEach((f) => f.reset());
                 markComplete();
               }}
             >
