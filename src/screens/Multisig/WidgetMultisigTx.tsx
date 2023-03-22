@@ -209,10 +209,10 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
       (toAddress && wallets.value[ethers.utils.getAddress(toAddress)]?.name) ||
       (toContractId
         ? getSContractProp(toContractId, 'name')
-        : toAddress && toAddress.slice(0, 20));
+        : toAddress && toAddress?.slice(0, 20));
     const toMethod = toParsed
       ? toParsed.functionFragment.name
-      : toTxData.slice(0, 10);
+      : toTxData?.slice(0, 10);
 
     let destName, destMethod;
     if (transaction?.data && toContractId === 'MARIONETTE') {
@@ -230,10 +230,10 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 
       destName = destContractId
         ? getSContractProp(destContractId, 'name')
-        : destAddress && destAddress.slice(0, 20);
+        : destAddress && destAddress?.slice(0, 20);
       destMethod = destParsed
         ? destParsed.functionFragment.name
-        : destTxData.slice(0, 10);
+        : destTxData?.slice(0, 10);
     } else {
       destMethod = '-';
     }
@@ -253,7 +253,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     name &&
     (name.length <= 24
       ? name
-      : name.slice(0, 12) + '..' + name.slice(name.length - 12));
+      : name?.slice(0, 12) + '..' + name?.slice(name.length - 12));
 
   return (
     <Card

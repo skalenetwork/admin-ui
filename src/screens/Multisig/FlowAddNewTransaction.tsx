@@ -290,19 +290,30 @@ export function FlowAddNewTransaction({
             const response = await writeAsync(true).finally(() => {
               form[0].reset();
               form[1].reset();
+              onSubmit(response);
             });
             return response;
           },
           {
             pending: {
-              render: ({ data }) => `Submitting transaction`,
+              render: ({ data }) => (
+                <>
+                  <p>Submitting transaction</p>
+                </>
+              ),
             },
             success: {
-              render: ({ data }) =>
-                `Transaction submitted ${data?.hash} ${
-                  counts.data.countReqdConfirms > 1 &&
-                  `| Pending ${counts.data.countReqdConfirms - 1} more confirm.`
-                }`,
+              render: ({ data }) => (
+                <>
+                  <p>Transaction submitted {data?.hash}</p>
+                  {counts.data.countReqdConfirms > 1 && (
+                    <p className="font-semibold">
+                      Pending: Requires {counts.data.countReqdConfirms - 1} more
+                      confirmations to succeed
+                    </p>
+                  )}
+                </>
+              ),
             },
             error: {
               render: ({ data }) => `Transaction failed to submit`,

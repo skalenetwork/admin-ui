@@ -273,7 +273,11 @@ export default function Multisig() {
               <FlowAddNewTransaction
                 alertKey={alertKey}
                 toggleAlert={toggleAlert}
-                onSubmit={(data) => {}}
+                onSubmit={(data) => {
+                  executedTrxIds.refetch();
+                  pendingTrxIds.refetch();
+                  countsRefetch();
+                }}
               />
             </div>
           }
