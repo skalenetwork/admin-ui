@@ -28,7 +28,7 @@ const Select = ({
       >
         <div>
           <SelectPrimitive.Value />
-          <SelectPrimitive.Icon className="ml-2 text-[inherit]">
+          <SelectPrimitive.Icon className="ml-auto text-[inherit]">
             <ChevronDownIcon />
           </SelectPrimitive.Icon>
         </div>

@@ -1,8 +1,11 @@
 import Card from '@/components/Card/Card';
+import { useCacheWallet } from '@/features/multisig/hooks';
+import { getAbi } from '@/features/network/abi/abi';
 import { getSContractProp } from '@/features/network/contract';
 import { useSContractRead, useSContractWrite } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
 import {
+  CaretRightIcon,
   CheckCircledIcon,
   CircleIcon,
   MinusCircledIcon,
@@ -92,6 +95,9 @@ const TxAction = ({
   );
 };
 
+const marionetteAbi = getAbi('MARIONETTE');
+const marionetteIface = new ethers.utils.Interface(marionetteAbi);
+
 export const WidgetMultisigTx = React.memo(function TxWidget({
   id,
   events = [],
@@ -175,26 +181,59 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
       : 0;
   }, [block]);
 
-  const toAddress =
+  const wallets = useCacheWallet();
+
+  // const toAddress =
+  //   transaction?.data &&
+  //   (('0x' + transaction?.data.slice(34, 34 + 40)) as Address);
+
+  const multisigAbi = getAbi('MULTISIG_WALLET');
+  const multisigIface = new ethers.utils.Interface(multisigAbi);
+  const txArgs =
     transaction?.data &&
-    (('0x' + transaction?.data.slice(34, 34 + 40)) as Address);
+    multisigIface &&
+    multisigIface.decodeFunctionData('submitTransaction', transaction.data);
+  const toAddress = txArgs?.[0] as Address;
+  const toTxData = txArgs?.[2];
 
   const [toContractId, toName, toMethod, destName, destMethod] = useMemo(() => {
     const toContractId = toAddress && build.contractIdFromAddress(toAddress);
-    const toName = toContractId
-      ? getSContractProp(toContractId, 'name')
-      : toAddress && toAddress.slice(0, 12);
-    const toMethod = transaction?.data && transaction.data.slice(264, 264 + 10);
+    const toAbi = toContractId && getAbi(toContractId);
+    const toIface = toAbi && new ethers.utils.Interface(toAbi);
+    let toParsed;
+    try {
+      toParsed = toIface && toIface.parseTransaction({ data: toTxData });
+    } catch (e) {}
+
+    const toName =
+      (toAddress && wallets.value[ethers.utils.getAddress(toAddress)]?.name) ||
+      (toContractId
+        ? getSContractProp(toContractId, 'name')
+        : toAddress && toAddress.slice(0, 20));
+    const toMethod = toParsed
+      ? toParsed.functionFragment.name
+      : toTxData.slice(0, 10);
 
     let destName, destMethod;
     if (transaction?.data && toContractId === 'MARIONETTE') {
-      const destAddress = ('0x' +
-        transaction.data.slice(298, 298 + 40)) as Address;
+      const destAddress = toParsed?.args[0] as Address;
       const destContractId = build.contractIdFromAddress(destAddress);
+      const destAbi = destContractId && getAbi(destContractId);
+      const destIface = destAbi && new ethers.utils.Interface(destAbi);
+      const destTxData = toParsed && toParsed?.args[2];
+
+      let destParsed;
+      try {
+        destParsed =
+          destIface && destIface.parseTransaction({ data: destTxData });
+      } catch (e) {}
+
       destName = destContractId
         ? getSContractProp(destContractId, 'name')
-        : destAddress && destAddress.slice(0, 12);
-      destMethod = transaction.data.slice(529, 529 + 9);
+        : destAddress && destAddress.slice(0, 20);
+      destMethod = destParsed
+        ? destParsed.functionFragment.name
+        : destTxData.slice(0, 10);
     } else {
       destMethod = '-';
     }
@@ -210,34 +249,31 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     (reqdConfirmations || 0) - (countConfirmations || 0),
   );
 
+  const displayName =
+    name &&
+    (name.length <= 24
+      ? name
+      : name.slice(0, 12) + '..' + name.slice(name.length - 12));
+
   return (
     <Card
       lean
       heading={
         <div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <div className="text-sm">
+            <div className="flex items-center gap-1 text-sm">
+              <div>
                 {id}
                 <span className="text-[var(--gray10)]">-</span>{' '}
               </div>
-              {name && method ? (
+              {displayName && method ? (
                 <>
                   {toContractId === 'MARIONETTE' && (
                     <span>
                       <StackIcon />
                     </span>
                   )}
-                  <span>
-                    {name.length <= 12
-                      ? name
-                      : name.slice(0, 6) + '..' + name.slice(name.length - 6)}
-                  </span>
-                  <code
-                    className={tw('text-xs', failed ? 'bg-[var(--red2)]' : '')}
-                  >
-                    {method}
-                  </code>
+                  <span>{displayName}</span>
                 </>
               ) : (
                 'Contract Interaction <>'
@@ -260,16 +296,30 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
               )}
             </div>
           </div>
-          <span className="text-sm text-[var(--gray10)]">
-            {elapsed ? `About ${elapsed} ago` : '. . .'}
-          </span>
+          <code
+            className={tw(
+              'text-xs rounded-sm',
+              failed
+                ? 'bg-[var(--red2)]'
+                : executed
+                ? 'bg-[var(--green1)]'
+                : 'bg-[var(--yellow2)]',
+            )}
+          >
+            <CaretRightIcon /> {method}
+          </code>
         </div>
       }
     >
-      <div className="flex justify-between items-center">
-        <div className="text-sm">
-          Confirmations: {countConfirmations}{' '}
-          {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
+      <div>
+        <div className="flex justify-between items-center">
+          <div className="text-sm">
+            Confirmations: {countConfirmations}{' '}
+            {reqdConfirmations && !executed && `of ${reqdConfirmations}`}{' '}
+          </div>
+          <div className="text-xs text-[var(--gray10)]">
+            {elapsed ? `~ ${elapsed} ago` : '. . .'}
+          </div>
         </div>
       </div>
     </Card>

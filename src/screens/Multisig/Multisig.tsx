@@ -32,9 +32,9 @@ export function WalletSelect({
   onActiveChange: (value: string) => void;
 }) {
   return (
-    <div className="h-full w-min">
+    <div className="h-full min-w-[400px] w-max">
       <Select
-        triggerClass="z-50 flex h-full px-2 items-center border bg-[var(--white)] text-[var(--black)] rounded-3xl"
+        triggerClass="z-50 flex w-full h-full px-2 items-center border bg-[var(--white)] text-[var(--black)] rounded-3xl"
         listClass="z-50 w-full bg-[var(--white)] rounded-3xl text-[var(--black)]"
         listItemClass="shadow-sm p-1 hover:bg[var(--slate)] text-[var(--black)]"
         onValueChange={onActiveChange}
@@ -169,7 +169,7 @@ export default function Multisig() {
         <div data-id="count_owners" data-s="2">
           <Card full heading="Number of owners" bodyClass="flex items-center">
             <p className="text-2xl font-bold text-[var(--primary)]">
-              {owners?.data?.length} persons
+              {owners?.data?.length} Owners
             </p>
           </Card>
         </div>

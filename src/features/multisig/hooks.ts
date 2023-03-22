@@ -68,11 +68,19 @@ export function useCacheWallet() {
     },
     [value],
   );
+  const update = useCallback(
+    (payload: NamedAddressStorage[number]['address']) => {
+      const copy: NamedAddressStorage = JSON.parse(JSON.stringify(value));
+      delete copy[payload];
+      setValue(copy);
+    },
+    [value],
+  );
   return {
     value: {
       ...value,
       [defaultAddress]: {
-        name: `Predeployed Multisig ${defaultAddress.slice(0, 5)}`,
+        name: `Default MultiSig ${defaultAddress.slice(0, 5)}`,
         address: defaultAddress,
       },
     },
