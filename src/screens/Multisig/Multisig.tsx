@@ -10,9 +10,9 @@ import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocalStorage } from 'react-use';
-import { Address, useNetwork } from 'wagmi';
+import { Address, useAccount, useNetwork } from 'wagmi';
 import { FlowAddNewOwner } from './FlowAddNewOwner';
 import { FlowAddNewTransaction } from './FlowAddNewTransaction';
 import { FlowAddNewWallet } from './FlowAddNewWallet';
@@ -58,13 +58,18 @@ export function WalletSelect({
 export default function Multisig() {
   const { value: walletList } = useCacheWallet();
 
-  const activeWalletAddress =
+  const defaultWalletAddress =
     Object.entries(walletList)[0][1]?.address ||
     CONTRACT['MULTISIG_WALLET'].address;
 
-  const contractKey = CONTRACT['MULTISIG_WALLET'].key;
+  const [activeWalletAddress, setActiveWalletAddress] = useState();
+
+  useEffect(() => {
+    !activeWalletAddress && setActiveWalletAddress(defaultWalletAddress);
+  }, [defaultWalletAddress]);
 
   const { chain } = useNetwork();
+  const { address } = useAccount();
 
   const {
     queryKey,
@@ -94,6 +99,8 @@ export default function Multisig() {
       name: string;
     };
   }>(`SKL_MULTISIG_OWNERS:${activeWalletAddress}`, {});
+
+  const isOwner = owners?.data?.includes(address) as boolean | undefined;
 
   const [alertKey, setAlertKey] = useState('');
 
@@ -129,7 +136,7 @@ export default function Multisig() {
             )}
             active={activeWalletAddress}
             onActiveChange={(val) => {
-              // @todo switch wallet of state
+              set;
             }}
           />
           <FlowAddNewWallet
@@ -218,20 +225,22 @@ export default function Multisig() {
             heading={
               <div className="flex w-full justify-between">
                 <h4>Owners</h4>
-                <FlowAddNewOwner
-                  alertKey={alertKey}
-                  toggleAlert={toggleAlert}
-                  owners={owners?.data || []}
-                  onSubmit={(data) => {
-                    setCachedOwners({
-                      ...cachedOwners,
-                      [data.ownerAddress]: {
-                        address: data.ownerAddress,
-                        name: data.ownerName,
-                      },
-                    });
-                  }}
-                />
+                {isOwner && (
+                  <FlowAddNewOwner
+                    alertKey={alertKey}
+                    toggleAlert={toggleAlert}
+                    owners={owners?.data || []}
+                    onSubmit={(data) => {
+                      setCachedOwners({
+                        ...cachedOwners,
+                        [data.ownerAddress]: {
+                          address: data.ownerAddress,
+                          name: data.ownerName,
+                        },
+                      });
+                    }}
+                  />
+                )}
               </div>
             }
           >
@@ -252,7 +261,7 @@ export default function Multisig() {
                   key={address}
                   name={(cachedOwners || {})[address]?.name}
                   address={address}
-                  showControls={true}
+                  showControls={isOwner}
                 />
               ))
             ) : (
@@ -270,15 +279,17 @@ export default function Multisig() {
           heading={
             <div className="flex w-full justify-between">
               <h4>Transactions</h4>
-              <FlowAddNewTransaction
-                alertKey={alertKey}
-                toggleAlert={toggleAlert}
-                onSubmit={(data) => {
-                  executedTrxIds.refetch();
-                  pendingTrxIds.refetch();
-                  countsRefetch();
-                }}
-              />
+              {isOwner && (
+                <FlowAddNewTransaction
+                  alertKey={alertKey}
+                  toggleAlert={toggleAlert}
+                  onSubmit={(data) => {
+                    executedTrxIds.refetch();
+                    pendingTrxIds.refetch();
+                    countsRefetch();
+                  }}
+                />
+              )}
             </div>
           }
           bodyClass="flex flex-col gap-4"

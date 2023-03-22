@@ -58,6 +58,7 @@ const TxAction = ({
   return (
     <>
       {!executed &&
+        !!(confirmTx.write || revokeConfirmTx.write) &&
         (hasConfirmed === undefined ? (
           <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
         ) : hasConfirmed === false && !!confirmTx.write ? (
@@ -130,6 +131,12 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     enabled: !!id,
     name: 'getConfirmations',
     args: [BigNumber.from(id)] as const,
+  });
+
+  const isOwner = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!address,
+    name: 'isOwner',
+    args: [address],
   });
 
   const countConfirmations = ownersThatConfirmed.data?.length;
@@ -280,7 +287,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
               )}{' '}
             </div>
             <div>
-              {executed === false && (
+              {executed === false && isOwner.data && (
                 <TxAction
                   id={id}
                   executed={executed}
