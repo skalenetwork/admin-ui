@@ -302,7 +302,7 @@ export function useSContractReads<
   });
   return {
     ...response,
-    data: response.data ? response.data : Array(reads.length),
+    data: response.data !== undefined ? response.data : Array(reads.length),
   } as {
     [K in keyof typeof response as Exclude<K, 'data'>]: (typeof response)[K];
   } & {

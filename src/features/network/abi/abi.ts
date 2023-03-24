@@ -11,6 +11,7 @@ import mainnetImaUnion from './abi-ima-mainnet.union';
 import schainImaUnion from './abi-ima.union';
 import MarionetteABI from './abi-marionette';
 import MultisigWalletABI from './abi-multisig_wallet';
+import skaleManagerUnion from './abi-skale_manager.union';
 
 export type ContractName<K extends ContractId> = Lowercase<
   (typeof CONTRACT)[K]['name']
@@ -30,6 +31,13 @@ export const ABI = {
   CONFIG_CONTROLLER: ConfigControllerABI,
   MULTISIG_WALLET: MultisigWalletABI,
   MARIONETTE: MarionetteABI,
+  MESSAGE_PROXY_MAINNET_ON_MAINNET:
+    mainnetImaUnion['message_proxy_mainnet_abi'],
+  MESSAGE_PROXY_MAINNET_ON_TESTNET:
+    mainnetImaUnion['message_proxy_mainnet_abi'],
+  MESSAGE_PROXY_SCHAIN: schainImaUnion['message_proxy_chain_abi'],
+  MANAGER_WALLETS_ON_MAINNET: skaleManagerUnion['wallets_abi'],
+  MANAGER_WALLETS_ON_TESTNET: skaleManagerUnion['wallets_abi'],
   TOKEN_MANAGER_ERC20: schainImaUnion['token_manager_erc20_abi'],
   TOKEN_MANAGER_ERC721: schainImaUnion['token_manager_erc721_abi'],
   TOKEN_MANAGER_ERC721_WITH_METADATA:
