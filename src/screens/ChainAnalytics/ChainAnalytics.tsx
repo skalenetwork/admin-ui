@@ -130,7 +130,7 @@ export function ChainAnalytics() {
         <div data-id="ima_pool" data-s="2" className="mt-1">
           <Card
             full
-            heading="IMA Community pool"
+            heading="IMA Health"
             bodyClass="h-full grid grid-rows-2 grid-cols-2"
           >
             <FormattedMetric

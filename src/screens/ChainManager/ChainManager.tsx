@@ -7,8 +7,11 @@ import AlertDialog from '@/components/AlertDialog/AlertDialog';
 import FileStorageReserve from './FileStorageReserve';
 
 import Hoverover from '@/components/Hoverover/Hoverover';
+import { ManagerIcon } from '@/components/Icons/Icons';
 import { useChainMetadata } from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
 import { useStorageSpace } from '@/features/storage/hooks';
+import NotSupported from '@/screens/NotSupported';
 import { MinusCircledIcon } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -369,9 +372,21 @@ export default function ChainManager() {
 
   const {} = useStorageSpace();
 
+  const { chain } = useNetwork();
+
   return (
     <>
-      <div className="grid spaced h-full w-full grid-cols-2 grid-rows-3">
+      <div className="relative grid spaced h-full w-full grid-cols-2 grid-rows-3">
+        {chain?.network !== NETWORK.SKALE ? (
+          <NotSupported theme="blur">
+            <ManagerIcon className="mr-4" />
+            &emsp;
+            <strong>Chain Manager</strong> allows miscellaneous control
+            operations on an SChain.
+          </NotSupported>
+        ) : (
+          <></>
+        )}
         <div data-id="contract_deploy" data-s="2">
           <WidgetConfigFcd
             id="contract_deploy"
