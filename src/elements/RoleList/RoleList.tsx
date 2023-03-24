@@ -106,7 +106,9 @@ export default function RoleList({}: Props) {
                 </>
               ) : (
                 !isSignerMultisigOwner.isLoading && (
-                  <>You may have limited access to administrative functions.</>
+                  <span className="text-[var(--gray10)]">
+                    You may have limited access to administrative functions.
+                  </span>
                 )
               )}
               <br />

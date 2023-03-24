@@ -383,9 +383,14 @@ export function useSContractWrite<
     autoConfirm?: boolean;
   },
 ) {
-  const { address, abi } = build.addressAbiPair(id) || {};
+  const account = useAccount();
 
+  const { address, abi } = build.addressAbiPair(id) || {};
   const multisig = build.addressAbiPair('MULTISIG_WALLET');
+
+  const { pendingTrxIds, counts, owners } = useMultisig();
+  const isAccountMultisigOwner = owners.data?.includes(account.address);
+  const requiredConfirmations = counts.data.countReqdConfirms;
 
   const isMultisigOnlyWalletWrite =
     id === 'MULTISIG_WALLET' && MULTISIG_ONLY_WALLET_FUNCTIONS.includes(name);
@@ -456,7 +461,9 @@ export function useSContractWrite<
 
   const { config: mnmConfig } = usePrepareContractWrite({
     ...params,
-    enabled: !!marionetteExecEncoded && params.enabled !== false,
+    enabled:
+      !!(marionetteExecEncoded && isAccountMultisigOwner) &&
+      params.enabled !== false,
     address: multisig.address,
     abi: multisig.abi,
     functionName: 'submitTransaction',
@@ -483,9 +490,6 @@ export function useSContractWrite<
   });
 
   // from args: evaluate if transaction is duplicate of unconfirmed transaction
-
-  const { pendingTrxIds, counts } = useMultisig();
-  const requiredConfirmations = counts.data.countReqdConfirms;
 
   const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
     enabled: pendingTrxIds.isSuccess,
@@ -596,6 +600,7 @@ export function useSContractWrite<
     required: requiredConfirmations,
     confirmed: existingTrxConfirmCount.data,
   };
+
   // @todo include executed state
   const mnmIsFinalized =
     !!(mnmConfirms.confirmed && mnmConfirms.required) &&
