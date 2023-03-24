@@ -396,7 +396,7 @@ export default function ChainManager() {
         <div data-id="chainlist_pr" data-s="2">
           <WidgetManageChainlist />
         </div>
-        <div data-id="chain_metadata" data-s="1">
+        <div data-id="chain_metadata" data-s="2">
           <WidgetManageMetadata />
         </div>
         <div data-id="to_autodeploy" data-s="2">

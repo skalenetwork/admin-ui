@@ -131,7 +131,7 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="transactions_chart" data-s="3">
+        <div data-id="transactions_chart" data-s="2">
           <Card
             full
             lean
@@ -160,7 +160,7 @@ export function ChainAnalytics() {
             </div>
           </Card>
         </div>
-        <div data-id="gas_save_chart" data-s="3">
+        <div data-id="gas_save_chart" data-s="2">
           <Card
             full
             lean
@@ -230,6 +230,7 @@ function Bar() {
         secondaryAxes,
         defaultColors: ['var(--primary)'],
         dark: darkMode,
+        tooltip: false,
       }}
     />
   );

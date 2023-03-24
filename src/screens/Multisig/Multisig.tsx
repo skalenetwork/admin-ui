@@ -128,7 +128,7 @@ export default function Multisig() {
       ) : (
         <></>
       )}
-      <div data-id="toolbar:wallet_select" data-s="1" className="col-span-full">
+      <div data-id="toolbar:wallet_select" data-s="2" className="col-span-full">
         <div className="flex h-full w-full items-center gap-2">
           <WalletSelect
             wallets={Object.entries(walletList).map(
@@ -217,7 +217,7 @@ export default function Multisig() {
 
         <div
           data-id="list_owners"
-          data-s="1"
+          data-s="2"
           className="col-span-full row-start-3 row-end-5"
         >
           <Card
@@ -273,7 +273,7 @@ export default function Multisig() {
 
       {/* Transaction lists */}
 
-      <div data-id="list_txs" data-s="1" className="row-span-2">
+      <div data-id="list_txs" data-s="2" className="row-span-2">
         <Card
           full
           heading={
