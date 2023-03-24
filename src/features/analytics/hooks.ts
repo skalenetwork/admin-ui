@@ -10,9 +10,7 @@ import {
 } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { ethers } from 'ethers';
-import { useMemo } from 'react';
 import { useAccount, useBlockNumber, useNetwork, useProvider } from 'wagmi';
-import { TimedBlocks } from './core/block';
 
 type NoUndefined<T> = T extends undefined ? never : T;
 
@@ -35,8 +33,6 @@ const ETHEREUM_MAINNET_HASH = ethers.utils
   .id('Mainnet')
   .toString() as `0x${string}`;
 
-console.log(ETHEREUM_MAINNET_HASH);
-
 export function useSkaleManagerStats() {
   const { chain: originChain, chains } = useNetwork();
 
@@ -44,9 +40,6 @@ export function useSkaleManagerStats() {
     originChain && (ethers.utils.id(originChain.name) as `0x${string}`);
 
   const sChains = chains.filter((c) => c.network === NETWORK.SKALE);
-
-  //1. Wallets.getSchainBalance(chainHash) (Ethereum)
-  // 2. MessageProxyForMainnet.getIncomingMessageCounter(chainHash) (Ethereum)
 
   const schainWalletBalance = useSContractRead('MANAGER_WALLETS_ON_MAINNET', {
     enabled: !!originChainHash,
@@ -130,11 +123,6 @@ export function useBlockHistory({
   const { chain } = useNetwork();
   const provider = useProvider({ chainId: chain?.id });
 
-  const timedBlocks = useMemo(
-    () => provider && new TimedBlocks(provider),
-    [provider],
-  );
-
   const { data: blockNumber } = useBlockNumber();
 
   const dayStartTime = (time - (time % 86400000)) / 1000; // seconds
@@ -198,15 +186,3 @@ export function useBlockHistory({
     },
   };
 }
-
-/**
- *
- */
-
-export function useTransactionHistory() {}
-
-/**
- *
- */
-
-export function useWalletHistory() {}
