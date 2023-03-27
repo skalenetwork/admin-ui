@@ -43,7 +43,7 @@ function FormattedMetric({
     <div>
       {reader?.isError ? (
         <p className="p-1" title={reader.error?.reason}>
-          <ExclamationTriangleIcon className="text-[var(--red10)]" />
+          <ExclamationTriangleIcon className="text-[var(--yellow11)]" />
         </p>
       ) : reader?.isLoading ? (
         <p className="p-0 text-2xl font-semibold animate-pulse">...</p>

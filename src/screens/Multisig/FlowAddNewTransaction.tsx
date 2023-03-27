@@ -24,6 +24,7 @@ import { getSContractProp } from '@/features/network/contract';
 import { useSContractWrite } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { build } from '@/features/network/manifest';
+import { useMultisigContext } from '@/screens/Multisig/context';
 import { AlertProps } from '@/screens/types';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
@@ -61,11 +62,14 @@ export function FlowAddNewTransaction({
 }: AlertProps & { onSubmit: (data: DataOut) => void }) {
   const [step, setStep] = useState(1);
 
+  const { walletAddress } = useMultisigContext();
   const account = useAccount();
   const balance = useBalance({
     address: account.address,
   });
-  const { counts, pendingTrxIds } = useMultisig();
+  const { counts, pendingTrxIds } = useMultisig({
+    address: walletAddress,
+  });
   // reset
   useLayoutEffect(() => {
     if (alertKey !== id) {
@@ -263,6 +267,7 @@ export function FlowAddNewTransaction({
 
   const contractIdForWrite = contractId || 'MULTISIG_WALLET';
   const submitTransaction = useSContractWrite(contractIdForWrite, {
+    multisigAddress: walletAddress,
     enabled: !!(contractAddress && contractMethod && infoForm.encoded),
     name: contractId ? contractFunction?.definition.name : 'submitTransaction',
     args: contractId

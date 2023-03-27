@@ -5,6 +5,7 @@ import { useCallback, useLayoutEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { AlertProps } from '../types';
+import { useMultisigContext } from './context';
 import { MultisigOwner } from './MultisigOwner';
 
 export type DataOut = {
@@ -21,6 +22,8 @@ export function FlowAddNewOwner({
   onSubmit,
 }: AlertProps & { owners: string[]; onSubmit: (data: DataOut) => void }) {
   const [step, setStep] = useState(1);
+
+  const { walletAddress } = useMultisigContext();
 
   // reset
   useLayoutEffect(() => {
@@ -53,6 +56,7 @@ export function FlowAddNewOwner({
   ] as const;
 
   const addOwner = useSContractWrite('MULTISIG_WALLET', {
+    multisigAddress: walletAddress,
     name: 'addOwner',
     args: [form[0].watch('ownerAddress') as `0x{string}`],
   });

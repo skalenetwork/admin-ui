@@ -2,12 +2,8 @@ import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
 import { NiceAddress } from '@/elements/NiceAddress';
-import {
-  useChainConnect,
-  useHistory,
-  useTokenManager,
-} from '@/features/bridge';
-import { useSContractRead } from '@/features/network/hooks';
+import { useChainConnect, useHistory } from '@/features/bridge';
+import { useSContractApi, useSContractRead } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -92,8 +88,9 @@ const SelectedPeerChainItem = ({
     selectedOriginChain?.network === NETWORK.SKALE
       ? 'TOKEN_MANAGER'
       : 'DEPOSIT_BOX';
+  const standardString = selectedStandard?.name.toUpperCase();
   const contractId =
-    selectedOriginChain && selectedStandard
+    selectedOriginChain && selectedStandard?.name
       ? (`${contractPrefix}_${selectedStandard?.name.toUpperCase()}` as const)
       : undefined;
 
@@ -103,10 +100,7 @@ const SelectedPeerChainItem = ({
     }
   }, [alertKey]);
 
-  const { api: tokenManager } = useTokenManager({
-    standard: standardName.toUpperCase(),
-    network: selectedOriginChain?.network,
-  });
+  const tokenManager = useSContractApi({ id: contractId });
 
   // pending ima-js release
   const mappingsLength = useQuery({
@@ -415,7 +409,10 @@ export default function ImaManager() {
               <Prelay>Switch to an SChain to view connected chains</Prelay>
             ) : (
               chains
-                .filter((c) => c.network === NETWORK.SKALE)
+                .filter(
+                  (c) =>
+                    c.network === NETWORK.SKALE && c.testnet === chain.testnet,
+                )
                 .map(({ name }) => (
                   <PeerChainItem
                     key={name}

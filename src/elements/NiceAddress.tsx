@@ -52,7 +52,10 @@ export function NiceAddress({
           <div className="relative ml-auto">
             <button
               className="flex items-center justify-center"
-              onClick={() => copy(address)}
+              onClick={(e) => {
+                e.preventDefault();
+                copy(address);
+              }}
             >
               {copied.value ? (
                 <CheckBadgeIcon className="ml-auto h-6 w-6 cursor-pointer text-[var(--green10)]" />

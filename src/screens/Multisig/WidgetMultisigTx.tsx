@@ -4,6 +4,7 @@ import { getAbi } from '@/features/network/abi/abi';
 import { getSContractProp } from '@/features/network/contract';
 import { useSContractRead, useSContractWrite } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
+import { useMultisigContext } from '@/screens/Multisig/context';
 import {
   CaretRightIcon,
   CheckCircledIcon,
@@ -37,9 +38,12 @@ const TxAction = ({
   remainingConfirms: number;
   onAction?: () => void;
 }) => {
-  const isFinalSigner = remainingConfirms === 1 && !!confirmTx?.write;
+  const isFinalSigner =
+    remainingConfirms === 1 && !!confirmTx?.write && !hasConfirmed;
   const handleSubmit = useCallback(async () => {
-    const action = (revokeConfirmTx || confirmTx).writeAsync;
+    const action = hasConfirmed
+      ? revokeConfirmTx.writeAsync
+      : confirmTx.writeAsync;
     if (!action) return;
     toast.promise(
       async () => {
@@ -47,14 +51,22 @@ const TxAction = ({
         onAction?.();
       },
       {
-        pending: `Confirming multisig transaction #${id}`,
+        pending: `${
+          hasConfirmed ? 'Revoking confirmation of' : 'Confirming'
+        } multisig transaction #${id}`,
         success: `Multisig transaction #${id} ${
-          isFinalSigner ? 'executed' : 'confirmed'
+          isFinalSigner
+            ? 'is executed'
+            : hasConfirmed
+            ? 'has confirmation revoked'
+            : 'is confirmed'
         }`,
-        error: `Failed to confirm multisig transaction #${id}`,
+        error: `Failed to ${
+          hasConfirmed ? 'revoke confirmation of' : 'confirm'
+        } multisig transaction #${id}`,
       },
     );
-  }, [confirmTx.write, revokeConfirmTx.write]);
+  }, [hasConfirmed, confirmTx.write, revokeConfirmTx.write]);
   return (
     <>
       {!executed &&
@@ -110,8 +122,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   reqdConfirmations?: number;
   onAction?: () => void;
 }) {
-  // evaluate multisig tx state
-
+  const { walletAddress } = useMultisigContext();
   const { address } = useAccount();
 
   const {
@@ -149,11 +160,13 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   // ready up writers
 
   const confirmTx = useSContractWrite('MULTISIG_WALLET', {
+    multisigAddress: walletAddress,
     enabled: !!(id && executed === false),
     name: 'confirmTransaction',
     args: id ? [BigNumber.from(id)] : undefined,
   });
   const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
+    multisigAddress: walletAddress,
     enabled: !!(id && executed === false),
     name: 'revokeConfirmation',
     args: id ? [BigNumber.from(id)] : undefined,

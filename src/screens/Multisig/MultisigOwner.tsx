@@ -1,5 +1,6 @@
 import { NiceAddress } from '@/elements/NiceAddress';
 import { useSContractWrite } from '@/features/network/hooks';
+import { useMultisigContext } from '@/screens/Multisig/context';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -14,7 +15,9 @@ export function MultisigOwner({
   address: Address;
   showControls?: boolean;
 }) {
+  const { walletAddress } = useMultisigContext();
   const { writeAsync } = useSContractWrite('MULTISIG_WALLET', {
+    multisigAddress: walletAddress,
     enabled: !!address,
     name: 'removeOwner',
     args: [address],

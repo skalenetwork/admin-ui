@@ -191,7 +191,7 @@ export type SContractReadParams<
 > = {
   [K in keyof TBaseParams as Exclude<
     K,
-    'args' | 'functionName' | 'abi' | 'address' | 'select'
+    'args' | 'functionName' | 'abi' | 'select'
   >]: TBaseParams[K];
 } & {
   name: TFunctionName;
@@ -214,15 +214,16 @@ export function useSContractRead<
   id: TContractId,
   {
     name,
+    address,
     ...params
   }: SContractReadParams<TAbi, TFunctionName> & { select?: TSelect },
 ) {
   // implementation
-  const address = getSContractProp(id, 'address') as Address;
+  const defaultAddress = getSContractProp(id, 'address') as Address;
   const abi = getAbi(id);
   const query = useContractRead<TAbi, TFunctionName, TReturnData>({
     ...params,
-    address,
+    address: address || defaultAddress,
     abi,
     functionName: name,
     onError: (err) => {
@@ -265,6 +266,7 @@ export function useSContractReads<
   id: TContractId,
   {
     reads,
+    address,
     ...params
   }: {
     [K in keyof TBaseParams as Exclude<
@@ -273,6 +275,7 @@ export function useSContractReads<
     >]: TBaseParams[K];
   } & {
     select?: TSelect;
+    address?: Address;
     reads: Array<{
       name: TFunctionName;
       args?: AbiParametersToPrimitiveTypes<
@@ -282,11 +285,12 @@ export function useSContractReads<
     }>;
   },
 ) {
-  const { abi, address } = useSContract({ id: id });
+  const { abi, address: defaultAddress } = useSContract({ id: id });
+
   const contracts = reads.map(({ name, ...oneRead }) => {
     const params = {
       abi,
-      address,
+      address: address || defaultAddress,
       functionName: name,
       ...oneRead,
     };
@@ -376,19 +380,29 @@ export function useSContractWrite<
   id: TContractId,
   {
     name,
-    autoConfirm = true,
+    multisigAddress,
     ...params
   }: Exclude<TBaseParams, 'abi' | 'address' | 'functionName'> & {
     name: TFunctionName;
-    autoConfirm?: boolean;
+    multisigAddress: Address;
   },
 ) {
   const account = useAccount();
 
-  const { address, abi } = build.addressAbiPair(id) || {};
+  const destContract = build.addressAbiPair(id) || {};
   const multisig = build.addressAbiPair('MULTISIG_WALLET');
 
-  const { pendingTrxIds, counts, owners } = useMultisig();
+  // overrides for multisig selection
+  if (id === 'MULTISIG_WALLET' && multisigAddress) {
+    multisig.address = multisigAddress;
+    destContract.address = multisigAddress;
+  }
+
+  const { address, abi } = destContract;
+
+  const { pendingTrxIds, counts, owners } = useMultisig({
+    address: multisig.address,
+  });
   const isAccountMultisigOwner = owners.data?.includes(account.address);
   const requiredConfirmations = counts.data.countReqdConfirms;
 
@@ -492,6 +506,7 @@ export function useSContractWrite<
   // from args: evaluate if transaction is duplicate of unconfirmed transaction
 
   const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
+    address: multisig.address,
     enabled: pendingTrxIds.isSuccess,
     reads: (pendingTrxIds.data || []).map((trxId) => ({
       name: 'transactions',
@@ -524,6 +539,7 @@ export function useSContractWrite<
 
   const existingTrxConfirmCount = useSContractRead('MULTISIG_WALLET', {
     enabled: !!(existingTrxId && existingTrxId >= 0),
+    address: multisig.address,
     name: 'getConfirmationCount',
     args:
       existingTrxId && existingTrxId >= 0
@@ -601,7 +617,7 @@ export function useSContractWrite<
     confirmed: existingTrxConfirmCount.data,
   };
 
-  // @todo include executed state
+  // @later if needed include executed state
   const mnmIsFinalized =
     !!(mnmConfirms.confirmed && mnmConfirms.required) &&
     mnmConfirms.confirmed >= mnmConfirms.required;

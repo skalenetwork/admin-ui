@@ -133,7 +133,7 @@ export function getApi<I extends keyof typeof API>(
   const abi = contractId ? ABI[contractId] : undefined;
   const contract = contractId ? CONTRACT[contractId] : undefined;
   if (!(contract ?? abi)) {
-    console.error(`getApi: id=${contractId} is invalid`);
+    console.warn(`getApi: id=${contractId} is invalid`);
     return;
   }
   try {

@@ -99,24 +99,14 @@ export const WidgetConfigFcd = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
-  const {
-    toggle,
-    writeAsync,
-    isEnabled,
-    isSuccess,
-    isLoading,
-    isError,
-    confirmed,
-    refetch,
-  } = useFcd();
-  const status =
-    isEnabled === undefined
-      ? 'loading'
-      : !connected
-      ? 'disabled'
-      : isLoading
-      ? 'pending'
-      : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
+  const { toggle, writeAsync, isEnabled, isLoading, refetch } = useFcd();
+  const status = !connected
+    ? 'disabled'
+    : isEnabled === undefined
+    ? 'loading'
+    : isLoading
+    ? 'pending'
+    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
 
   return (
     <Card
@@ -127,7 +117,7 @@ export const WidgetConfigFcd = ({
           <FormattedStatus status={status} />
         </>
       }
-      tooltip={'Peep Peeep'}
+      tooltip={'Free contract deployment'}
     >
       <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--gray9)] text-sm">
@@ -152,8 +142,7 @@ export const WidgetConfigFcd = ({
               writeAsync &&
                 toast.promise(
                   async () => {
-                    const { wait } = await writeAsync?.();
-                    await wait();
+                    await writeAsync?.(true);
                     return refetch();
                   },
                   {
@@ -183,9 +172,11 @@ export const WidgetConfigMtm = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
-  const { toggle, isEnabled, isSuccess, isError, isLoading } = useMtm();
+  const { toggle, isEnabled, isLoading, refetch } = useMtm();
   const status = !connected
     ? 'disabled'
+    : isEnabled === undefined
+    ? 'loading'
     : isLoading
     ? 'pending'
     : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
@@ -198,7 +189,7 @@ export const WidgetConfigMtm = ({
           <FormattedStatus status={status} />
         </>
       }
-      tooltip={'Peep Peeep'}
+      tooltip={'MTM'}
     >
       <div className="flex h-full flex-col justify-between">
         <p className="text-[var(--gray9)] text-sm">
@@ -220,7 +211,8 @@ export const WidgetConfigMtm = ({
               } Multi-transaction mode?`}
               description="Please confirm this action"
               onAction={async () => {
-                toggle?.();
+                await toggleAsync?.(true);
+                return refetch();
                 return {
                   status: 'success',
                 };
