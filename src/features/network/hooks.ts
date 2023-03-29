@@ -384,7 +384,7 @@ export function useSContractWrite<
     ...params
   }: Exclude<TBaseParams, 'abi' | 'address' | 'functionName'> & {
     name: TFunctionName;
-    multisigAddress: Address;
+    multisigAddress?: Address;
   },
 ) {
   const account = useAccount();

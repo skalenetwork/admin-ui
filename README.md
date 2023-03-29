@@ -80,6 +80,18 @@ First class TypeScript support allows dynamic typing from ABIs enabling TS compa
 
 > Why redistribute JSON ABIs as .ts files? We need the narrowest `Abi` type, producible by a `const` assertion. TS currently doesn't _(want to)_ support JSON `as const` https://github.com/microsoft/TypeScript/issues/32063
 
+Example usage of exposed getters:
+
+```ts
+const address = getSContractProp('CONFIG_CONTROLLER', 'address');
+
+const abi = getAbi('CONFIG_CONTROLLER');
+
+build.contractIdFromAddress(address);
+
+const { abi, address } = build.addressAbiPair('CONFIG_CONTROLLER');
+```
+
 ### Configuration: Registry
 
 Medium-to-fast changing data
@@ -136,8 +148,21 @@ Refer to [wagmi docs](https://wagmi.sh/react/getting-started) for complete setup
 
 ```tsx
 // single-read
+const { data } = useSContractRead('TOKEN_MANAGER_ERC20', {
+  name: 'automaticDeploy',
+});
 
 // multi-read fits best with TS for similarly typed return values
+const { data, status, refetch } = useSContractReads('CONFIG_CONTROLLER', {
+  reads: [
+    {
+      name: 'isMTMEnabled',
+    },
+    {
+      name: 'isFCDEnabled',
+    },
+  ],
+});
 ```
 
 - **Write** to pre-deployed contract
@@ -156,8 +181,7 @@ const handleSubmit = useCallback(() => {
 
 const handleSubmitWithConfirm = useCallback(async () => {
   if(!writer.writeAsync) return;
-  const { wait } = await writer.writeAsync();
-  await wait();
+  await writer.writeAsync(true);
 }, [writer.writeAsync]);
 
 ```
@@ -189,13 +213,10 @@ const countMultisigRequiredConfirmations = mnmConfirms?.required;
 - **Guard** UI actions from unready writer
 
 ```jsx
-// SButton serves as a convenience button only for reactive feedback
-// action is to be explicitly initiated with button handlers or form submit
-
-<SButton className="btn" writer={writer} onClick={() => handleSubmit()}>
-  Very smart submit
-</SButton>
+<button disabled={!!writer.writeAsync}>Guarded Action</button>
 ```
+
+---
 
 # @next
 
