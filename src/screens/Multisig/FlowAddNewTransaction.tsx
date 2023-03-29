@@ -290,42 +290,43 @@ export function FlowAddNewTransaction({
         ...form[1].getValues(),
       };
       writeAsync &&
-        toast.promise(
-          async () => {
-            const response = await writeAsync(true).finally(() => {
-              form[0].reset();
-              form[1].reset();
-              onSubmit(response);
-            });
-            return response;
-          },
-          {
-            pending: {
-              render: ({ data }) => (
-                <>
-                  <p>Submitting transaction</p>
-                </>
-              ),
+        toast
+          .promise(
+            async () => {
+              const response = await writeAsync(true);
+              return response;
             },
-            success: {
-              render: ({ data }) => (
-                <>
-                  <p>Transaction submitted {data?.hash}</p>
-                  {counts.data.countReqdConfirms > 1 && (
-                    <p className="font-semibold">
-                      Pending: Requires {counts.data.countReqdConfirms - 1} more
-                      confirmations to succeed
-                    </p>
-                  )}
-                </>
-              ),
+            {
+              pending: {
+                render: ({ data }) => (
+                  <>
+                    <p>Submitting transaction</p>
+                  </>
+                ),
+              },
+              success: {
+                render: ({ data }) => (
+                  <>
+                    <p>Transaction submitted {data?.hash}</p>
+                    {counts.data.countReqdConfirms > 1 && (
+                      <p className="font-semibold">
+                        Pending: Requires {counts.data.countReqdConfirms - 1}{' '}
+                        more confirmations to succeed
+                      </p>
+                    )}
+                  </>
+                ),
+              },
+              error: {
+                render: ({ data }) => `${data?.message}`,
+              },
             },
-            error: {
-              render: ({ data }) => `Transaction failed to submit`,
-            },
-          },
-        );
-      onSubmit(data);
+          )
+          .then(() => {
+            form[0].reset();
+            form[1].reset();
+            onSubmit(data);
+          });
       toggleAlert(id)(false);
     },
     [form],
@@ -524,9 +525,7 @@ export function FlowAddNewTransaction({
               type="submit"
               className={`${className}`}
               value="Submit"
-              disabled={
-                !(form[0].formState.isValid && form[1].formState.isValid)
-              }
+              disabled={!form[0].formState.isValid}
             />
           ),
           cancelElement: ({ className }) => (

@@ -347,10 +347,29 @@ const wrapWriteAsync = <
     if (confirmations === false) {
       return writeAsync?.(overrideConfig);
     } else {
-      const { wait, hash } = await (writeAsync as TWriteAsync)?.(
-        overrideConfig,
-      );
-      const receipt = await wait(confirmations === true ? 1 : confirmations);
+      let submitted;
+      try {
+        submitted = await (writeAsync as TWriteAsync)?.(overrideConfig);
+      } catch (err) {
+        console.error('writeAsync:on-signing', err);
+        throw {
+          message: 'Failed to send transaction',
+          error: err,
+        };
+      }
+
+      let receipt;
+      const { wait, hash } = submitted;
+      try {
+        receipt = await wait(confirmations === true ? 1 : confirmations);
+      } catch (err) {
+        console.error('writeAsync:on-confirmation', err);
+        throw {
+          message: 'Transaction sent but failed to confirm',
+          error: err,
+        };
+      }
+
       return {
         hash,
         receipt,
