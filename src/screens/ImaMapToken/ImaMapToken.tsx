@@ -25,12 +25,15 @@ import {
   Address,
   useAccount,
   useContract,
+  useContractWrite,
   useNetwork,
+  usePrepareContractWrite,
   usePrepareSendTransaction,
   useProvider,
   useSendTransaction,
   useSigner,
   useSwitchNetwork,
+  useWaitForTransaction,
 } from 'wagmi';
 
 import imaAbi from '@/features/network/abi/abi-ima.union';
@@ -228,6 +231,10 @@ export default function ImaMapToken() {
 
   const cloneContractAddress = form[1].watch('cloneContractAddress');
 
+  const tokenAddress = form[1].getFieldState('cloneContractAddress').invalid
+    ? ''
+    : cloneContractAddress;
+
   const targetContract = useContract({
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
     address: form[1].getFieldState('cloneContractAddress').invalid
@@ -354,6 +361,36 @@ export default function ImaMapToken() {
       ],
     },
   );
+
+  const grantMinterRoleConfig = usePrepareContractWrite({
+    enabled: !!(tokenAddress && MINTER_ROLE && tokenManager.address),
+    address: tokenAddress,
+    abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
+    functionName: 'grantRole',
+    args: [MINTER_ROLE, tokenManager.address],
+  });
+  const grantMinterRole = useContractWrite(grantMinterRoleConfig);
+  const grantMinterRoleConfirmed = useWaitForTransaction({
+    hash: grantMinterRole.data?.hash,
+    onSuccess: () => {
+      tmHasMinterRole.refetch();
+    },
+  });
+
+  const grantBurnerRoleConfig = usePrepareContractWrite({
+    enabled: !!(tokenAddress && BURNER_ROLE && tokenManager.address),
+    address: tokenAddress,
+    abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
+    functionName: 'grantRole',
+    args: [BURNER_ROLE, tokenManager.address],
+  });
+  const grantBurnerRole = useContractWrite(grantBurnerRoleConfig);
+  const grantBurnerRoleConfirmed = useWaitForTransaction({
+    hash: grantBurnerRole.data?.hash,
+    onSuccess: () => {
+      tmHasBurnerRole.refetch();
+    },
+  });
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
     ? [
@@ -664,34 +701,23 @@ export default function ImaMapToken() {
                           />
                           <div className="my-6 flex flex-row">
                             <button
+                              disabled={
+                                !MINTER_ROLE ||
+                                !BURNER_ROLE ||
+                                !grantBurnerRoleConfirmed.isIdle ||
+                                !grantMinterRoleConfirmed.isIdle
+                              }
                               className="btn btn-outline py-3"
                               onClick={async (e) => {
                                 e.preventDefault();
-                                MINTER_ROLE &&
-                                  !tmHasMinterRole.data &&
-                                  (await targetContract
-                                    ?.grantRole(
-                                      MINTER_ROLE,
-                                      tokenManager.address,
-                                    )
-                                    .then(({ wait }) => wait())
-                                    .then((receipt) =>
-                                      tmHasMinterRole.refetch(),
-                                    ));
-                                BURNER_ROLE &&
-                                  !tmHasBurnerRole.data &&
-                                  (await targetContract
-                                    ?.grantRole(
-                                      BURNER_ROLE,
-                                      tokenManager.address,
-                                    )
-                                    .then(({ wait }) => wait())
-                                    .then((receipt) =>
-                                      tmHasBurnerRole.refetch(),
-                                    ));
+                                grantMinterRole.write?.();
+                                grantBurnerRole.write?.();
                               }}
                             >
-                              Re-assign roles
+                              {grantBurnerRoleConfirmed.isIdle ||
+                              grantMinterRoleConfirmed.isIdle
+                                ? `Re-assign roles`
+                                : `Reassigning roles...`}
                             </button>
                           </div>
                         </div>
