@@ -2,7 +2,6 @@ import { chains as skaleChains } from '@/features/network/chains/chains';
 import { configureChains, mainnet as ethereumMainnet } from 'wagmi';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
-// update this when @features/../chains.mainnet is updated
 const chains = [
   ethereumMainnet,
   ...Object.values(skaleChains.staging),
