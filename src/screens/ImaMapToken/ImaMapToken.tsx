@@ -669,16 +669,26 @@ export default function ImaMapToken() {
                                 e.preventDefault();
                                 MINTER_ROLE &&
                                   !tmHasMinterRole.data &&
-                                  (await targetContract?.grantRole(
-                                    MINTER_ROLE,
-                                    tokenManager.address,
-                                  ));
+                                  (await targetContract
+                                    ?.grantRole(
+                                      MINTER_ROLE,
+                                      tokenManager.address,
+                                    )
+                                    .then(({ wait }) => wait())
+                                    .then((receipt) =>
+                                      tmHasMinterRole.refetch(),
+                                    ));
                                 BURNER_ROLE &&
                                   !tmHasBurnerRole.data &&
-                                  (await targetContract?.grantRole(
-                                    BURNER_ROLE,
-                                    tokenManager.address,
-                                  ));
+                                  (await targetContract
+                                    ?.grantRole(
+                                      BURNER_ROLE,
+                                      tokenManager.address,
+                                    )
+                                    .then(({ wait }) => wait())
+                                    .then((receipt) =>
+                                      tmHasBurnerRole.refetch(),
+                                    ));
                               }}
                             >
                               Re-assign roles
