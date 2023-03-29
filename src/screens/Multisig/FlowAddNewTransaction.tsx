@@ -80,6 +80,12 @@ export function FlowAddNewTransaction({
     }
   }, [alertKey]);
 
+  const advancedDefaultValues = useMemo(() => {
+    return {
+      nonce: counts.data.countTotalTrx,
+    };
+  }, [counts.data.countTotalTrx]);
+
   const form = [
     useForm<InfoFormData>({
       mode: 'all',
@@ -96,9 +102,7 @@ export function FlowAddNewTransaction({
     useForm<AdvancedFormData>({
       mode: 'all',
       reValidateMode: 'onChange',
-      defaultValues: {
-        nonce: counts.data.countTotalTrx,
-      },
+      defaultValues: advancedDefaultValues,
     }),
   ] as const;
 
