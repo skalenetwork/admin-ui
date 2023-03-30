@@ -149,7 +149,7 @@ export function getApi<I extends keyof typeof API>(
     };
     return API[contractId](props) as ReturnType<(typeof API)[I]>;
   } catch (e) {
-    console.error(e);
+    console.error('getApi', e);
     return;
   }
 }

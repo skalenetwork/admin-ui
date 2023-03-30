@@ -2056,7 +2056,7 @@
 
 "@skalenetwork/ima-js@adiled/ima-js#2.0-hotfix-signer":
   version "2.0.0"
-  resolved "https://codeload.github.com/adiled/ima-js/tar.gz/0357a28c44c37ccd8237e333a9c98a850d97ec02"
+  resolved "https://codeload.github.com/adiled/ima-js/tar.gz/790a7de7b448b7e990bc51f25c7ba287451dd763"
   dependencies:
     debug "^4.3.4"
     ethers "5.6.9"

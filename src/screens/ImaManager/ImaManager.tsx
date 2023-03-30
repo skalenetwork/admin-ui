@@ -100,23 +100,75 @@ const SelectedPeerChainItem = ({
     }
   }, [alertKey]);
 
-  const tokenManager = useSContractApi({ id: contractId });
+  const tokenManager = useSContractApi({
+    id: contractId as 'TOKEN_MANAGER_ERC20',
+  });
+  const originTokenManager = useSContractApi({
+    enabled: !!selectedOriginChain,
+    id: contractId as 'TOKEN_MANAGER_ERC20',
+    chainId: selectedOriginChain?.id,
+  });
 
   // pending ima-js release
-  const mappingsLength = useQuery({
-    enabled: false && !!(tokenManager?.api && chain),
-    queryKey: ['CUSTOM:tokenMappings'],
+  const mappingsFromOrigin = useQuery({
+    enabled: !!(tokenManager?.api && chain && selectedOriginChain),
+    queryKey: [
+      'custom',
+      chain?.id,
+      'getTokenMappings',
+      selectedOriginChain?.name,
+    ],
     queryFn: async () => {
       const { api } = tokenManager;
-      const length = await api?.getTokenMappingsLength(chain.name);
+      const length = await api?.getTokenMappingsLength(
+        selectedOriginChain.name,
+      );
+      console.log('mappings', length);
       const mapping = await api?.getTokenMappings(
-        chain.name,
+        selectedOriginChain.name,
         BigNumber.from(0),
         length,
       );
-      return mapping || null;
+      return (
+        mapping?.map((address) => ({
+          address,
+        })) || undefined
+      );
     },
   });
+
+  const mappingsFromTarget = useQuery({
+    enabled: !!(selectedOriginChain && originTokenManager?.api && chain),
+    queryKey: [
+      'custom',
+      selectedOriginChain?.id,
+      'getTokenMappings',
+      chain?.name,
+    ],
+    queryFn: async () => {
+      const { api } = originTokenManager;
+      const length = await api?.getTokenMappingsLength(chain?.name);
+      console.log('mappings', length);
+      const mapping = await api?.getTokenMappings(
+        chain?.name,
+        BigNumber.from(0),
+        length,
+      );
+      return (
+        mapping?.map((address) => ({
+          address,
+        })) || undefined
+      );
+    },
+  });
+
+  console.log(
+    'mappings length',
+    originTokenManager,
+    mappingsFromOrigin.data,
+    tokenManager,
+    mappingsFromTarget.data,
+  );
 
   // alternate for ethereum mapping
   const ethereumMappingLength = useSContractRead(
@@ -147,7 +199,8 @@ const SelectedPeerChainItem = ({
       ? (ethereumMappings.data || []).map((addr) => {
           address: addr;
         })
-      : [];
+      : mappingsFromTarget.data || [];
+
   const originTokenMappings: { name?: string; address: Address }[] = [];
 
   return (
