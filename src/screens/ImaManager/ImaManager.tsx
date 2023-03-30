@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
   CaretLeftIcon,
   ChevronRightIcon,
+  MinusCircledIcon,
 } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
@@ -21,7 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { tw } from 'twind';
-import { Address, useNetwork } from 'wagmi';
+import { useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
 import { FormattedPeerChain } from './FormattedPeerChain';
 
@@ -153,7 +154,7 @@ const SelectedPeerChainItem = ({
         length,
       );
       return (
-        mapping?.map((address) => ({
+        (mapping || []).map((address) => ({
           address,
         })) || undefined
       );
@@ -182,17 +183,15 @@ const SelectedPeerChainItem = ({
     name: `getSchainToAll${selectedStandard?.name.toUpperCase()}`,
     args: [chain?.name, BigNumber.from(0), ethereumMappingLength.data],
     chainId: selectedOriginChain?.id,
+    select: (data) => {
+      return (data || []).map((addr) => {
+        address: addr;
+      });
+    },
   });
 
-  const targetTokenMappings: { name?: string; address: Address }[] =
-    selectedOriginChain?.network === NETWORK.ETHEREUM
-      ? (ethereumMappings.data || []).map((addr) => {
-          address: addr;
-        })
-      : mappingsFromTarget.data || [];
-
-  const originTokenMappings: { name?: string; address: Address }[] =
-    mappingsFromOrigin.data || [];
+  const targetTokenMappings = mappingsFromTarget;
+  const originTokenMappings = mappingsFromOrigin;
 
   return (
     <motion.div
@@ -253,7 +252,7 @@ const SelectedPeerChainItem = ({
                           <span className="text-[var(--blue10)]">
                             {standards.find((s) => s.name === name)?.label}
                           </span>{' '}
-                          <span className="text-[var(--green10)]">()</span>
+                          {/* <span className="text-[var(--green10)]">()</span> */}
                         </a>
                       ))}
                     </button>
@@ -293,14 +292,19 @@ const SelectedPeerChainItem = ({
                                 </p>
                               }
                             >
-                              {!targetTokenMappings.length
-                                ? 'No mappings discovered'
-                                : targetTokenMappings.map((token) => (
-                                    <NiceAddress
-                                      address={token.address}
-                                      copyable
-                                    />
-                                  ))}
+                              {targetTokenMappings.isLoading ? (
+                                <MinusCircledIcon className="text-[var(--gray11)] animate-spin" />
+                              ) : !targetTokenMappings.data?.length ? (
+                                'No mappings discovered'
+                              ) : (
+                                targetTokenMappings.data?.map((token) => (
+                                  <NiceAddress
+                                    key={token.address}
+                                    address={token.address}
+                                    copyable
+                                  />
+                                ))
+                              )}
                             </Card>
                           )}
                           <Card
@@ -312,14 +316,19 @@ const SelectedPeerChainItem = ({
                               </p>
                             }
                           >
-                            {!originTokenMappings.length
-                              ? 'No mappings discovered'
-                              : originTokenMappings.map((token) => (
-                                  <NiceAddress
-                                    address={token.address}
-                                    copyable
-                                  />
-                                ))}
+                            {originTokenMappings.isLoading ? (
+                              <MinusCircledIcon className="text-[var(--gray11)] animate-spin" />
+                            ) : !originTokenMappings.data?.length ? (
+                              'No mappings discovered'
+                            ) : (
+                              originTokenMappings.data?.map((token) => (
+                                <NiceAddress
+                                  key={token.address}
+                                  address={token.address}
+                                  copyable
+                                />
+                              ))
+                            )}
                           </Card>
                         </div>
                       ),
