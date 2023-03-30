@@ -123,7 +123,6 @@ const SelectedPeerChainItem = ({
       const length = await api?.getTokenMappingsLength(
         selectedOriginChain.name,
       );
-      console.log('mappings', length);
       const mapping = await api?.getTokenMappings(
         selectedOriginChain.name,
         BigNumber.from(0),
@@ -148,7 +147,6 @@ const SelectedPeerChainItem = ({
     queryFn: async () => {
       const { api } = originTokenManager;
       const length = await api?.getTokenMappingsLength(chain?.name);
-      console.log('mappings', length);
       const mapping = await api?.getTokenMappings(
         chain?.name,
         BigNumber.from(0),
@@ -161,14 +159,6 @@ const SelectedPeerChainItem = ({
       );
     },
   });
-
-  console.log(
-    'mappings length',
-    originTokenManager,
-    mappingsFromOrigin.data,
-    tokenManager,
-    mappingsFromTarget.data,
-  );
 
   // alternate for ethereum mapping
   const ethereumMappingLength = useSContractRead(
@@ -201,7 +191,8 @@ const SelectedPeerChainItem = ({
         })
       : mappingsFromTarget.data || [];
 
-  const originTokenMappings: { name?: string; address: Address }[] = [];
+  const originTokenMappings: { name?: string; address: Address }[] =
+    mappingsFromOrigin.data || [];
 
   return (
     <motion.div

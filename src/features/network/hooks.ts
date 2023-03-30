@@ -159,10 +159,10 @@ export function useSContractApi<T extends keyof typeof API>({
   const { provider, signer } = useSContractProvider({ id });
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
-  const customProvider = useProvider({
+  const customChain = chains.find((c) => c.id === chainId);
+  const customProvider = getProvider({
     chainId,
   });
-  const customChain = chains.find((c) => c.id === chainId);
   const { data: customSigner } = useSigner({
     chainId,
   });

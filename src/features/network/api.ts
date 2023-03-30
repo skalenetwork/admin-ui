@@ -74,15 +74,30 @@ export const API = {
   ),
   TOKEN_MANAGER_ERC20: buildApi(
     TokenManagerERC20,
-    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
+    ({ address, abi, signer, name, provider }) => [
+      provider,
+      address,
+      abi,
+      name,
+    ],
   ),
   TOKEN_MANAGER_ERC721: buildApi(
     TokenManagerERC721,
-    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
+    ({ address, abi, signer, name, provider }) => [
+      provider,
+      address,
+      abi,
+      name,
+    ],
   ),
   TOKEN_MANAGER_ERC1155: buildApi(
     TokenManagerERC1155,
-    ({ address, abi, signer, name }) => [signer?.provider, address, abi, name],
+    ({ address, abi, signer, name, provider }) => [
+      provider,
+      address,
+      abi,
+      name,
+    ],
   ),
   TOKEN_MANAGER_ETH: buildApi(
     TokenManagerEth,
