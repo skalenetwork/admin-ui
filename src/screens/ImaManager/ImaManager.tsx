@@ -2,8 +2,12 @@ import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
 import { NiceAddress } from '@/elements/NiceAddress';
-import { useChainConnect, useHistory } from '@/features/bridge';
-import { useSContractApi, useSContractRead } from '@/features/network/hooks';
+import {
+  useChainConnect,
+  useHistory,
+  useTokenMappings,
+} from '@/features/bridge';
+import { useSContractRead } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -14,7 +18,6 @@ import {
   ChevronRightIcon,
   MinusCircledIcon,
 } from '@radix-ui/react-icons';
-import { useQuery } from '@tanstack/react-query';
 import { BigNumber } from 'ethers';
 import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
@@ -101,64 +104,16 @@ const SelectedPeerChainItem = ({
     }
   }, [alertKey]);
 
-  const tokenManager = useSContractApi({
-    id: contractId as 'TOKEN_MANAGER_ERC20',
-  });
-  const originTokenManager = useSContractApi({
-    enabled: !!selectedOriginChain,
-    id: contractId as 'TOKEN_MANAGER_ERC20',
-    chainId: selectedOriginChain?.id,
+  const mappingsFromOrigin = useTokenMappings({
+    contractId,
+    toChainId: chain?.id,
+    fromChainName: selectedOriginChain?.name,
   });
 
-  // pending ima-js release
-  const mappingsFromOrigin = useQuery({
-    enabled: !!(tokenManager?.api && chain && selectedOriginChain),
-    queryKey: [
-      'custom',
-      chain?.id,
-      'getTokenMappings',
-      selectedOriginChain?.name,
-    ],
-    queryFn: async () => {
-      const { api } = tokenManager;
-      const length = await api?.getTokenMappingsLength(
-        selectedOriginChain.name,
-      );
-      const mapping = await api?.getTokenMappings(
-        selectedOriginChain.name,
-        BigNumber.from(0),
-        length,
-      );
-      return (
-        mapping?.map((address) => ({
-          address,
-        })) || undefined
-      );
-    },
-  });
-
-  const mappingsFromTarget = useQuery({
-    enabled: !!(selectedOriginChain && originTokenManager?.api && chain),
-    queryKey: [
-      'custom',
-      selectedOriginChain?.id,
-      'getTokenMappings',
-      chain?.name,
-    ],
-    queryFn: async () => {
-      const { api } = originTokenManager;
-      const length = await api?.getTokenMappingsLength(chain?.name);
-      const mapping = await api?.getTokenMappings(
-        chain?.name,
-        BigNumber.from(0),
-        length,
-      );
-      return (
-        (mapping || []).map((address) => ({
-          address,
-        })) || undefined
-      );
-    },
+  const mappingsFromTarget = useTokenMappings({
+    contractId,
+    toChainId: selectedOriginChain?.id,
+    fromChainName: chain?.name,
   });
 
   // alternate for ethereum mapping
