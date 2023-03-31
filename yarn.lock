@@ -2054,9 +2054,10 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@skalenetwork/ima-js@adiled/ima-js#2.0-hotfix-signer":
-  version "2.0.0"
-  resolved "https://codeload.github.com/adiled/ima-js/tar.gz/0357a28c44c37ccd8237e333a9c98a850d97ec02"
+"@skalenetwork/ima-js@2.0.1-develop.0":
+  version "2.0.1-develop.0"
+  resolved "https://registry.yarnpkg.com/@skalenetwork/ima-js/-/ima-js-2.0.1-develop.0.tgz#7e211ebd775539813c4ccc8cfa433430b4933c87"
+  integrity sha512-NheSZRMtflJhfAKtm5rfI7nkJOaDkTgWSCk2jXwUoFRoCjqjdiIowBUGEHpeFnNFcGDfABLCaYEMjdhpJ1WU3w==
   dependencies:
     debug "^4.3.4"
     ethers "5.6.9"

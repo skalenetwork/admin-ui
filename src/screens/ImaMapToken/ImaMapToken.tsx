@@ -832,7 +832,6 @@ export default function ImaMapToken() {
                 <ExclamationTriangleIcon />
               </span>{' '}
               Do not navigate. Approve pending actions from your wallet.
-              <bvr></bvr>
             </p>
           )}
           <SubmitButtonPair

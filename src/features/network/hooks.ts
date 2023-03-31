@@ -146,23 +146,52 @@ export function useSContract<
  * @param param0
  * @returns
  */
-export function useSContractApi<T extends keyof typeof API>({ id }: { id: T }) {
-  const { chain } = useNetwork();
-  const { address } = useAccount();
+export function useSContractApi<T extends keyof typeof API>({
+  id,
+  chainId,
+  enabled = true,
+}: {
+  id: T;
+  chainId?: number;
+  enabled?: boolean;
+}) {
+  const { chain, chains } = useNetwork();
   const { provider, signer } = useSContractProvider({ id });
   const connected = chain ? chain.network === NETWORK.SKALE : false;
 
-  const api = useMemo(() => {
-    return chain && signer && provider && id
-      ? getApi(id, {
+  const customChain = chains.find((c) => c.id === chainId);
+  const customProvider = getProvider({
+    chainId,
+  });
+  const { data: customSigner } = useSigner({
+    chainId,
+  });
+
+  const params =
+    chainId !== undefined && customProvider && customChain && customSigner
+      ? {
+          chain: customChain,
+          provider: customProvider,
+          signer: customSigner,
+        }
+      : chainId === undefined && chain && signer && provider
+      ? {
           chain,
           provider,
           signer,
-        })
+        }
       : undefined;
-  }, [id, connected, chain?.id, signer, provider]);
 
-  return { connected, chainId: chain?.id, signer, api };
+  const api = useMemo(() => {
+    return id && enabled && params ? getApi(id, params) : undefined;
+  }, [id, params?.chain, params?.provider, params?.signer, enabled]);
+
+  return {
+    connected,
+    chainId: chainId || chain?.id,
+    signer: params?.signer,
+    api,
+  };
 }
 
 /**

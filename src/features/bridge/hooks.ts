@@ -18,6 +18,7 @@ import {
 } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
+import { useQuery } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { useNetwork } from 'wagmi';
 import { toSentenceCase } from '../../utils';
@@ -196,4 +197,30 @@ export function useHistory({
   };
 }
 
-export function useTokenMapping({}: {}) {}
+export function useTokenMappings({
+  contractId,
+  toChainId,
+  fromChainName,
+}: {
+  contractId: `TOKEN_MANAGER_${string}` | `DEPOSIT_BOX_${string}`;
+  toChainId: number;
+  fromChainName: string;
+}) {
+  const { api } = useSContractApi({
+    enabled: !!toChainId,
+    id: contractId as 'TOKEN_MANAGER_ERC20',
+    chainId: toChainId,
+  });
+  return useQuery({
+    enabled: !!(api && toChainId && fromChainName),
+    queryKey: ['custom', toChainId, 'getTokenMappings', fromChainName],
+    queryFn: async () => {
+      if (!api) return;
+      const length = await api.getTokenMappingsLength(fromChainName);
+      const mapping = await api.getTokenMappings(fromChainName, 0, length);
+      return mapping?.map((address) => ({
+        address,
+      }));
+    },
+  });
+}
