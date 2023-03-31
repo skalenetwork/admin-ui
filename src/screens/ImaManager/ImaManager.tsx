@@ -116,7 +116,9 @@ const SelectedPeerChainItem = ({
     fromChainName: chain?.name,
   });
 
-  // alternate for ethereum mapping
+  // alternate for ethereum mapping, remove false enabled flag
+  // then update following variables
+
   const ethereumMappingLength = useSContractRead(
     contractId as 'DEPOSIT_BOX_ERC20',
     {
