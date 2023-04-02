@@ -17,7 +17,7 @@ import { manifest } from '@/features/network';
 import Dialog from '@/components/Dialog/Dialog';
 import { Switch } from '@/components/Switch/Switch';
 import Field from '@/elements/Field/Field';
-import { NiceAddress } from '@/elements/NiceAddress';
+import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import { useMultisig } from '@/features/multisig/hooks';
 import { getAbi } from '@/features/network/abi/abi';
 import { getSContractProp } from '@/features/network/contract';

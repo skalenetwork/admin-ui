@@ -1,7 +1,7 @@
 import Card from '@/components/Card/Card';
 import Stepper from '@/components/Stepper/Stepper';
 import Field from '@/elements/Field/Field';
-import { NiceAddress } from '@/elements/NiceAddress';
+import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import { ABI } from '@/features/network/abi/abi';
 import ERC20Standard from '@/features/network/abi/erc20-standard.json';
 import { CONTRACT } from '@/features/network/contract';

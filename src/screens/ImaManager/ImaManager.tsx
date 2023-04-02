@@ -1,7 +1,7 @@
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
-import { NiceAddress } from '@/elements/NiceAddress';
+import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import {
   useChainConnect,
   useHistory,
@@ -34,6 +34,8 @@ const supported = [
   TOKEN_STANDARD.ERC721,
   TOKEN_STANDARD.ERC1155,
 ] as const;
+
+type UppercaseStandard = Uppercase<(typeof supported)[number]['name']>;
 
 const TransactionItem = ({
   id,
@@ -92,7 +94,8 @@ const SelectedPeerChainItem = ({
     selectedOriginChain?.network === NETWORK.SKALE
       ? 'TOKEN_MANAGER'
       : 'DEPOSIT_BOX';
-  const standardString = selectedStandard?.name.toUpperCase();
+  const standardString =
+    selectedStandard?.name.toUpperCase() as UppercaseStandard;
   const contractId =
     selectedOriginChain && selectedStandard?.name
       ? (`${contractPrefix}_${selectedStandard?.name.toUpperCase()}` as const)
@@ -120,7 +123,7 @@ const SelectedPeerChainItem = ({
   // then update following variables
 
   const ethereumMappingLength = useSContractRead(
-    contractId as 'DEPOSIT_BOX_ERC20',
+    contractId as `DEPOSIT_BOX_${typeof standardString}`,
     {
       enabled:
         false &&
@@ -130,22 +133,26 @@ const SelectedPeerChainItem = ({
           selectedOriginChain?.network === NETWORK.ETHEREUM &&
           selectedStandard
         ),
-      name: `getSchainToAll${selectedStandard?.name.toUpperCase()}Length`,
+      name: `getSchainToAll${standardString}Length`,
       args: [chain?.name],
       chainId: selectedOriginChain?.id,
     },
   );
-  const ethereumMappings = useSContractRead(contractId as 'DEPOSIT_BOX_ERC20', {
-    enabled: false && !!(ethereumMappingLength.data?.gt(0) && selectedStandard),
-    name: `getSchainToAll${selectedStandard?.name.toUpperCase()}`,
-    args: [chain?.name, BigNumber.from(0), ethereumMappingLength.data],
-    chainId: selectedOriginChain?.id,
-    select: (data) => {
-      return (data || []).map((addr) => {
-        address: addr;
-      });
+  const ethereumMappings = useSContractRead(
+    contractId as `DEPOSIT_BOX_${typeof standardString}`,
+    {
+      enabled:
+        false && !!(ethereumMappingLength.data?.gt(0) && selectedStandard),
+      name: `getSchainToAll${standardString}`,
+      args: [chain?.name, BigNumber.from(0), ethereumMappingLength.data],
+      chainId: selectedOriginChain?.id,
+      select: (data) => {
+        return (data || []).map((addr) => {
+          address: addr;
+        });
+      },
     },
-  });
+  );
 
   const targetTokenMappings = mappingsFromTarget;
   const originTokenMappings = mappingsFromOrigin;
@@ -258,6 +265,7 @@ const SelectedPeerChainItem = ({
                                   <NiceAddress
                                     key={token.address}
                                     address={token.address}
+                                    chainId={selectedOriginChain?.id}
                                     copyable
                                   />
                                 ))
@@ -282,6 +290,7 @@ const SelectedPeerChainItem = ({
                                 <NiceAddress
                                   key={token.address}
                                   address={token.address}
+                                  chainId={chain?.id}
                                   copyable
                                 />
                               ))

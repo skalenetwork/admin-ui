@@ -1,7 +1,7 @@
 import Card from '@/components/Card/Card';
 import { PeopleIcon } from '@/components/Icons/Icons';
 import Select from '@/components/Select/Select';
-import { NiceAddress } from '@/elements/NiceAddress';
+import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
 import { getAbi } from '@/features/network/abi/abi';
 import { CONTRACT } from '@/features/network/contract';

@@ -1,4 +1,4 @@
-import { NiceAddress } from '@/elements/NiceAddress';
+import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import { useSContractWrite } from '@/features/network/hooks';
 import { useMultisigContext } from '@/screens/Multisig/context';
 import { TrashIcon } from '@radix-ui/react-icons';

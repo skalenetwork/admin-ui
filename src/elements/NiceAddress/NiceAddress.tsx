@@ -4,6 +4,23 @@ import { CopyIcon } from '@radix-ui/react-icons';
 import { Avatar as AddressAvatar } from 'connectkit';
 import { useEffect } from 'react';
 import { useCopyToClipboard } from 'react-use';
+import { useContractRead } from 'wagmi';
+
+const ABI_NAME = [
+  {
+    inputs: [],
+    name: 'name',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
 
 export function NiceAddress({
   className = '',
@@ -13,6 +30,7 @@ export function NiceAddress({
   copyable = false,
   iconUrl,
   labelOnly = false,
+  chainId,
 }: {
   className?: string;
   address: string;
@@ -21,6 +39,7 @@ export function NiceAddress({
   copyable?: boolean;
   iconUrl?: string;
   labelOnly?: boolean;
+  chainId?: number;
 }) {
   const [copied, copy] = useCopyToClipboard();
 
@@ -30,6 +49,18 @@ export function NiceAddress({
         copy('');
       }, 1000);
   }, [copied.value]);
+
+  const contractName = useContractRead({
+    enabled: !!(chainId && address),
+    queryKey: ['custom', chainId, address, 'name'],
+    staleTime: 7 * 24 * 60 * 60,
+    address,
+    abi: ABI_NAME,
+    functionName: 'name',
+    chainId,
+  });
+
+  console.log('a', contractName);
 
   return (
     <div
@@ -44,7 +75,9 @@ export function NiceAddress({
         ></AddressAvatar>
       )}
       <div className="flex justify-start gap-4">
-        {label && <span className="font-semibold">{label}</span>}{' '}
+        {(label || contractName.data) && (
+          <span className="font-semibold">{label || contractName.data}</span>
+        )}{' '}
         {!(label && labelOnly) && <span>{address}</span>}
       </div>
       <div className="flex items-center gap-2">
