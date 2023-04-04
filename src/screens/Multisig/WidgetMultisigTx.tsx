@@ -203,10 +203,6 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 
   const wallets = useCacheWallet();
 
-  // const toAddress =
-  //   transaction?.data &&
-  //   (('0x' + transaction?.data.slice(34, 34 + 40)) as Address);
-
   const multisigAbi = getAbi('MULTISIG_WALLET');
   const multisigIface = new ethers.utils.Interface(multisigAbi);
   const txArgs =

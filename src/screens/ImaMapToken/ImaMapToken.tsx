@@ -33,6 +33,7 @@ import {
   useSendTransaction,
   useSigner,
   useSwitchNetwork,
+  useToken,
   useWaitForTransaction,
 } from 'wagmi';
 
@@ -288,21 +289,10 @@ export default function ImaMapToken() {
     },
   });
 
-  const targetContractInfo = useQuery({
-    enabled: Boolean(
-      targetContract && !form[1].getFieldState('cloneContractAddress').invalid,
-    ),
-    queryKey: [`CUSTOM:${targetContract?.address}`, 'constructor_data'],
-    queryFn: async () => {
-      const symbol = await targetContract?.symbol();
-      const name = await targetContract?.name();
-      const decimals = await targetContract?.decimals();
-      return {
-        symbol,
-        name,
-        decimals,
-      };
-    },
+  const targetContractInfo = useToken({
+    address: form[1].getFieldState('cloneContractAddress').invalid
+      ? ''
+      : cloneContractAddress,
   });
 
   const name = form[2].watch('name');
@@ -624,6 +614,27 @@ export default function ImaMapToken() {
                             placeholder="18"
                             required="Contract decimals are required"
                           />
+                          {deployment.isError ? (
+                            <p className="text-sm py-4">
+                              <span className="text-[var(--red10)]">
+                                <ExclamationTriangleIcon />
+                              </span>{' '}
+                              Could not deploy the token -{' '}
+                              {deployment.error?.message}
+                              <br />
+                              <button
+                                className="underline"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  deployment.reset?.();
+                                }}
+                              >
+                                Reset to try again
+                              </button>
+                            </p>
+                          ) : (
+                            <></>
+                          )}
                           <SubmitButtonPair
                             isReady={
                               form[2].formState.isValid &&
@@ -723,6 +734,44 @@ export default function ImaMapToken() {
                       </>
                     )}
                   </Card>
+                  {grantBurnerRoleConfirmed.isError ||
+                  grantBurnerRole.isError ||
+                  grantMinterRoleConfirmed.isError ||
+                  grantMinterRole.isError ? (
+                    <p className="text-sm py-4">
+                      <span className="text-[var(--red10)]">
+                        <ExclamationTriangleIcon />
+                      </span>{' '}
+                      {(grantBurnerRoleConfirmed.isError ||
+                        grantBurnerRole.isError) &&
+                        `Failed to grant burner role - ${
+                          grantBurnerRole.error?.message ||
+                          grantBurnerRoleConfirmed.error?.message ||
+                          ''
+                        }`}
+                      <br></br>
+                      {(grantMinterRoleConfirmed.isError ||
+                        grantMinterRole.isError) &&
+                        `Failed to grant minter role - ${
+                          grantMinterRole.error?.message ||
+                          grantMinterRoleConfirmed.error?.message ||
+                          ''
+                        }`}
+                      <br></br>
+                      <button
+                        className="underline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          grantMinterRole.reset();
+                          grantBurnerRole.reset();
+                        }}
+                      >
+                        Reset to try again
+                      </button>
+                    </p>
+                  ) : (
+                    <></>
+                  )}
                   <SubmitButtonPair
                     isReady={Boolean(
                       tmHasBurnerRole.data && tmHasMinterRole.data,
@@ -743,7 +792,7 @@ export default function ImaMapToken() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                await addTokenByOwner.writeAsync?.();
+                await addTokenByOwner.writeAsync?.(true);
                 form.forEach((f) => f.reset());
                 markComplete();
               }}
@@ -772,6 +821,28 @@ export default function ImaMapToken() {
                     value={form[1].getValues('cloneContractAddress')}
                   />
                 </fieldset>
+                {addTokenByOwner.isError ? (
+                  <p className="text-sm py-4">
+                    <span className="text-[var(--red10)]">
+                      <ExclamationTriangleIcon />
+                    </span>{' '}
+                    Could not register the mapped token -{' '}
+                    {addTokenByOwner.error?.message} :{' '}
+                    {addTokenByOwner.error?.error?.message}
+                    <br />
+                    <button
+                      className="underline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addTokenByOwner.reset?.();
+                      }}
+                    >
+                      Reset to try again
+                    </button>
+                  </p>
+                ) : (
+                  <></>
+                )}
                 <SubmitButtonPair
                   isReady={!!addTokenByOwner.writeAsync}
                   text="Confirm"

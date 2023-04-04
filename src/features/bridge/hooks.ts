@@ -213,7 +213,13 @@ export function useTokenMappings({
   });
   return useQuery({
     enabled: !!(api && toChainId && fromChainName),
-    queryKey: ['custom', toChainId, 'getTokenMappings', fromChainName],
+    queryKey: [
+      'custom',
+      contractId,
+      toChainId,
+      'getTokenMappings',
+      fromChainName,
+    ],
     queryFn: async () => {
       if (!api) return;
       const length = await api.getTokenMappingsLength(fromChainName);
