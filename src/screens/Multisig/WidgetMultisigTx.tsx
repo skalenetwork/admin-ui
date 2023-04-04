@@ -216,7 +216,15 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
   const toAddress = txArgs?.[0] as Address;
   const toTxData = txArgs?.[2];
 
-  const [toContractId, toName, toMethod, destName, destMethod] = useMemo(() => {
+  const [
+    toContractId,
+    toName,
+    toMethod,
+    toArgs,
+    destName,
+    destMethod,
+    destArgs,
+  ] = useMemo(() => {
     const toContractId = toAddress && build.contractIdFromAddress(toAddress);
     const toAbi = toContractId && getAbi(toContractId);
     const toIface = toAbi && new ethers.utils.Interface(toAbi);
@@ -233,8 +241,9 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
     const toMethod = toParsed
       ? toParsed.functionFragment.name
       : toTxData?.slice(0, 10);
+    const toArgs = toParsed ? toParsed.args : [];
 
-    let destName, destMethod;
+    let destName, destMethod, destArgs;
     if (transaction?.data && toContractId === 'MARIONETTE') {
       const destAddress = toParsed?.args[0] as Address;
       const destContractId = build.contractIdFromAddress(destAddress);
@@ -254,15 +263,25 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
       destMethod = destParsed
         ? destParsed.functionFragment.name
         : destTxData?.slice(0, 10);
+      destArgs = destParsed ? destParsed.args : [];
     } else {
       destMethod = '-';
     }
 
-    return [toContractId, toName, toMethod, destName, destMethod];
+    return [
+      toContractId,
+      toName,
+      toMethod,
+      toArgs,
+      destName,
+      destMethod,
+      destArgs,
+    ];
   }, [toAddress]);
 
   const name = destName || toName;
   const method = destName ? destMethod : toMethod;
+  const methodArgs = destName ? destArgs : toArgs;
 
   const remainingConfirmations = Math.max(
     0,
@@ -325,6 +344,7 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
                 ? 'bg-[var(--green1)]'
                 : 'bg-[var(--yellow2)]',
             )}
+            title={methodArgs?.join('\n')}
           >
             <CaretRightIcon /> {method}
           </code>

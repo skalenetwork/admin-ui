@@ -589,7 +589,6 @@ export default function ImaMapToken() {
                       <form
                         onSubmit={form[2].handleSubmit(
                           async (data) => {
-                            //@todo impl deploy default contract, then enable following with returned address
                             const response =
                               await deployment.sendTransactionAsync?.();
                             const receipt = await response?.wait();

@@ -546,38 +546,38 @@ export const staging = {
     },
     testnet: true
   },
-  'staging-numb-spotted-albaldah': {
-    id: 742822768,
-    name: 'staging-numb-spotted-albaldah',
+  'staging-old-mushy-saiph': {
+    id: 1103198827,
+    name: 'staging-old-mushy-saiph',
     network: 'skale',
     nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
     rpcUrls: {
       default: {
         http: [
-          'https://staging-v3.skalenodes.com/v1/staging-numb-spotted-albaldah'
+          'https://staging-v3.skalenodes.com/v1/staging-old-mushy-saiph'
         ],
         webSocket: [
-          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-spotted-albaldah'
+          'https://staging-v3.skalenodes.com/v1/ws/staging-old-mushy-saiph'
         ]
       },
       public: {
         http: [
-          'https://staging-v3.skalenodes.com/v1/staging-numb-spotted-albaldah'
+          'https://staging-v3.skalenodes.com/v1/staging-old-mushy-saiph'
         ],
         webSocket: [
-          'https://staging-v3.skalenodes.com/v1/ws/staging-numb-spotted-albaldah'
+          'https://staging-v3.skalenodes.com/v1/ws/staging-old-mushy-saiph'
         ]
       },
       filestorage: {
         http: [
-          'https://staging-v3.skalenodes.com/fs/staging-numb-spotted-albaldah'
+          'https://staging-v3.skalenodes.com/fs/staging-old-mushy-saiph'
         ]
       }
     },
     blockExplorers: {
       default: {
         name: 'SKALE Explorer',
-        url: 'https://staging-numb-spotted-albaldah.explorer.staging-v3.skalenodes.com/'
+        url: 'https://staging-old-mushy-saiph.explorer.staging-v3.skalenodes.com/'
       }
     },
     testnet: true
@@ -686,6 +686,42 @@ export const staging = {
       default: {
         name: 'SKALE Explorer',
         url: 'https://staging-numb-flawless-skat.explorer.staging-v3.skalenodes.com/'
+      }
+    },
+    testnet: true
+  },
+  'staging-untimely-yawning-algorab': {
+    id: 1722394779,
+    name: 'staging-untimely-yawning-algorab',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-untimely-yawning-algorab'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-untimely-yawning-algorab'
+        ]
+      },
+      public: {
+        http: [
+          'https://staging-v3.skalenodes.com/v1/staging-untimely-yawning-algorab'
+        ],
+        webSocket: [
+          'https://staging-v3.skalenodes.com/v1/ws/staging-untimely-yawning-algorab'
+        ]
+      },
+      filestorage: {
+        http: [
+          'https://staging-v3.skalenodes.com/fs/staging-untimely-yawning-algorab'
+        ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://staging-untimely-yawning-algorab.explorer.staging-v3.skalenodes.com/'
       }
     },
     testnet: true
