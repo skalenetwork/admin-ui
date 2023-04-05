@@ -8,6 +8,8 @@ SKALE Chain — Admin UI
 
 # Install
 
+Use node version ^18.12
+
 ```bash
 yarn
 yarn dev

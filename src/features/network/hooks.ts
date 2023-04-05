@@ -463,9 +463,9 @@ export function useSContractWrite<
       (id === 'MULTISIG_WALLET' ?? !isMultisigOnlyWalletWrite)
     )
       return;
-    const iface = new ethers.utils.Interface(abi);
     let destMethodEncoded;
     try {
+      const iface = new ethers.utils.Interface(abi);
       destMethodEncoded = iface.encodeFunctionData(
         name,
         params.args,
