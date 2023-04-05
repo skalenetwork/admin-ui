@@ -1,4 +1,5 @@
 import Card from '@/components/Card/Card';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { useToggleAutodeploy } from '@/features/bridge/hooks';
 import { TOKEN_STANDARD } from '@/features/network/literals';
 
@@ -51,7 +52,7 @@ const SingleConfig = ({
   );
 };
 
-export default function ImaAutodeploy() {
+export function ImaAutodeploy() {
   return (
     <div className="grid h-full w-full rounded-lg bg-[var(--white)] p-4">
       <Card
@@ -73,3 +74,5 @@ export default function ImaAutodeploy() {
     </div>
   );
 }
+
+export default withErrorBoundary(ImaAutodeploy);

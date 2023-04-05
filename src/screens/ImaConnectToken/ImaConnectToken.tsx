@@ -1,9 +1,10 @@
 import Card from '@/components/Card/Card';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { TOKEN_STANDARD } from '@/features/network/literals';
 import { Link, useParams } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
 
-export default function ImaConnectToken() {
+export function ImaConnectToken() {
   const { chain, chains } = useNetwork();
   const { chainName } = useParams();
   return (
@@ -31,3 +32,5 @@ export default function ImaConnectToken() {
     </Card>
   );
 }
+
+export default withErrorBoundary(ImaConnectToken);

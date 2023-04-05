@@ -1,4 +1,5 @@
 import { CrownIcon } from '@/components/Icons/Icons';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Field from '@/elements/Field/Field';
 import { addresses } from '@/features/network';
 import { ContractDetailList, ContractId } from '@/features/network/contract';
@@ -21,7 +22,7 @@ type FormData = {
   assigneeAddress: string;
 };
 
-export default function RoleAssigner() {
+export function RoleAssigner() {
   const form = useForm({
     mode: 'all',
     reValidateMode: 'onChange',
@@ -193,3 +194,5 @@ export default function RoleAssigner() {
     </div>
   );
 }
+
+export default withErrorBoundary(RoleAssigner);

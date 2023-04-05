@@ -7,9 +7,14 @@ export default function ErrorScreen({ error, resetErrorBoundary }) {
       role="alert"
       className="flex h-full w-full flex-col items-center justify-center gap-4"
     >
-      <p>Something went wrong:</p>
+      <p>
+        <span className="inline-block rotate-90">✈️</span> Something went wrong,
+        but it's probably okay..
+      </p>
       <pre>{error.message}</pre>
-      <button onClick={resetErrorBoundary}>Try again</button>
+      <button onClick={resetErrorBoundary} className="btn btn-outline">
+        Try again
+      </button>
     </div>
   );
 }

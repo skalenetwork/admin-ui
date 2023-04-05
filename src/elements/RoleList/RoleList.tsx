@@ -1,6 +1,7 @@
 import Hoverover from '@/components/Hoverover/Hoverover';
 import { InfoIcon, RoleIcon } from '@/components/Icons/Icons';
 import Tooltip from '@/components/Tooltip/Tooltip';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { getSContractProp } from '@/features/network/contract';
 import {
   useSContractRead,
@@ -68,7 +69,7 @@ const RoleQuickView = ({ id }: { id: ContractId }) => {
   );
 };
 
-export default function RoleList({}: Props) {
+export function RoleList({}: Props) {
   const account = useAccount();
   const { chain } = useNetwork();
   const allContracts = useSContracts({
@@ -124,3 +125,5 @@ export default function RoleList({}: Props) {
     </Hoverover>
   );
 }
+
+export default withErrorBoundary(RoleList);

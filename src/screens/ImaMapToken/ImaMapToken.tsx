@@ -37,6 +37,7 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import imaAbi from '@/features/network/abi/abi-ima.union';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { BigNumber, ethers } from 'ethers';
@@ -91,7 +92,7 @@ const SubmitButtonPair = ({
 
 type Token = { address: string; name: string };
 
-export default function ImaMapToken() {
+export function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
 
@@ -957,3 +958,5 @@ export default function ImaMapToken() {
     <ImaConnectToken />
   );
 }
+
+export default withErrorBoundary(ImaMapToken);

@@ -1,6 +1,7 @@
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import {
   useChainConnect,
@@ -370,7 +371,7 @@ const PeerChainItem = ({
   );
 };
 
-export default function ImaManager() {
+export function ImaManager() {
   const [alertKey, setAlertKey] = useState('');
 
   const { chain, chains } = useNetwork();
@@ -479,3 +480,5 @@ export default function ImaManager() {
     </div>
   );
 }
+
+export default withErrorBoundary(ImaManager);

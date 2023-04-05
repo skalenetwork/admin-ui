@@ -1,6 +1,7 @@
 import Card from '@/components/Card/Card';
 import Dialog from '@/components/Dialog/Dialog';
 import Progress from '@/components/Progress/Progress';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Field from '@/elements/Field/Field';
 import { useSContractWrite } from '@/features/network/hooks';
 import { useStorageSpace } from '@/features/storage/hooks';
@@ -53,7 +54,7 @@ type StorageReserveForm = {
   reserveSpaceUnit: 'kb' | 'gb' | 'mb';
 };
 
-export default function FileStorageReserve({
+export function FileStorageReserve({
   id,
   alertKey,
   toggleAlert,
@@ -189,3 +190,5 @@ export default function FileStorageReserve({
     </Card>
   );
 }
+
+export default withErrorBoundary(FileStorageReserve);

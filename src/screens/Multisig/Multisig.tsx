@@ -1,6 +1,7 @@
 import Card from '@/components/Card/Card';
 import { PeopleIcon } from '@/components/Icons/Icons';
 import Select from '@/components/Select/Select';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
 import { useCacheWallet, useMultisig } from '@/features/multisig/hooks';
 import { getAbi } from '@/features/network/abi/abi';
@@ -56,7 +57,7 @@ export function WalletSelect({
   );
 }
 
-export default function Multisig() {
+export function Multisig() {
   const { value: walletList } = useCacheWallet();
 
   const [activeWalletAddress, setActiveWalletAddress] = useState<Address>(
@@ -383,3 +384,5 @@ export default function Multisig() {
     </MultisigContext.Provider>
   );
 }
+
+export default withErrorBoundary(Multisig);

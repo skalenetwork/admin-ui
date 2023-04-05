@@ -8,6 +8,7 @@ import FileStorageReserve from './FileStorageReserve';
 
 import Hoverover from '@/components/Hoverover/Hoverover';
 import { ManagerIcon } from '@/components/Icons/Icons';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { useChainMetadata } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { useStorageSpace } from '@/features/storage/hooks';
@@ -350,7 +351,7 @@ export const WidgetManageMetadata = () => {
   );
 };
 
-export default function ChainManager() {
+export function ChainManager() {
   const [alertKey, setAlertKey] = useState('');
 
   const toggleAlert = useCallback(
@@ -427,3 +428,5 @@ export default function ChainManager() {
     </>
   );
 }
+
+export default withErrorBoundary(ChainManager);

@@ -1,4 +1,5 @@
 import Card from '@/components/Card/Card';
+import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { useChainConnect } from '@/features/bridge';
 import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
@@ -8,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNetwork } from 'wagmi';
 
-export default function ImaConnectChain() {
+export function ImaConnectChain() {
   const { chains, chain: originChain } = useNetwork();
   const [selectedChainName, setSelectedChainName] = useState('');
 
@@ -96,3 +97,5 @@ export default function ImaConnectChain() {
     </div>
   );
 }
+
+export default withErrorBoundary(ImaConnectChain);
