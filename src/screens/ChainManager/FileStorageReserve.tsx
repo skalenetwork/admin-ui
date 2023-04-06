@@ -3,8 +3,9 @@ import Dialog from '@/components/Dialog/Dialog';
 import Progress from '@/components/Progress/Progress';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Field from '@/elements/Field/Field';
-import { useSContractWrite } from '@/features/network/hooks';
+import { useRoleAccess, useSContractWrite } from '@/features/network/hooks';
 import { useStorageSpace } from '@/features/storage/hooks';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Address } from 'abitype';
 import { BigNumber } from 'ethers';
 import prettyBytes from 'pretty-bytes';
@@ -83,6 +84,11 @@ export function FileStorageReserve({
     args: [form.watch('reserveSpaceAddress'), BigNumber.from(amount)],
   });
 
+  const {
+    data: { allow },
+    isLoading,
+  } = useRoleAccess('FILESTORAGE', 'ALLOCATOR_ROLE');
+
   return (
     <Card full heading="Filestorage">
       <div className="flex h-full flex-col justify-between">
@@ -91,101 +97,113 @@ export function FileStorageReserve({
           occupiedSpace={totalReservedSpace}
           reservedSpace={totalStorageSpace}
         />
-        <FormProvider {...form}>
-          <Dialog
-            title={`Reserve file space`}
-            open={alertKey === id}
-            onOpenChange={(open) => {
-              toggleAlert(`${id}`)(open);
-            }}
-            trigger={
-              <center>
-                <button
-                  className={tw(
-                    'btn btn-wide w-5/6 m-auto',
-                    reserveSpace.isLoading ? 'loading' : '',
-                  )}
-                >
-                  Reserve file space
-                </button>
-              </center>
-            }
-            description={''}
-            activeStep={1}
-            steps={[
-              {
-                onSubmit: form.handleSubmit(
-                  (data) => {
-                    reserveSpace.writeAsync &&
-                      toast.promise(
-                        async () => {
-                          const response = await reserveSpace
-                            .writeAsync(true)
-                            .finally(() => {
-                              form.reset();
-                            });
-                          return response;
-                        },
-                        {
-                          pending: 'Reserving space',
-                          success: 'Space reserved',
-                          error: 'Failed to reserve space',
-                        },
-                      );
-                    toggleAlert(id)(false);
-                  },
-                  (err) => {
-                    console.error(err);
-                  },
-                ),
-                content: (
-                  <div className="w-2/3 m-auto">
-                    <Field<StorageReserveForm>
-                      control={() => <input type="text" />}
-                      name="reserveSpaceAddress"
-                      label="Address"
-                      required="Address is invalid"
-                    />
-                    <div className="grid grid-cols-2">
+        {isLoading ? (
+          <></>
+        ) : !(allow.eoa && allow.mnm) ? (
+          <small>
+            <ExclamationTriangleIcon /> To reserve space, assign{' '}
+            <code>ALLOCATOR_ROLE</code> to <code>Marionette</code>
+          </small>
+        ) : (
+          <FormProvider {...form}>
+            <Dialog
+              title={`Reserve file space`}
+              open={alertKey === id}
+              onOpenChange={(open) => {
+                toggleAlert(`${id}`)(open);
+              }}
+              trigger={
+                <center>
+                  <button
+                    className={tw(
+                      'btn btn-wide w-5/6 m-auto',
+                      reserveSpace.isLoading ? 'loading' : '',
+                    )}
+                    disabled={!(allow.eoa || allow.mnm)}
+                  >
+                    Reserve file space
+                  </button>
+                </center>
+              }
+              description={''}
+              activeStep={1}
+              steps={[
+                {
+                  onSubmit: form.handleSubmit(
+                    (data) => {
+                      reserveSpace.writeAsync &&
+                        toast
+                          .promise(
+                            async () => {
+                              const response = await reserveSpace.writeAsync(
+                                true,
+                              );
+                              return response;
+                            },
+                            {
+                              pending: 'Reserving space',
+                              success: 'Space reserved',
+                              error: 'Failed to reserve space',
+                            },
+                          )
+                          .then(() => {
+                            form.reset();
+                          });
+                      toggleAlert(id)(false);
+                    },
+                    (err) => {
+                      console.error(err);
+                    },
+                  ),
+                  content: (
+                    <div className="w-2/3 m-auto">
                       <Field<StorageReserveForm>
-                        control={() => (
-                          <input type="text" className="border-r-0" />
-                        )}
-                        name="reserveSpaceAmount"
-                        label="Space to reserve"
+                        control={() => <input type="text" />}
+                        name="reserveSpaceAddress"
+                        label="Address"
                         required="Address is invalid"
-                        validate={(val) =>
-                          !isNaN(Number(val)) || 'Space amount is invalid'
-                        }
                       />
-                      <Field<StorageReserveForm>
-                        control={() => (
-                          <select>
-                            <option value="kb">kB</option>
-                            <option value="mb">MB</option>
-                            <option value="gb">GB</option>
-                          </select>
-                        )}
-                        name="reserveSpaceUnit"
-                        label="units"
-                      />
+                      <div className="grid grid-cols-2">
+                        <Field<StorageReserveForm>
+                          control={() => (
+                            <input type="text" className="border-r-0" />
+                          )}
+                          name="reserveSpaceAmount"
+                          label="Space to reserve"
+                          required="Address is invalid"
+                          validate={(val) =>
+                            !isNaN(Number(val)) || 'Space amount is invalid'
+                          }
+                        />
+                        <Field<StorageReserveForm>
+                          control={() => (
+                            <select>
+                              <option value="kb">kB</option>
+                              <option value="mb">MB</option>
+                              <option value="gb">GB</option>
+                            </select>
+                          )}
+                          name="reserveSpaceUnit"
+                          label="units"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ),
-                actionElement({ className }) {
-                  return (
-                    <button
-                      className={className}
-                      disabled={reserveSpace.isLoading || !reserveSpace.write}
-                    >
-                      Reserve
-                    </button>
-                  );
+                  ),
+                  actionElement({ className }) {
+                    return (
+                      <button
+                        className={className}
+                        disabled={reserveSpace.isLoading || !reserveSpace.write}
+                      >
+                        Reserve
+                      </button>
+                    );
+                  },
                 },
-              },
-            ]}
-          />
-        </FormProvider>
+              ]}
+            />
+          </FormProvider>
+        )}
       </div>
     </Card>
   );

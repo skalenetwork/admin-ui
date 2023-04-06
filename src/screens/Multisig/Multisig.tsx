@@ -11,6 +11,7 @@ import { MultisigOwner } from '@/screens/Multisig/MultisigOwner';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
 import { BoltIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useCallback, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 import { Address, useAccount, useNetwork } from 'wagmi';
@@ -309,15 +310,18 @@ export function Multisig() {
               className="h-1/2 !bg-[var(--slate)]"
               bodyClass="scrollbar"
             >
-              <div className="flex flex-col gap-2">
-                {chain?.network !== NETWORK.SKALE ? (
-                  <Prelay>Not supported by the network.</Prelay>
-                ) : !pendingTrxIds ? (
-                  <Prelay>...</Prelay>
-                ) : pendingTrxIds.isError ? (
-                  <Prelay>Failed to retrieve queue</Prelay>
-                ) : pendingTrxIds.data ? (
-                  pendingTrxIds.data.map((id, i) => (
+              {chain?.network !== NETWORK.SKALE ? (
+                <Prelay>Not supported by the network</Prelay>
+              ) : pendingTrxIds.isLoading ? (
+                <Prelay>...</Prelay>
+              ) : pendingTrxIds.isError ? (
+                <Prelay className="gap-1">
+                  <ExclamationTriangleIcon />
+                  Could not retrieve queue
+                </Prelay>
+              ) : pendingTrxIds.data ? (
+                <div className="flex flex-col gap-2">
+                  {pendingTrxIds.data.map((id, i) => (
                     <WidgetMultisigTx
                       key={id}
                       id={id}
@@ -337,11 +341,11 @@ export function Multisig() {
                         countsRefetch();
                       }}
                     />
-                  ))
-                ) : (
-                  <></>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <></>
+              )}
             </Card>
             <Card
               lean
@@ -349,15 +353,18 @@ export function Multisig() {
               className="h-1/2 !bg-[var(--slate)]"
               bodyClass="scrollbar"
             >
-              <div className="flex flex-col gap-2">
-                {chain?.network !== NETWORK.SKALE ? (
-                  <Prelay>Not supported by the network.</Prelay>
-                ) : !executedTrxIds ? (
-                  <Prelay>...</Prelay>
-                ) : executedTrxIds.isError ? (
-                  <Prelay>Failed to retrieve queue</Prelay>
-                ) : executedTrxIds.data ? (
-                  executedTrxIds.data.map((id, i) => (
+              {chain?.network !== NETWORK.SKALE ? (
+                <Prelay>Not supported by the network</Prelay>
+              ) : executedTrxIds.isLoading ? (
+                <Prelay>...</Prelay>
+              ) : executedTrxIds.isError ? (
+                <Prelay className="gap-1">
+                  <ExclamationTriangleIcon />
+                  Could not retrieve queue
+                </Prelay>
+              ) : executedTrxIds.data ? (
+                <div className="flex flex-col gap-2">
+                  {executedTrxIds.data.map((id, i) => (
                     <WidgetMultisigTx
                       key={id}
                       id={id}
@@ -372,11 +379,11 @@ export function Multisig() {
                             )
                       }
                     />
-                  ))
-                ) : (
-                  <></>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <></>
+              )}
             </Card>
           </Card>
         </div>

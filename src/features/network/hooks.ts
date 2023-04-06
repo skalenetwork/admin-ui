@@ -784,6 +784,78 @@ export function useSContracts<T extends ContractIdWithAbi>({
   );
 }
 
+export function useRoleAccess<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
+>(id: TContractId, role: TRoleName) {
+  const { data, ...rest } = useRolesAccess(id, [role]);
+  return {
+    data: data[0],
+    ...rest,
+  };
+}
+
+export function useRolesAccess<
+  TContractId extends ContractId,
+  TAbi extends (typeof ABI)[TContractId],
+  TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
+>(id: TContractId, roleList?: TRoleName[]) {
+  const account = useAccount();
+
+  const accountRole = useSContractRoles(id, roleList);
+  const puppeteerRoleHash = useSContractRead('MARIONETTE', {
+    name: 'PUPPETEER_ROLE',
+  });
+  const isMultisigPuppeteer = useSContractRead('MARIONETTE', {
+    enabled: puppeteerRoleHash.isSuccess,
+    name: 'hasRole',
+    args: [puppeteerRoleHash.data as Address, CONTRACT.MULTISIG_WALLET.address],
+  });
+  const isSignerMultisigOwner = useSContractRead('MULTISIG_WALLET', {
+    enabled: !!account.address,
+    name: 'isOwner',
+    args: [account.address as Address],
+  });
+
+  const allReads = [accountRole, isSignerMultisigOwner, isMultisigPuppeteer];
+
+  const data = accountRole.data.map((datum) => {
+    const { permissions } = datum;
+    const mnmRequirements = [
+      permissions.marionette,
+      isSignerMultisigOwner.data,
+      isMultisigPuppeteer.data,
+    ];
+    const hasMnm = mnmRequirements.some((v) => v === undefined)
+      ? undefined
+      : mnmRequirements.reduce((acc, curr) => acc && curr, 1);
+    return {
+      name: datum.name,
+      hash: datum.hash,
+      adminAddress: datum.adminAddress,
+      isOwnerOfMultisig: isSignerMultisigOwner.data,
+      isMultisigPuppeteer: isMultisigPuppeteer.data,
+      allow: {
+        eoa: permissions.signer,
+        mnm: hasMnm,
+      },
+    };
+  });
+
+  return {
+    isLoading: allReads.reduce(
+      (acc, curr) => acc.isLoading || curr.isLoading,
+      1,
+    ),
+    isFetching: allReads.reduce(
+      (acc, curr) => acc.isFetching || curr.isFetching,
+      1,
+    ),
+    data,
+  };
+}
+
 export function useSContractRole<
   TContractId extends ContractId,
   TAbi extends (typeof ABI)[TContractId],
