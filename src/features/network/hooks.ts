@@ -29,6 +29,7 @@ import {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
+import * as debug from 'debug';
 import { BigNumber, ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { useAsyncFn } from 'react-use';
@@ -45,6 +46,8 @@ import {
   useSigner,
   useWaitForTransaction,
 } from 'wagmi';
+
+const log = debug('feat:network');
 
 const { chainMetadataUrl } = build;
 
@@ -256,7 +259,11 @@ export function useSContractRead<
     abi,
     functionName: name,
     onError: (err) => {
-      console.error('[read]', id, name, err.data?.code, err.data?.reason);
+      console.error(
+        '[read]',
+        `${id}.${name}`,
+        err?.data ? `\n${err.data.code} : ${err.data.reason}` : '',
+      );
       params.onError?.(err);
     },
   });
@@ -329,7 +336,11 @@ export function useSContractReads<
     ...params,
     contracts,
     onError: (err) => {
-      console.error('[reads]', id, '', err.data?.code, err.data?.reason);
+      console.error(
+        '[reads]',
+        `${id}`,
+        err?.data ? `\n${err.data.code} : ${err.data.reason}` : '',
+      );
       params.onError?.(err);
     },
   });
@@ -380,7 +391,7 @@ const wrapWriteAsync = <
       try {
         submitted = await (writeAsync as TWriteAsync)?.(overrideConfig);
       } catch (err) {
-        console.error('writeAsync:on-signing', err);
+        log('writeAsync:on-signing', err);
         throw {
           message: 'Failed to send transaction',
           error: err,
@@ -392,7 +403,7 @@ const wrapWriteAsync = <
       try {
         receipt = await wait(confirmations === true ? 1 : confirmations);
       } catch (err) {
-        console.error('writeAsync:on-confirmation', err);
+        log('writeAsync:on-confirmation', err);
         throw {
           message: 'Transaction sent but failed to confirm',
           error: err,
@@ -514,7 +525,11 @@ export function useSContractWrite<
           : params.overrides?.gasLimit,
     },
     onError: (err) => {
-      console.error('[write:eoa]', id, name, err.data?.code, err.data?.message);
+      log(
+        'check-write:eoa',
+        `${id}.${name}`,
+        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      );
       params.onError?.(err);
     },
   });
@@ -540,12 +555,10 @@ export function useSContractWrite<
       ),
     },
     onError: (err) => {
-      console.error(
-        '[write:mnm_submit]',
-        id,
-        name,
-        err.data?.code,
-        err.data?.message,
+      log(
+        'check-write:mnm-submit',
+        `${id}.${name}`,
+        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
       );
       params.onError?.(err);
     },
@@ -617,12 +630,10 @@ export function useSContractWrite<
       ),
     },
     onError: (err) => {
-      console.error(
-        '[write:mnm_confirm]',
-        id,
-        name,
-        err.data?.code,
-        err.data?.message,
+      log(
+        'check-write:mnm-confirm',
+        `${id}.${name}`,
+        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
       );
       params.onError?.(err);
     },

@@ -60,8 +60,6 @@ export function NiceAddress({
     chainId,
   });
 
-  console.log('a', contractName);
-
   return (
     <div
       className={`grid grid-cols-[max-content_max-content_1fr] items-center gap-x-4 gap-y-1 ${className}`}

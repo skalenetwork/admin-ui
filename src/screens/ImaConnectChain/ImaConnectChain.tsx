@@ -5,8 +5,9 @@ import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useNetwork } from 'wagmi';
 
 export function ImaConnectChain() {
@@ -22,13 +23,25 @@ export function ImaConnectChain() {
   useEffect(() => {
     if (chain?.connect.isSuccess) {
       navigate(`/ima_manager/token_map/${selectedChainName}`);
-      chain?.connect.reset();
+      chain?.connect.reset?.();
     }
   }, [chain?.connect.isSuccess]);
 
-  const handleSubmit = () => {
-    chain?.connect?.write?.();
-  };
+  const handleSubmit = useCallback(() => {
+    chain?.connect?.writeAsync &&
+      toast.promise(
+        chain?.connect?.writeAsync(true, {
+          recklesslySetUnpreparedOverrides: {
+            gasLimit: 8000000,
+          },
+        }),
+        {
+          pending: `Connecting to chain ${name}`,
+          success: `Connected to chain ${name}`,
+          error: `Failed to connect to chain ${name}`,
+        },
+      );
+  }, [chain?.connect?.writeAsync]);
 
   return originChain?.network !== NETWORK.SKALE ? (
     <NotSupported>

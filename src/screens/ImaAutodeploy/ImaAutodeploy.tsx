@@ -3,7 +3,12 @@ import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { useToggleAutodeploy } from '@/features/bridge/hooks';
 import { TOKEN_STANDARD } from '@/features/network/literals';
 
-const standards = Object.values(TOKEN_STANDARD);
+const standards = [
+  TOKEN_STANDARD.ERC20,
+  TOKEN_STANDARD.ERC721,
+  TOKEN_STANDARD.ERC721_WITH_METADATA,
+  TOKEN_STANDARD.ERC1155,
+];
 
 const SingleConfig = ({
   title,

@@ -131,7 +131,7 @@ export const WidgetConfigFcd = ({
             open={alertKey === id}
             onOpenChange={toggleAlert(id)}
             trigger={
-              <button className="btn btn-wide w-5/6" disabled={!toggle}>
+              <button className="btn btn-wide w-5/6" disabled={!writeAsync}>
                 {isEnabled ? 'Disable' : 'Enable'} FCD
               </button>
             }
@@ -173,7 +173,7 @@ export const WidgetConfigMtm = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
-  const { toggle, isEnabled, isLoading, refetch } = useMtm();
+  const { writeAsync, isEnabled, isLoading, refetch } = useMtm();
   const status = !connected
     ? 'disabled'
     : isEnabled === undefined
@@ -203,7 +203,7 @@ export const WidgetConfigMtm = ({
               open={alertKey === id}
               onOpenChange={toggleAlert(id)}
               trigger={
-                <button className="btn btn-wide w-5/6" disabled={!toggle}>
+                <button className="btn btn-wide w-5/6" disabled={!writeAsync}>
                   {isEnabled ? 'Disable' : 'Enable'} MTM
                 </button>
               }
@@ -212,8 +212,18 @@ export const WidgetConfigMtm = ({
               } Multi-transaction mode?`}
               description="Please confirm this action"
               onAction={async () => {
-                await toggleAsync?.(true);
-                return refetch();
+                writeAsync &&
+                  toast.promise(
+                    async () => {
+                      await writeAsync?.(true);
+                      return refetch();
+                    },
+                    {
+                      pending: 'Toggling MTM',
+                      success: 'MTM status changed',
+                      error: 'Failed to change MTM',
+                    },
+                  );
                 return {
                   status: 'success',
                 };
@@ -299,6 +309,8 @@ export const WidgetManageMetadata = () => {
       ? [false, 'Not Submitted']
       : [true, 'Submitted'];
 
+  const actionText = chainMetadata.data === null ? 'Submit PR' : 'Update';
+
   return (
     <Card
       full
@@ -327,7 +339,7 @@ export const WidgetManageMetadata = () => {
         <center>
           <Hoverover
             title="Chain Metadata"
-            trigger={<>View & Submit PR</>}
+            trigger={<>View & {actionText}</>}
             triggerClass="btn w-5/6"
           >
             <div className="w-[320px]">
@@ -341,7 +353,7 @@ export const WidgetManageMetadata = () => {
                 target="blank"
                 href="https://github.com/skalenetwork/skale-network/compare"
               >
-                Submit PR
+                {actionText}
               </a>
             </div>
           </Hoverover>
