@@ -172,7 +172,7 @@ export function RoleAssigner() {
                 label="Assignee"
                 control={() => <input type="text" />}
                 required="Assignee address is required"
-                disabled={notAllowed || !!role}
+                disabled={notAllowed || !role}
                 placeholder="0x..."
               />
               <div className="pt-4 px-4">
