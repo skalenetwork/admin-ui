@@ -4,6 +4,7 @@ import Field from '@/elements/Field/Field';
 import { addresses } from '@/features/network';
 import { ContractDetailList, ContractId } from '@/features/network/contract';
 import {
+  useRoleAccess,
   useSContract,
   useSContractRead,
   useSContractWrite,
@@ -47,23 +48,33 @@ export function RoleAssigner() {
     id: selectedContractId,
   });
 
-  const roles = abi
-    ? abi
-        .filter(
-          ({ type, name }) => type === 'function' && name.includes('_ROLE'),
-        )
-        .map((fragment) => fragment.name)
-    : [];
+  const accessAdminRole = useRoleAccess(
+    selectedContractId,
+    'DEFAULT_ADMIN_ROLE',
+  );
+
+  const roles =
+    abi && (accessAdminRole.data?.allow.mnm || accessAdminRole.data?.allow.eoa)
+      ? abi
+          .filter(
+            ({ type, name }) => type === 'function' && name.includes('_ROLE'),
+          )
+          .map((fragment) => fragment.name)
+      : [];
 
   const { data: roleHash } = useSContractRead(selectedContractId, {
     enabled: !!role,
     name: role,
   });
 
+  const notAllowed =
+    accessAdminRole.data?.allow.mnm === false &&
+    accessAdminRole.data?.allow.eoa === false;
+
   useEffect(() => {
-    form.setValue('role', roles[0]);
+    !notAllowed && form.setValue('role', roles[0]);
     form.trigger('role');
-  }, [contractAddress]);
+  }, [contractAddress, notAllowed]);
 
   const roleDescription = useMemo(() => {
     const foundRole = rolesMetadata.find((item) => item.name === role);
@@ -138,7 +149,15 @@ export function RoleAssigner() {
                     ))}
                   </select>
                 )}
-                required="Role is required"
+                disabled={notAllowed}
+                validate={(val) =>
+                  !!val ||
+                  (accessAdminRole.isLoading
+                    ? '...'
+                    : notAllowed
+                    ? 'No access to role grantor on the selected contract'
+                    : 'Role is required')
+                }
                 placeholder="Choose a role"
               />
               <div className="pt-4 px-4">
@@ -153,6 +172,7 @@ export function RoleAssigner() {
                 label="Assignee"
                 control={() => <input type="text" />}
                 required="Assignee address is required"
+                disabled={notAllowed || !!role}
                 placeholder="0x..."
               />
               <div className="pt-4 px-4">
