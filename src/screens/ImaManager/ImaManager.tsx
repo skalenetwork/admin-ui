@@ -8,7 +8,7 @@ import {
   useHistory,
   useTokenMappings,
 } from '@/features/bridge';
-import { useSContractRead } from '@/features/network/hooks';
+import { useRoleAccess, useSContractRead } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -17,6 +17,7 @@ import {
   ArrowRightIcon,
   CaretLeftIcon,
   ChevronRightIcon,
+  ExclamationTriangleIcon,
   MinusCircledIcon,
 } from '@radix-ui/react-icons';
 import { BigNumber } from 'ethers';
@@ -158,6 +159,11 @@ const SelectedPeerChainItem = ({
   const targetTokenMappings = mappingsFromTarget;
   const originTokenMappings = mappingsFromOrigin;
 
+  const accessRegistrarRole = useRoleAccess(
+    'TOKEN_MANAGER_LINKER',
+    'REGISTRAR_ROLE',
+  );
+
   return (
     <motion.div
       className={tw(
@@ -183,28 +189,37 @@ const SelectedPeerChainItem = ({
         <>
           <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
           <div className="flex flex-grow items-center">
-            {connectionStatus === 'target' ? (
-              <button
-                onClick={() => {
-                  connect?.writeAsync &&
-                    toast.promise(
-                      connect.writeAsync(true, {
-                        recklesslySetUnpreparedOverrides: {
-                          gasLimit: 8000000,
+            {accessRegistrarRole.isLoading ? (
+              <>. . .</>
+            ) : connectionStatus === 'target' ? (
+              !(
+                accessRegistrarRole.data.allow.eoa ||
+                accessRegistrarRole.data.allow.mnm
+              ) ? (
+                <></>
+              ) : (
+                <button
+                  onClick={() => {
+                    connect?.writeAsync &&
+                      toast.promise(
+                        connect.writeAsync(true, {
+                          recklesslySetUnpreparedOverrides: {
+                            gasLimit: 8000000,
+                          },
+                        }),
+                        {
+                          pending: `Accepting request from ${name}`,
+                          success: `Request accepted from ${name}`,
+                          error: `Failed to accept request from ${name}`,
                         },
-                      }),
-                      {
-                        pending: `Accepting request from ${name}`,
-                        success: `Request accepted from ${name}`,
-                        error: `Failed to accept request from ${name}`,
-                      },
-                    );
-                }}
-                className="btn btn-outline m-auto w-2/3 rounded-full"
-                disabled={!connect.writeAsync}
-              >
-                Accept request
-              </button>
+                      );
+                  }}
+                  className="btn btn-outline m-auto w-2/3 rounded-full"
+                  disabled={!connect.writeAsync}
+                >
+                  Accept request
+                </button>
+              )
             ) : (
               <>
                 <span className="font-medium">Mapped Tokens: </span>
@@ -239,14 +254,31 @@ const SelectedPeerChainItem = ({
                       onSubmit: (e) => {
                         e.preventDefault();
                       },
-                      actionElement: ({ className }) => (
-                        <Link
-                          className={`${className}`}
-                          to={`token_map/${name}?t=${chain?.id}&standard=${selectedStandard?.name}`}
-                        >
-                          Add new {selectedStandard?.label} token
-                        </Link>
-                      ),
+                      actionElement: ({ className }) =>
+                        accessRegistrarRole.isLoading ? (
+                          <>...</>
+                        ) : !(
+                            accessRegistrarRole.data.allow.eoa ||
+                            accessRegistrarRole.data.allow.mnm
+                          ) ? (
+                          accessRegistrarRole.data.isOwnerOfMultisig ? (
+                            <small>
+                              <ExclamationTriangleIcon /> To map tokens, assign{' '}
+                              <code>REGISTRAR_ROLE</code> on{' '}
+                              <code>TokenManagerLinker</code> to{' '}
+                              <code>Marionette</code>
+                            </small>
+                          ) : (
+                            <></>
+                          )
+                        ) : (
+                          <Link
+                            className={`${className}`}
+                            to={`token_map/${name}?t=${chain?.id}&standard=${selectedStandard?.name}`}
+                          >
+                            Add new {selectedStandard?.label} token
+                          </Link>
+                        ),
                       cancelElement: () => <></>,
                       content: (
                         <div>
@@ -396,6 +428,11 @@ export function ImaManager() {
     [alertKey],
   );
 
+  const accessRegistrarRole = useRoleAccess(
+    'TOKEN_MANAGER_LINKER',
+    'REGISTRAR_ROLE',
+  );
+
   // useEffect(() => {
   //   peerSChains?.[0]?.chainName && setSelectedChain(peerSChains[0].chainName);
   // }, [peerSChains?.[0]?.chainName]);
@@ -422,9 +459,16 @@ export function ImaManager() {
         heading={
           <div className="flex h-max items-center justify-between">
             <h4 className="font-medium">Connected chains</h4>
-            <Link to="connect" className="btn btn-wide rounded-full text-sm">
-              Connect new chain
-            </Link>
+            {!(
+              accessRegistrarRole.data.allow.eoa ||
+              accessRegistrarRole.data.allow.mnm
+            ) ? (
+              <></>
+            ) : (
+              <Link to="connect" className="btn btn-wide rounded-full text-sm">
+                Connect new chain
+              </Link>
+            )}
           </div>
         }
       >

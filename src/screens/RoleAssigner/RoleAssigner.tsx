@@ -76,12 +76,14 @@ export function RoleAssigner() {
     args: [roleHash, assigneeAddress],
   });
 
+  const isOffnet = chain?.network !== NETWORK.SKALE;
+
   return (
     <div
       className="h-full w-full rounded-lg bg-[var(--white)] p-6 relative"
       data-s="-1"
     >
-      {chain?.network !== NETWORK.SKALE ? (
+      {isOffnet ? (
         <NotSupported theme="blur">
           <CrownIcon className="mr-4" />
           &emsp;
