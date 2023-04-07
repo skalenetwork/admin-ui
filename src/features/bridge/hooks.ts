@@ -18,12 +18,10 @@ import {
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { useQuery } from '@tanstack/react-query';
-import * as debug from 'debug';
+
 import { ethers } from 'ethers';
 import { useNetwork } from 'wagmi';
 import { toSentenceCase } from '../../utils';
-
-const debugLog = debug('feat:bridge');
 
 type TokenTypeProps<S> = {
   standard: S;
@@ -172,7 +170,6 @@ export function useHistory({
           try {
             parsedLog = iface.parseLog(log);
           } catch (e) {
-            debugLog(index, log, e);
             parsedLog = { name: 'unknown' };
           }
           return {

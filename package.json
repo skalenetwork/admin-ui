@@ -41,7 +41,6 @@
     "@tanstack/react-query": "^4.20.9",
     "buffer": "^6.0.3",
     "connectkit": "^1.1.1",
-    "debug": "^4.3.4",
     "ethers": "^5.7.2",
     "framer-motion": "^9.0.1",
     "humanize-duration": "^3.28.0",

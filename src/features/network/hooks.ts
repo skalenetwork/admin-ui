@@ -29,7 +29,6 @@ import {
   ExtractAbiFunction,
   ExtractAbiFunctionNames,
 } from 'abitype';
-import * as debug from 'debug';
 import { BigNumber, ethers } from 'ethers';
 import { useEffect, useMemo, useState } from 'react';
 import { useAsyncFn } from 'react-use';
@@ -46,8 +45,6 @@ import {
   useSigner,
   useWaitForTransaction,
 } from 'wagmi';
-
-const log = debug('feat:network');
 
 const { chainMetadataUrl } = build;
 
@@ -391,7 +388,7 @@ const wrapWriteAsync = <
       try {
         submitted = await (writeAsync as TWriteAsync)?.(overrideConfig);
       } catch (err) {
-        log('writeAsync:on-signing', err);
+        // log('writeAsync:on-signing', err);
         throw {
           message: 'Failed to send transaction',
           error: err,
@@ -403,7 +400,7 @@ const wrapWriteAsync = <
       try {
         receipt = await wait(confirmations === true ? 1 : confirmations);
       } catch (err) {
-        log('writeAsync:on-confirmation', err);
+        // log('writeAsync:on-confirmation', err);
         throw {
           message: 'Transaction sent but failed to confirm',
           error: err,
@@ -525,11 +522,11 @@ export function useSContractWrite<
           : params.overrides?.gasLimit,
     },
     onError: (err) => {
-      log(
-        'check-write:eoa',
-        `${id}.${name}`,
-        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
-      );
+      // log(
+      //   'check-write:eoa',
+      //   `${id}.${name}`,
+      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      // );
       params.onError?.(err);
     },
   });
@@ -555,11 +552,11 @@ export function useSContractWrite<
       ),
     },
     onError: (err) => {
-      log(
-        'check-write:mnm-submit',
-        `${id}.${name}`,
-        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
-      );
+      // log(
+      //   'check-write:mnm-submit',
+      //   `${id}.${name}`,
+      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      // );
       params.onError?.(err);
     },
   });
@@ -630,11 +627,11 @@ export function useSContractWrite<
       ),
     },
     onError: (err) => {
-      log(
-        'check-write:mnm-confirm',
-        `${id}.${name}`,
-        err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
-      );
+      // log(
+      //   'check-write:mnm-confirm',
+      //   `${id}.${name}`,
+      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      // );
       params.onError?.(err);
     },
   });
