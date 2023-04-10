@@ -167,10 +167,21 @@ export function RoleAssigner() {
               </div>
             </div>
             <div className="grid grid-cols-2">
+              <datalist id="contract_list">
+                {Object.values(CONTRACT)
+                  .filter((c) => c.network === NETWORK.SKALE)
+                  .map((contract) => (
+                    <option key={contract.key} value={contract.address}>
+                      {contract.name}
+                    </option>
+                  ))}
+              </datalist>
               <Field<FormData>
                 name="assigneeAddress"
                 label="Assignee"
-                control={() => <input type="text" />}
+                control={() => (
+                  <input type="text" id="contract_list" list="contract_list" />
+                )}
                 required="Assignee address is required"
                 disabled={notAllowed || !role}
                 placeholder="0x..."

@@ -8,6 +8,7 @@ import {
   useHistory,
   useTokenMappings,
 } from '@/features/bridge';
+import { getSContractProp } from '@/features/network/contract';
 import { useRoleAccess, useSContractRead } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
@@ -433,6 +434,16 @@ export function ImaManager() {
     'REGISTRAR_ROLE',
   );
 
+  const tmLinkerAddress = getSContractProp('TOKEN_MANAGER_LINKER', 'address');
+  const chainConnectorRoleHash = useSContractRead('MESSAGE_PROXY_SCHAIN', {
+    name: 'CHAIN_CONNECTOR_ROLE',
+  });
+  const hasChainConnectorRole = useSContractRead('MESSAGE_PROXY_SCHAIN', {
+    enabled: tmLinkerAddress && chainConnectorRoleHash.data,
+    name: 'hasRole',
+    args: [chainConnectorRoleHash.data, tmLinkerAddress],
+  });
+
   // useEffect(() => {
   //   peerSChains?.[0]?.chainName && setSelectedChain(peerSChains[0].chainName);
   // }, [peerSChains?.[0]?.chainName]);
@@ -461,9 +472,17 @@ export function ImaManager() {
             <h4 className="font-medium">Connected chains</h4>
             {!(
               accessRegistrarRole.data.allow.eoa ||
-              accessRegistrarRole.data.allow.mnm
+              accessRegistrarRole.data.allow.mnm ||
+              hasChainConnectorRole.isLoading
             ) ? (
               <></>
+            ) : accessRegistrarRole.data.isOwnerOfMultisig &&
+              !hasChainConnectorRole.data ? (
+              <small>
+                <ExclamationTriangleIcon /> To connect chain, assign{' '}
+                <code>MessageProxyForSchain.CHAIN_CONNECTOR_ROLE</code> to{' '}
+                <code>TokenManagerLinker</code>
+              </small>
             ) : (
               <Link to="connect" className="btn btn-wide rounded-full text-sm">
                 Connect new chain
