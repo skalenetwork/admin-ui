@@ -368,12 +368,17 @@ const MULTISIG_ONLY_WALLET_FUNCTIONS = [
   'changeRequirement',
 ] satisfies ExtractAbiFunctionNames<(typeof ABI)['MULTISIG_WALLET']>[];
 
+const MULTISIG_LOG_EXECUTION_FAILURE =
+  '0x526441bb6c1aba3c9a4a6ca1d6545da9c2333c8c48343ef398eb858d72b79236';
+
 const wrapWriteAsync = <
+  TContractId extends ContractId,
   TWriteAsync extends NonNullable<
     ReturnType<typeof useContractWrite>['writeAsync']
   >,
   TReceipt = Awaited<ReturnType<Awaited<ReturnType<TWriteAsync>>['wait']>>,
 >(
+  contractId: ContractId,
   writeAsync?: TWriteAsync,
 ) => {
   if (!writeAsync) return;
@@ -404,6 +409,22 @@ const wrapWriteAsync = <
         throw {
           message: 'Transaction sent but failed to confirm',
           error: err,
+        };
+      }
+
+      if (
+        contractId === 'MULTISIG_WALLET' &&
+        receipt.logs?.length &&
+        receipt.logs.some(
+          (log) =>
+            log.topics[0]?.toLowerCase() === MULTISIG_LOG_EXECUTION_FAILURE,
+        )
+      ) {
+        throw {
+          message: 'Transaction confirmed but failed to execute',
+          error: {
+            message: 'ExecutionFailure',
+          },
         };
       }
 
@@ -527,7 +548,6 @@ export function useSContractWrite<
       //   `${id}.${name}`,
       //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
       // );
-      params.onError?.(err);
     },
   });
 
@@ -685,7 +705,7 @@ export function useSContractWrite<
       receipt: _eoaWait.data,
       isFinalized: !!_eoaWait.data,
       ..._eoa,
-      writeAsync: wrapWriteAsync(_eoa.writeAsync),
+      writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
     mnm:
       id === 'MULTISIG_WALLET'
@@ -699,7 +719,7 @@ export function useSContractWrite<
             receipt: mnmConfirmTxWait.data,
             isFinalized: mnmIsFinalized,
             ...mnmConfirmTx,
-            writeAsync: wrapWriteAsync(mnmConfirmTx.writeAsync),
+            writeAsync: wrapWriteAsync(id, mnmConfirmTx.writeAsync),
           }
         : {
             mnmAction: 'submit',
@@ -709,7 +729,7 @@ export function useSContractWrite<
             receipt: _mnmWait.data,
             isFinalized: mnmIsFinalized,
             ..._mnm,
-            writeAsync: wrapWriteAsync(_mnm.writeAsync),
+            writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
           },
   };
 

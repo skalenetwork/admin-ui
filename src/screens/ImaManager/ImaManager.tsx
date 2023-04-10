@@ -433,7 +433,6 @@ export function ImaManager() {
     'TOKEN_MANAGER_LINKER',
     'REGISTRAR_ROLE',
   );
-
   const tmLinkerAddress = getSContractProp('TOKEN_MANAGER_LINKER', 'address');
   const chainConnectorRoleHash = useSContractRead('MESSAGE_PROXY_SCHAIN', {
     name: 'CHAIN_CONNECTOR_ROLE',
