@@ -9,7 +9,11 @@ import {
   useTokenMappings,
 } from '@/features/bridge';
 import { getSContractProp } from '@/features/network/contract';
-import { useRoleAccess, useSContractRead } from '@/features/network/hooks';
+import {
+  useRoleAccess,
+  useSContractRead,
+  useSContractWrite,
+} from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import Prelay from '@/screens/Prelay';
@@ -165,6 +169,16 @@ const SelectedPeerChainItem = ({
     'REGISTRAR_ROLE',
   );
 
+  const tmLinkerAddress = getSContractProp('TOKEN_MANAGER_LINKER', 'address');
+  const chainConnectorRoleHash = useSContractRead('MESSAGE_PROXY_SCHAIN', {
+    name: 'CHAIN_CONNECTOR_ROLE',
+  });
+  const hasChainConnectorRole = useSContractRead('MESSAGE_PROXY_SCHAIN', {
+    enabled: tmLinkerAddress && chainConnectorRoleHash.data,
+    name: 'hasRole',
+    args: [chainConnectorRoleHash.data, tmLinkerAddress],
+  });
+
   return (
     <motion.div
       className={tw(
@@ -190,7 +204,8 @@ const SelectedPeerChainItem = ({
         <>
           <FormattedPeerChain name={name} connectionStatus={connectionStatus} />
           <div className="flex flex-grow items-center">
-            {accessRegistrarRole.isLoading ? (
+            {accessRegistrarRole.isLoading ||
+            hasChainConnectorRole.isLoading ? (
               <>. . .</>
             ) : connectionStatus === 'target' ? (
               !(
@@ -198,6 +213,12 @@ const SelectedPeerChainItem = ({
                 accessRegistrarRole.data.allow.mnm
               ) ? (
                 <></>
+              ) : !hasChainConnectorRole.data ? (
+                <small>
+                  <ExclamationTriangleIcon /> To accept, assign{' '}
+                  <code>MessageProxyForSchain.CHAIN_CONNECTOR_ROLE</code> to{' '}
+                  <code>TokenManagerLinker</code>
+                </small>
               ) : (
                 <button
                   onClick={() => {
@@ -443,6 +464,11 @@ export function ImaManager() {
     args: [chainConnectorRoleHash.data, tmLinkerAddress],
   });
 
+  const grantChainConnectorRole = useSContractWrite('MESSAGE_PROXY_SCHAIN', {
+    name: 'grantRole',
+    args: [chainConnectorRoleHash.data, tmLinkerAddress],
+  });
+
   // useEffect(() => {
   //   peerSChains?.[0]?.chainName && setSelectedChain(peerSChains[0].chainName);
   // }, [peerSChains?.[0]?.chainName]);
@@ -475,13 +501,21 @@ export function ImaManager() {
               hasChainConnectorRole.isLoading
             ) ? (
               <></>
-            ) : accessRegistrarRole.data.isOwnerOfMultisig &&
-              !hasChainConnectorRole.data ? (
-              <small>
-                <ExclamationTriangleIcon /> To connect chain, assign{' '}
-                <code>MessageProxyForSchain.CHAIN_CONNECTOR_ROLE</code> to{' '}
-                <code>TokenManagerLinker</code>
-              </small>
+            ) : grantChainConnectorRole.writeAsync ? (
+              <button
+                className="btn rounded-full"
+                onClick={(e) => {
+                  e.preventDefault();
+                  grantChainConnectorRole.writeAsync &&
+                    toast.promise(grantChainConnectorRole.writeAsync(true), {
+                      pending: `Granting chain connector role to token manager linker`,
+                      success: `Granted chain connector role to token manager linker`,
+                      error: `Failed to grant chain connector role to token manager linker`,
+                    });
+                }}
+              >
+                Assign Chain Connector Role
+              </button>
             ) : (
               <Link to="connect" className="btn btn-wide rounded-full text-sm">
                 Connect new chain
