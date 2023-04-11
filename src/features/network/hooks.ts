@@ -359,6 +359,8 @@ const marionette = {
   interface: new ethers.utils.Interface(m.abi),
 };
 
+// constants
+
 const EOA_TO_MULTISIG_MIN_GAS_LIMIT = 375000;
 const MNM_MIN_GAS_LIMIT = 3000000;
 const MULTISIG_ONLY_WALLET_FUNCTIONS = [
@@ -367,9 +369,11 @@ const MULTISIG_ONLY_WALLET_FUNCTIONS = [
   'replaceOwner',
   'changeRequirement',
 ] satisfies ExtractAbiFunctionNames<(typeof ABI)['MULTISIG_WALLET']>[];
-
 const MULTISIG_LOG_EXECUTION_FAILURE =
   '0x526441bb6c1aba3c9a4a6ca1d6545da9c2333c8c48343ef398eb858d72b79236';
+const MNM_GAS_BY_TYPE = {
+  'ima:bridge': 8000000,
+};
 
 const wrapWriteAsync = <
   TContractId extends ContractId,
@@ -553,6 +557,9 @@ export function useSContractWrite<
 
   // transaction initiated by EOA on multisig to marionette through to destination contract
 
+  const contractType = getSContractProp(id, 'type');
+  const mnmDefaultGasLimit = MNM_GAS_BY_TYPE[contractType] || MNM_MIN_GAS_LIMIT;
+
   const { config: mnmConfig } = usePrepareContractWrite({
     ...params,
     enabled:
@@ -567,7 +574,7 @@ export function useSContractWrite<
     overrides: {
       ...params.overrides,
       gasLimit: Math.max(
-        MNM_MIN_GAS_LIMIT,
+        mnmDefaultGasLimit,
         Number(params?.overrides?.gasLimit || 0),
       ),
     },

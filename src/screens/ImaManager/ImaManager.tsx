@@ -223,18 +223,11 @@ const SelectedPeerChainItem = ({
                 <button
                   onClick={() => {
                     connect?.writeAsync &&
-                      toast.promise(
-                        connect.writeAsync(true, {
-                          recklesslySetUnpreparedOverrides: {
-                            gasLimit: 8000000,
-                          },
-                        }),
-                        {
-                          pending: `Accepting request from ${name}`,
-                          success: `Request accepted from ${name}`,
-                          error: `Failed to accept request from ${name}`,
-                        },
-                      );
+                      toast.promise(connect.writeAsync(true), {
+                        pending: `Accepting request from ${name}`,
+                        success: `Request accepted from ${name}`,
+                        error: `Failed to accept request from ${name}`,
+                      });
                   }}
                   className="btn btn-outline m-auto w-2/3 rounded-full"
                   disabled={!connect.writeAsync}

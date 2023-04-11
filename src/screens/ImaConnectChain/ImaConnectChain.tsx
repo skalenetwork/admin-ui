@@ -29,18 +29,11 @@ export function ImaConnectChain() {
 
   const handleSubmit = useCallback(() => {
     chain?.connect?.writeAsync &&
-      toast.promise(
-        chain?.connect?.writeAsync(true, {
-          recklesslySetUnpreparedOverrides: {
-            gasLimit: 8000000,
-          },
-        }),
-        {
-          pending: `Connecting to chain ${name}`,
-          success: `Connected to chain ${name}`,
-          error: `Failed to connect to chain ${name}`,
-        },
-      );
+      toast.promise(chain?.connect?.writeAsync(true), {
+        pending: `Connecting to chain ${name}`,
+        success: `Connected to chain ${name}`,
+        error: `Failed to connect to chain ${name}`,
+      });
   }, [chain?.connect?.writeAsync]);
 
   return originChain?.network !== NETWORK.SKALE ? (
