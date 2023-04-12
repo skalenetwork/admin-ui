@@ -868,14 +868,12 @@ export function useRolesAccess<
   });
 
   return {
-    isLoading: allReads.reduce(
-      (acc, curr) => acc.isLoading || curr.isLoading,
-      1,
-    ),
-    isFetching: allReads.reduce(
-      (acc, curr) => acc.isFetching || curr.isFetching,
-      1,
-    ),
+    isLoading: allReads.reduce((acc, curr) => ({
+      isLoading: acc.isLoading || curr.isLoading,
+    }))?.isLoading,
+    isFetching: allReads.reduce((acc, curr) => ({
+      isFetching: acc.isFetching || curr.isFetching,
+    }))?.isFetching,
     data,
   };
 }

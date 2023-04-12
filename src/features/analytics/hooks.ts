@@ -49,9 +49,9 @@ export function useSkaleManagerStats() {
   });
 
   const exitsFromSchain = useSContractRead('MESSAGE_PROXY_MAINNET_ON_MAINNET', {
-    enabled: !!ETHEREUM_MAINNET_HASH,
+    enabled: !!originChainHash,
     name: 'getIncomingMessagesCounter',
-    args: [ETHEREUM_MAINNET_HASH],
+    args: [originChainHash],
     chainId: 1,
   });
 
@@ -59,6 +59,7 @@ export function useSkaleManagerStats() {
     enabled: !!ETHEREUM_MAINNET_HASH,
     name: 'getIncomingMessagesCounter',
     args: [ETHEREUM_MAINNET_HASH],
+    chainId: originChain?.id,
   });
 
   const targetConnectedChains = useSContractReads('TOKEN_MANAGER_LINKER', {
