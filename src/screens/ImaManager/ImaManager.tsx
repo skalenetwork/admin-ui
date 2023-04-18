@@ -490,11 +490,10 @@ export function ImaManager() {
             <h4 className="font-medium">Connected chains</h4>
             {!(
               accessRegistrarRole.data.allow.eoa ||
-              accessRegistrarRole.data.allow.mnm ||
-              hasChainConnectorRole.isLoading
-            ) ? (
+              accessRegistrarRole.data.allow.mnm
+            ) || hasChainConnectorRole.isLoading ? (
               <></>
-            ) : grantChainConnectorRole.writeAsync ? (
+            ) : !hasChainConnectorRole.data ? (
               <button
                 className="btn rounded-full"
                 onClick={(e) => {
@@ -506,6 +505,7 @@ export function ImaManager() {
                       error: `Failed to grant chain connector role to token manager linker`,
                     });
                 }}
+                disabled={!grantChainConnectorRole.writeAsync}
               >
                 Assign Chain Connector Role
               </button>
