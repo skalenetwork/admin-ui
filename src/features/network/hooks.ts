@@ -417,7 +417,6 @@ const wrapWriteAsync = <
       }
 
       if (
-        contractId === 'MULTISIG_WALLET' &&
         receipt.logs?.length &&
         receipt.logs.some(
           (log) =>
