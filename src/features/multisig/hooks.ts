@@ -222,15 +222,14 @@ export function useMultisig({
       },
     ],
   });
-  const [countTotalTrx, countPendingTrx, countExecutedTrx, countReqdConfirms] =
-    countReads.data;
+
   const counts = {
     ...countReads,
     data: {
-      countTotalTrx,
-      countPendingTrx,
-      countExecutedTrx,
-      countReqdConfirms,
+      countTotalTrx: countReads.data?.[0],
+      countPendingTrx: countReads.data?.[1],
+      countExecutedTrx: countReads.data?.[2],
+      countReqdConfirms: countReads.data?.[3],
     },
   };
 

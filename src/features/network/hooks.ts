@@ -440,7 +440,7 @@ const wrapWriteAsync = <
 };
 
 /**
- * Write to a network contract
+ * Write to a network contract, including pre-deployed multisig
  * @param id ContractId
  * @param param1
  * @returns
@@ -467,35 +467,44 @@ export function useSContractWrite<
     multisigAddress?: Address;
   },
 ) {
-  const account = useAccount();
+  ////
+  // prepare addresses and presets
 
+  const account = useAccount();
   const destContract = build.addressAbiPair(id) || {};
   const multisig = build.addressAbiPair('MULTISIG_WALLET');
-
-  // overrides for multisig selection
   if (id === 'MULTISIG_WALLET' && multisigAddress) {
     multisig.address = multisigAddress;
     destContract.address = multisigAddress;
   }
-
   const { address, abi } = destContract;
+
+  const contractType = getSContractProp(id, 'type');
+  const mnmDefaultGasLimit = MNM_GAS_BY_TYPE[contractType] || MNM_MIN_GAS_LIMIT;
+
+  ////
+  // selectively encode data for correct destination contract
 
   const { pendingTrxIds, counts, owners } = useMultisig({
     address: multisig.address,
   });
-  const isAccountMultisigOwner = owners.data?.includes(account.address);
   const requiredConfirmations = counts.data.countReqdConfirms;
 
-  const isMultisigOnlyWalletWrite =
+  const isAccountMultisigOwner = owners.data?.some(
+    (addr) => addr.toLowerCase() === account.address?.toLowerCase(),
+  );
+
+  const isMultisigAndSubmitOnly =
     id === 'MULTISIG_WALLET' && MULTISIG_ONLY_WALLET_FUNCTIONS.includes(name);
 
   const destMethodEncoded = useMemo(() => {
     if (
-      !(abi && name) &&
-      (id === 'MULTISIG_WALLET' ?? !isMultisigOnlyWalletWrite)
+      !(abi && name) ||
+      (id === 'MULTISIG_WALLET' ? !isMultisigAndSubmitOnly : false)
     )
       return;
     let destMethodEncoded;
+    pendingTrxIds;
     try {
       const iface = new ethers.utils.Interface(abi);
       destMethodEncoded = iface.encodeFunctionData(
@@ -504,7 +513,7 @@ export function useSContractWrite<
       ) as `0x${string}`;
     } catch (e) {}
     return destMethodEncoded;
-  }, [abi, params.args, name, isMultisigOnlyWalletWrite]);
+  }, [abi, params.args, name, isMultisigAndSubmitOnly]);
 
   const marionetteExecEncoded = useMemo(() => {
     if (!(address && destMethodEncoded) || id === 'MULTISIG_WALLET') return;
@@ -519,75 +528,9 @@ export function useSContractWrite<
     return marionetteExecEncoded;
   }, [destMethodEncoded, address]);
 
-  // transaction from EOA directly to destination contract
-
-  const modifyOnlyForMultisig = isMultisigOnlyWalletWrite
-    ? {
-        functionName: 'submitTransaction',
-        args: [address, params.value || 0, destMethodEncoded],
-      }
-    : {};
-
-  const { config: eoaConfig } = usePrepareContractWrite({
-    ...params,
-    enabled: !!(address && abi && name) && params.enabled !== false,
-    address: address as Address,
-    abi,
-    functionName: name,
-    ...modifyOnlyForMultisig,
-    overrides: {
-      ...params.overrides,
-      gasLimit:
-        id === 'MULTISIG_WALLET'
-          ? Math.max(
-              EOA_TO_MULTISIG_MIN_GAS_LIMIT,
-              Number(params?.overrides?.gasLimit || 0),
-            )
-          : params.overrides?.gasLimit,
-    },
-    onError: (err) => {
-      // log(
-      //   'check-write:eoa',
-      //   `${id}.${name}`,
-      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
-      // );
-    },
-  });
-
-  // transaction initiated by EOA on multisig to marionette through to destination contract
-
-  const contractType = getSContractProp(id, 'type');
-  const mnmDefaultGasLimit = MNM_GAS_BY_TYPE[contractType] || MNM_MIN_GAS_LIMIT;
-
-  const { config: mnmConfig } = usePrepareContractWrite({
-    ...params,
-    enabled:
-      !!(marionetteExecEncoded && isAccountMultisigOwner) &&
-      params.enabled !== false,
-    address: multisig.address,
-    abi: multisig.abi,
-    functionName: 'submitTransaction',
-    args: marionetteExecEncoded
-      ? [marionette.address, 0, marionetteExecEncoded]
-      : undefined,
-    overrides: {
-      ...params.overrides,
-      gasLimit: Math.max(
-        mnmDefaultGasLimit,
-        Number(params?.overrides?.gasLimit || 0),
-      ),
-    },
-    onError: (err) => {
-      // log(
-      //   'check-write:mnm-submit',
-      //   `${id}.${name}`,
-      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
-      // );
-      params.onError?.(err);
-    },
-  });
-
-  // from args: evaluate if transaction is duplicate of unconfirmed transaction
+  ////
+  // find if duplicate of existing transaction that is not yet executed
+  // (using tx arguments)
 
   const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
     address: multisig.address,
@@ -609,9 +552,15 @@ export function useSContractWrite<
       ).findIndex((trx) => {
         return (
           !!trx &&
-          !!marionetteExecEncoded &&
-          trx.destination.toLowerCase() === marionette.address.toLowerCase() &&
-          trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase()
+          (id === 'MULTISIG_WALLET'
+            ? !!destMethodEncoded &&
+              trx.destination.toLowerCase() ===
+                multisig.address.toLowerCase() &&
+              trx.data.toLowerCase() === destMethodEncoded.toLowerCase()
+            : !!marionetteExecEncoded &&
+              trx.destination.toLowerCase() ===
+                marionette.address.toLowerCase() &&
+              trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase())
         );
       });
   const existingTrxId: undefined | number =
@@ -621,26 +570,103 @@ export function useSContractWrite<
       ? existingTrxIndex
       : (pendingTrxIds.data[existingTrxIndex as number] as number);
 
-  const existingTrxConfirmCount = useSContractRead('MULTISIG_WALLET', {
+  const existingTrxConfirmers = useSContractRead('MULTISIG_WALLET', {
     enabled: !!(existingTrxId && existingTrxId >= 0),
     address: multisig.address,
-    name: 'getConfirmationCount',
+    name: 'getConfirmations',
     args:
       existingTrxId && existingTrxId >= 0
         ? [BigNumber.from(existingTrxId)]
         : undefined,
-    select: (data) => {
-      return data?.toNumber();
+  });
+
+  const ownerHasConfirmed: undefined | boolean =
+    existingTrxConfirmers.data &&
+    account.address &&
+    existingTrxConfirmers.data.some((addr: string) => {
+      return addr.toLowerCase() === account.address?.toLowerCase();
+    });
+
+  const existingTrxConfirmCount: undefined | number =
+    existingTrxConfirmers.data && existingTrxConfirmers.data.length;
+
+  const existingTrxIsConfirmed =
+    existingTrxConfirmCount &&
+    requiredConfirmations &&
+    existingTrxConfirmCount >= requiredConfirmations;
+
+  ///
+  // prepare correct action on multisig
+  // undefined = loading
+  // null = not authorized / not available
+
+  let mnmAction =
+    existingTrxId === undefined
+      ? undefined
+      : !isAccountMultisigOwner
+      ? null
+      : existingTrxId < 0
+      ? 'submit'
+      : ownerHasConfirmed === undefined || existingTrxIsConfirmed === undefined
+      ? undefined
+      : ownerHasConfirmed === false
+      ? 'confirm'
+      : existingTrxIsConfirmed === true
+      ? 'execute'
+      : null;
+
+  ////
+  // transaction initiated by EOA on multisig to marionette through to destination contract
+  // or on multisig contract directly in case of multisig self management
+
+  const { config: mnmConfig } = usePrepareContractWrite({
+    ...params,
+    enabled:
+      mnmAction === 'submit' &&
+      (!isMultisigAndSubmitOnly
+        ? !!marionetteExecEncoded
+        : !!destMethodEncoded) &&
+      params.enabled !== false,
+    address: multisig.address,
+    abi: multisig.abi,
+    functionName: 'submitTransaction',
+    args: marionetteExecEncoded
+      ? [marionette.address, 0, marionetteExecEncoded]
+      : isMultisigAndSubmitOnly
+      ? [address, params.value || 0, destMethodEncoded]
+      : undefined,
+    overrides: {
+      ...params.overrides,
+      gasLimit: Math.max(
+        mnmDefaultGasLimit,
+        Number(params?.overrides?.gasLimit || 0),
+      ),
+    },
+    onError: (err) => {
+      // log(
+      //   'check-write:mnm-submit',
+      //   `${id}.${name}`,
+      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      // );
+      params.onError?.(err);
     },
   });
 
-  // create a confirm writer if transaction is duplicate
+  ////
+  // create a confirm-or-execute writer if transaction is duplicate
+
+  const confirmFunction =
+    mnmAction === 'execute'
+      ? 'executeTransaction'
+      : mnmAction === 'confirm'
+      ? 'confirmTransaction'
+      : undefined;
 
   const { config: confirmConfig } = usePrepareContractWrite({
-    enabled: !!(existingTrxId && existingTrxId >= 0),
+    enabled: !!confirmFunction,
     address: multisig.address,
     abi: multisig.abi,
-    functionName: 'confirmTransaction',
+    functionName: confirmFunction,
     args:
       existingTrxId && existingTrxId >= 0
         ? [BigNumber.from(existingTrxId)]
@@ -661,14 +687,63 @@ export function useSContractWrite<
       params.onError?.(err);
     },
   });
+
+  const { config: eoaConfig } = usePrepareContractWrite({
+    ...params,
+    enabled:
+      !!(address && abi && name) &&
+      (id === 'MULTISIG_WALLET' ? !isMultisigAndSubmitOnly : true) &&
+      params.enabled !== false,
+    address: address as Address,
+    abi,
+    functionName: name,
+    overrides: {
+      ...params.overrides,
+      gasLimit:
+        id === 'MULTISIG_WALLET'
+          ? Math.max(
+              EOA_TO_MULTISIG_MIN_GAS_LIMIT,
+              Number(params?.overrides?.gasLimit || 0),
+            )
+          : params.overrides?.gasLimit,
+    },
+    onError: (err) => {
+      // log(
+      //   'check-write:eoa',
+      //   `${id}.${name}`,
+      //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
+      // );
+    },
+  });
+
+  ////
+  // setup writers to be exposed and handle resets
+
+  const _mnm = useContractWrite(mnmConfig);
+  const _mnmWait = useWaitForTransaction({
+    hash: _mnm.data?.hash,
+    onSettled: (data, err) => {
+      window.setTimeout(() => {
+        _mnm.reset();
+      }, 1000);
+    },
+    onSuccess: () => {
+      pendingTrxIds.refetch();
+      existingTrxConfirmers.refetch();
+    },
+  });
+
   const mnmConfirmTx = useContractWrite(confirmConfig);
   const mnmConfirmTxWait = useWaitForTransaction({
     hash: mnmConfirmTx.data?.hash,
-    onSuccess: () => {
-      existingTrxConfirmCount.refetch();
+    onSettled: (data, err) => {
       window.setTimeout(() => {
         mnmConfirmTx.reset();
       }, 1000);
+    },
+    onSuccess: () => {
+      pendingTrxIds.refetch();
+      existingTrxConfirmers.refetch();
     },
   });
 
@@ -681,31 +756,16 @@ export function useSContractWrite<
       }, 1000);
     },
   });
-  const _mnm = useContractWrite(mnmConfig);
-  const _mnmWait = useWaitForTransaction({
-    hash: _mnm.data?.hash,
-    onSettled: (data, err) => {
-      window.setTimeout(() => {
-        _mnm.reset();
-      }, 1000);
-    },
-  });
 
-  // expose redundant interface with sufficient states and finality data
-
-  const mnmAction = mnmConfirmTx.write ? 'confirm' : 'submit';
+  // extra metadata in case of mnm
   const mnmConfirms = {
     required: requiredConfirmations,
-    confirmed: existingTrxConfirmCount.data,
+    confirmed: existingTrxConfirmCount,
   };
-
-  // @later if needed include executed state
-  const mnmIsFinalized =
-    !!(mnmConfirms.confirmed && mnmConfirms.required) &&
-    mnmConfirms.confirmed >= mnmConfirms.required;
 
   const returnData = {
     eoa: {
+      action: 'eoa',
       isConfirmed: _eoaWait.isSuccess,
       isFailed: _eoaWait.isError,
       receipt: _eoaWait.data,
@@ -714,35 +774,30 @@ export function useSContractWrite<
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
     mnm:
-      id === 'MULTISIG_WALLET'
-        ? undefined
-        : mnmAction === 'confirm'
+      mnmAction === 'confirm' || mnmAction === 'execute'
         ? {
-            mnmAction: 'confirm',
+            action: mnmAction,
             mnmConfirms,
             isConfirmed: mnmConfirmTxWait.isSuccess,
             isFailed: mnmConfirmTxWait.isError,
             receipt: mnmConfirmTxWait.data,
-            isFinalized: mnmIsFinalized,
             ...mnmConfirmTx,
             writeAsync: wrapWriteAsync(id, mnmConfirmTx.writeAsync),
           }
-        : {
-            mnmAction: 'submit',
+        : mnmAction === 'submit'
+        ? {
+            action: mnmAction,
             mnmConfirms,
             isConfirmed: _mnmWait.isSuccess,
             isFailed: _mnmWait.isError,
             receipt: _mnmWait.data,
-            isFinalized: mnmIsFinalized,
             ..._mnm,
             writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
-          },
+          }
+        : undefined,
   };
 
-  const defaultWrite =
-    returnData.eoa.write || id === 'MULTISIG_WALLET'
-      ? returnData.eoa
-      : returnData.mnm;
+  const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;
 
   return {
     ...defaultWrite,

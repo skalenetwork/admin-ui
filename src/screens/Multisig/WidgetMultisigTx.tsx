@@ -23,87 +23,104 @@ import { Address, useAccount, useTransaction } from 'wagmi';
 
 const TxAction = ({
   id,
+  toAddress,
+  action,
   executed,
-  confirmTx,
-  revokeConfirmTx,
   hasConfirmed,
   remainingConfirms,
   onAction,
 }: {
   id: number;
+  toAddress: string;
+  action?: 'execute' | 'confirm' | 'revoke' | null;
   executed: boolean;
-  confirmTx: ReturnType<typeof useSContractWrite>;
   hasConfirmed: boolean;
-  revokeConfirmTx: ReturnType<typeof useSContractWrite>;
   remainingConfirms: number;
   onAction?: () => void;
 }) => {
   const isFinalSigner =
-    remainingConfirms === 1 && !!confirmTx?.write && !hasConfirmed;
+    action === 'execute' || (action === 'confirm' && remainingConfirms <= 1);
+
+  const actionTx = useSContractWrite('MULTISIG_WALLET', {
+    multisigAddress: toAddress,
+    enabled: !!action,
+    name:
+      action === 'revoke'
+        ? 'revokeConfirmation'
+        : action === 'confirm'
+        ? 'confirmTransaction'
+        : action === 'execute'
+        ? 'executeTransaction'
+        : '',
+    args: id ? [BigNumber.from(id)] : undefined,
+  });
+
+  const pendingNotif = {
+    execute: 'Executing',
+    revoke: 'Revoking confirmation of',
+    confirm: `Confirming ${isFinalSigner ? 'and executing' : ''}`,
+  };
+  const successNotif = {
+    execute: 'is executed',
+    revoke: 'has confirmation revoked',
+    confirm: `is confirmed ${isFinalSigner ? 'and executed' : ''}`,
+  };
+  const errorNotif = {
+    execute: 'execute',
+    revoke: 'revoke confirmation of',
+    confirm: `confirm ${isFinalSigner ? 'and execute' : ''}`,
+  };
+
   const handleSubmit = useCallback(async () => {
-    const action = hasConfirmed
-      ? revokeConfirmTx.writeAsync
-      : confirmTx.writeAsync;
-    if (!action) return;
+    if (!(action && actionTx.writeAsync)) return;
     toast.promise(
       async () => {
-        await action(true);
+        await actionTx.writeAsync?.(true);
         onAction?.();
       },
       {
-        pending: `${
-          hasConfirmed ? 'Revoking confirmation of' : 'Confirming'
-        } multisig transaction #${id}`,
-        success: `Multisig transaction #${id} ${
-          isFinalSigner
-            ? 'is executed'
-            : hasConfirmed
-            ? 'has confirmation revoked'
-            : 'is confirmed'
-        }`,
+        pending: `${pendingNotif[action] || ''} multisig transaction #${id}`,
+        success: `Multisig transaction #${id} ${successNotif[action] || ''}`,
         error: `Failed to ${
-          hasConfirmed ? 'revoke confirmation of' : 'confirm'
+          errorNotif[action] || ''
         } multisig transaction #${id}`,
       },
     );
-  }, [hasConfirmed, confirmTx.write, revokeConfirmTx.write]);
+  }, [action, actionTx.writeAsync, isFinalSigner]);
+
+  const actionTooltip = {
+    confirm: `Confirm ${isFinalSigner ? '& Execute' : ''}`,
+    revoke: 'Revoke Confirmation',
+    execute: 'Re-execute',
+  };
+
   return (
     <>
-      {!executed &&
-        !!(confirmTx.write || revokeConfirmTx.write) &&
-        (hasConfirmed === undefined ? (
-          <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
-        ) : hasConfirmed === false && !!confirmTx.write ? (
-          <button
-            className={tw(
-              'align-middle hover:scale-110 transition-all',
-              confirmTx.isLoading ? 'animate-bounce' : '',
-            )}
-            disabled={!confirmTx.write || confirmTx.isLoading}
-            onClick={handleSubmit}
-            title={isFinalSigner ? 'Confirm & Execute' : 'Confirm'}
-          >
-            {isFinalSigner ? (
-              <CheckCircledIcon className="align-middle text-[var(--green10)]" />
-            ) : (
-              <PlusCircledIcon className="align-middle text-[var(--green10)]" />
-            )}
-          </button>
-        ) : hasConfirmed === true && !!revokeConfirmTx.write ? (
-          <button
-            className={tw(
-              'align-middle hover:scale-110 transition-all',
-              revokeConfirmTx.isLoading ? 'animate-bounce' : '',
-            )}
-            disabled={!revokeConfirmTx.write || revokeConfirmTx.isLoading}
-            onClick={handleSubmit}
-            title="Revoke Confirmation"
-          >
+      {action === undefined ? (
+        <CircleIcon className="align-middle text-[var(--gray10)] animate-pulse" />
+      ) : !(action && actionTx.write) ? (
+        <></>
+      ) : (
+        <button
+          className={tw(
+            'align-middle hover:scale-110 transition-all',
+            actionTx.isLoading ? 'animate-bounce' : '',
+          )}
+          disabled={!actionTx.write || actionTx.isLoading}
+          onClick={handleSubmit}
+          title={actionTooltip[action]}
+        >
+          {isFinalSigner ? (
+            <CheckCircledIcon className="align-middle text-[var(--green10)]" />
+          ) : action === 'confirm' ? (
+            <PlusCircledIcon className="align-middle text-[var(--green10)]" />
+          ) : action === 'revoke' ? (
             <MinusCircledIcon className="align-middle text-[var(--red10)]" />
-          </button>
-        ) : (
-          <></>
-        ))}
+          ) : (
+            <></>
+          )}
+        </button>
+      )}
     </>
   );
 };
@@ -152,25 +169,32 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
 
   const countConfirmations = ownersThatConfirmed.data?.length;
 
+  const isConfirmed =
+    countConfirmations &&
+    reqdConfirmations &&
+    countConfirmations >= reqdConfirmations;
+
   const signerHasConfirmed =
     address &&
     ownersThatConfirmed?.data &&
-    ownersThatConfirmed.data.includes(address);
+    ownersThatConfirmed.data.some(
+      (addr) => address.toLowerCase() === addr.toLowerCase(),
+    );
 
   // ready up writers
 
-  const confirmTx = useSContractWrite('MULTISIG_WALLET', {
-    multisigAddress: walletAddress,
-    enabled: !!(id && executed === false),
-    name: 'confirmTransaction',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
-  const revokeConfirmTx = useSContractWrite('MULTISIG_WALLET', {
-    multisigAddress: walletAddress,
-    enabled: !!(id && executed === false),
-    name: 'revokeConfirmation',
-    args: id ? [BigNumber.from(id)] : undefined,
-  });
+  let action =
+    (id && executed) === undefined
+      ? undefined
+      : executed === true
+      ? null
+      : signerHasConfirmed === false
+      ? 'confirm'
+      : isConfirmed === undefined
+      ? undefined
+      : isConfirmed === true
+      ? 'execute'
+      : 'revoke';
 
   // evaluate time elapsed
 
@@ -318,9 +342,9 @@ export const WidgetMultisigTx = React.memo(function TxWidget({
               {executed === false && isOwner.data && (
                 <TxAction
                   id={id}
+                  toAddress={walletAddress}
+                  action={action}
                   executed={executed}
-                  confirmTx={confirmTx}
-                  revokeConfirmTx={revokeConfirmTx}
                   hasConfirmed={signerHasConfirmed}
                   remainingConfirms={remainingConfirmations}
                   onAction={() => {
