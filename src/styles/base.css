@@ -51,7 +51,7 @@
 
   button[disabled]:not(.loading),
   .btn[disabled]:not(.loading) {
-    @apply opacity-50  grayscale;
+    @apply opacity-50 grayscale;
   }
 
   button[disabled].loading,
@@ -104,7 +104,7 @@
     @apply border-[var(--red10)];
   }
 
-  input[disabled],
+  input[disabled]:not([type='submit']),
   select[disabled],
   textarea[disabled] {
     @apply bg-[var(--gray2)];

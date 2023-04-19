@@ -365,7 +365,7 @@ export function FlowAddNewTransaction({
               type="submit"
               className={`${className}`}
               value="Next"
-              disabled={!form[0].formState.isValid}
+              disabled={!(form[0].formState.isValid && writeAsync)}
             />
           ),
           content: (
@@ -617,7 +617,10 @@ export function FlowAddNewTransaction({
                 </Collapsible.Root>
                 <p className="center py-2 text-sm text-center text-[var(--primary)]">
                   <InfoCircledIcon /> You are signing on MultiSigWallet
-                  {submitTransaction.mnm && ' through Marionette'}.
+                  {submitTransaction.mnm &&
+                    contractIdForWrite !== 'MULTISIG_WALLET' &&
+                    ' through Marionette'}
+                  .
                 </p>
               </div>
             </div>
