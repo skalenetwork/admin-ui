@@ -378,7 +378,7 @@ const MNM_GAS_BY_TYPE = {
 const wrapWriteAsync = <
   TContractId extends ContractId,
   TWriteAsync extends NonNullable<
-    ReturnType<typeof useContractWrite>['writeAsync']
+    ReturnType<typeof usePrepareContractWrite>['writeAsync']
   >,
   TReceipt = Awaited<ReturnType<Awaited<ReturnType<TWriteAsync>>['wait']>>,
 >(
@@ -453,7 +453,7 @@ export function useSContractWrite<
     | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
     | { type: 'function'; constant: false }
   >['name'],
-  TBaseParams = Parameters<
+  TBaseParams extends Parameters<
     typeof usePrepareContractWrite<TAbi, TFunctionName>
   >[0],
 >(
@@ -757,10 +757,21 @@ export function useSContractWrite<
     },
   });
 
+  const countRemaining =
+    requiredConfirmations === undefined || existingTrxConfirmCount === undefined
+      ? undefined
+      : Math.max(
+          0,
+          (requiredConfirmations as number) - existingTrxConfirmCount,
+        );
+
   // extra metadata in case of mnm
-  const mnmConfirms = {
-    required: requiredConfirmations,
-    confirmed: existingTrxConfirmCount,
+  const multisigData = {
+    trxId: existingTrxId && existingTrxId >= 0 ? existingTrxId : undefined,
+    countRequired: requiredConfirmations as number,
+    countConfirmed: existingTrxConfirmCount,
+    countRemaining,
+    signerHasConfirmed: ownerHasConfirmed,
   };
 
   const returnData = {
@@ -777,7 +788,7 @@ export function useSContractWrite<
       mnmAction === 'confirm' || mnmAction === 'execute'
         ? {
             action: mnmAction,
-            mnmConfirms,
+            multisigData,
             isConfirmed: mnmConfirmTxWait.isSuccess,
             isFailed: mnmConfirmTxWait.isError,
             receipt: mnmConfirmTxWait.data,
@@ -787,14 +798,17 @@ export function useSContractWrite<
         : mnmAction === 'submit'
         ? {
             action: mnmAction,
-            mnmConfirms,
+            multisigData,
             isConfirmed: _mnmWait.isSuccess,
             isFailed: _mnmWait.isError,
             receipt: _mnmWait.data,
             ..._mnm,
             writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
           }
-        : undefined,
+        : {
+            action: 'none',
+            multisigData,
+          },
   };
 
   const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;

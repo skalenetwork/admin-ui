@@ -202,14 +202,16 @@ const { eoa, mnm, ...rest } = writer;
 
 // exposing default outputs of useContractWrite from wagmi and some extras
 
-const { mnmAction, mnmConfirms, receipt, isConfirmed, isFailed } = rest;
+const { action, multisigData, receipt, isConfirmed, isFailed } = rest;
 
-const isUsingMultisig = mnmAction;
-const isUsingMultisigConfirm = mnmAction === 'confirm';
-const isUsingMultisigSubmit = mnmAction === 'submit';
+const isUsingExternallyOwnedAccount = action === 'eoa';
 
-const countMultisigConfirmations = mnmConfirms?.confirmed;
-const countMultisigRequiredConfirmations = mnmConfirms?.required;
+const isUsingMultisigConfirm = action === 'confirm';
+const isUsingMultisigExecute = action === 'execute';
+const isUsingMultisigSubmit = action === 'submit';
+
+const countMultisigConfirmations = multisigData?.countConfirmed;
+const countMultisigRequiredConfirmations = multisigData?.countRequired;
 ```
 
 - **Guard** UI actions from unready writer

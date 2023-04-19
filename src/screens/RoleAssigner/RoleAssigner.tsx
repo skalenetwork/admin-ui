@@ -74,14 +74,14 @@ export function RoleAssigner() {
   useEffect(() => {
     !notAllowed && form.setValue('role', roles[0]);
     form.trigger('role');
-  }, [contractAddress, notAllowed]);
+  }, [contractAddress, notAllowed, roles[0]]);
 
   const roleDescription = useMemo(() => {
     const foundRole = rolesMetadata.find((item) => item.name === role);
     return foundRole ? foundRole.description : '';
   }, [role, contractAddress]);
 
-  const { writeAsync } = useSContractWrite(selectedContractId, {
+  const grantRole = useSContractWrite(selectedContractId, {
     enabled: !!(roleHash && assigneeAddress),
     name: 'grantRole',
     args: [roleHash, assigneeAddress],
@@ -111,7 +111,7 @@ export function RoleAssigner() {
         <FormProvider {...form}>
           <form
             onSubmit={form.handleSubmit((data) => {
-              writeAsync?.();
+              grantRole.writeAsync?.();
             })}
           >
             <div className="grid grid-cols-2">
@@ -217,7 +217,7 @@ export function RoleAssigner() {
             <button
               type="submit"
               className="btn mt-4"
-              disabled={!form.formState.isValid || !writeAsync}
+              disabled={!form.formState.isValid || !grantRole.writeAsync}
             >
               Assign Role
             </button>

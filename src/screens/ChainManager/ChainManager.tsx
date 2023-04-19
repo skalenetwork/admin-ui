@@ -35,8 +35,7 @@ const FormattedStatus = ({
     | 'no-auth'
     | 'pending'
     | 'executing'
-    | [true, string]
-    | [false, string];
+    | [boolean | 1, string];
 }) => {
   return status === 'loading' ? (
     <span className="ml-6 text-sm text-[var(--gray11)]">
@@ -58,34 +57,12 @@ const FormattedStatus = ({
     <span className="ml-6 text-sm text-[var(--red10)]">
       {status[1] || 'Enabled'}
     </span>
+  ) : status[0] === 1 ? (
+    <span className="ml-6 text-sm text-[var(--yellow11)]">
+      {status[1] || '-'}
+    </span>
   ) : (
     <></>
-  );
-};
-
-/**
- * Contract flag status
- * @param param0
- * @returns
- * @deprecated
- */
-const FlagStatus = ({
-  connected,
-  isEnabled,
-  isLoading,
-}: {
-  connected: boolean;
-  isEnabled: boolean | undefined;
-  isLoading: boolean;
-}) => {
-  return !connected ? (
-    <span className="ml-6 text-sm text-[var(--gray8)]">Not Supported</span>
-  ) : isLoading ? (
-    <span className="ml-6 text-sm text-[var(--yellow10)]">Pending Change</span>
-  ) : isEnabled ? (
-    <span className="ml-6 text-sm text-[var(--green10)]">Enabled</span>
-  ) : (
-    <span className="ml-6 text-sm text-[var(--red10)]">Disabled</span>
   );
 };
 
@@ -100,14 +77,19 @@ export const WidgetConfigFcd = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected } = useConfigController();
-  const { toggle, writeAsync, isEnabled, isLoading, refetch } = useFcd();
+  const fcd = useFcd();
   const status = !connected
     ? 'disabled'
-    : isEnabled === undefined
+    : fcd.isEnabled === undefined
     ? 'loading'
-    : isLoading
+    : fcd.isLoading
     ? 'pending'
-    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
+    : fcd.action === 'none'
+    ? [1, 'Awaiting Approvals']
+    : ([fcd.isEnabled, !fcd.isEnabled ? 'Disabled' : 'Enabled'] as [
+        boolean,
+        string,
+      ]);
 
   return (
     <Card
@@ -131,20 +113,20 @@ export const WidgetConfigFcd = ({
             open={alertKey === id}
             onOpenChange={toggleAlert(id)}
             trigger={
-              <button className="btn btn-wide w-5/6" disabled={!writeAsync}>
-                {isEnabled ? 'Disable' : 'Enable'} FCD
+              <button className="btn btn-wide w-5/6" disabled={!fcd.writeAsync}>
+                {fcd.isEnabled ? 'Disable' : 'Enable'} FCD
               </button>
             }
             title={`${
-              isEnabled ? 'Disable' : 'Enable'
+              fcd.isEnabled ? 'Disable' : 'Enable'
             } Free Contract Deployment?`}
             description="Please confirm this action"
             onAction={async () => {
-              writeAsync &&
+              fcd.writeAsync &&
                 toast.promise(
                   async () => {
-                    await writeAsync?.(true);
-                    return refetch();
+                    await fcd.writeAsync?.(true);
+                    return fcd.refetch();
                   },
                   {
                     pending: 'Toggling FCD',
@@ -173,14 +155,19 @@ export const WidgetConfigMtm = ({
   toggleAlert,
 }: WidgetWithAlertProps) => {
   const { connected, flags } = useConfigController();
-  const { writeAsync, isEnabled, isLoading, refetch } = useMtm();
+  const mtm = useMtm();
   const status = !connected
     ? 'disabled'
-    : isEnabled === undefined
+    : mtm.isEnabled === undefined
     ? 'loading'
-    : isLoading
+    : mtm.isLoading
     ? 'pending'
-    : ([isEnabled, !isEnabled ? 'Disabled' : 'Enabled'] as [boolean, string]);
+    : mtm.action === 'none'
+    ? [1, 'Awaiting Approvals']
+    : ([mtm.isEnabled, !mtm.isEnabled ? 'Disabled' : 'Enabled'] as [
+        boolean,
+        string,
+      ]);
   return (
     <Card
       full
@@ -203,20 +190,23 @@ export const WidgetConfigMtm = ({
               open={alertKey === id}
               onOpenChange={toggleAlert(id)}
               trigger={
-                <button className="btn btn-wide w-5/6" disabled={!writeAsync}>
-                  {isEnabled ? 'Disable' : 'Enable'} MTM
+                <button
+                  className="btn btn-wide w-5/6"
+                  disabled={!mtm.writeAsync}
+                >
+                  {mtm.isEnabled ? 'Disable' : 'Enable'} MTM
                 </button>
               }
               title={`${
-                isEnabled ? 'Disable' : 'Enable'
+                mtm.isEnabled ? 'Disable' : 'Enable'
               } Multi-transaction mode?`}
               description="Please confirm this action"
               onAction={async () => {
-                writeAsync &&
+                mtm.writeAsync &&
                   toast.promise(
                     async () => {
-                      await writeAsync?.(true);
-                      return refetch();
+                      await mtm.writeAsync?.(true);
+                      return mtm.refetch();
                     },
                     {
                       pending: 'Toggling MTM',
