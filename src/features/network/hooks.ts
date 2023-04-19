@@ -813,10 +813,15 @@ export function useSContractWrite<
 
   const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;
 
-  return {
-    ...defaultWrite,
+  const finalReturnData = {
     ...returnData,
+    ...defaultWrite,
   };
+
+  return finalReturnData as typeof returnData &
+    (typeof returnData)['eoa'] & (typeof returnData)['mnm'] & {
+      writeAsync: ReturnType<typeof wrapWriteAsync> | undefined;
+    };
 }
 
 /**

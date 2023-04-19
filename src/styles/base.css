@@ -49,14 +49,21 @@
     @apply cursor-default transition-all;
   }
 
-  button[disabled]:not(.loading),
-  .btn[disabled]:not(.loading) {
+  button[disabled]:not(.loading):not(.pending),
+  .btn[disabled]:not(.loading):not(.pending) {
     @apply opacity-50 grayscale;
   }
 
   button[disabled].loading,
   .btn[disabled].loading {
     @apply relative text-opacity-50 opacity-90;
+  }
+
+  button[disabled].pending,
+  .btn[disabled].pending {
+    @apply relative cursor-progress;
+    background-color: rgba(148, 104, 0, 0.8);
+    text-shadow: 1px 1px var(--blackA5);
   }
 
   button[disabled].loading:before,

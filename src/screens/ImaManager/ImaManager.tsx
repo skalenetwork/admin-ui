@@ -3,6 +3,7 @@ import Dialog from '@/components/Dialog/Dialog';
 import { BridgeIcon } from '@/components/Icons/Icons';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
+import { SButton } from '@/elements/SButton/SButton';
 import {
   useChainConnect,
   useHistory,
@@ -494,21 +495,20 @@ export function ImaManager() {
             ) || hasChainConnectorRole.isLoading ? (
               <></>
             ) : !hasChainConnectorRole.data ? (
-              <button
+              <SButton
                 className="btn rounded-full"
+                writer={grantChainConnectorRole}
                 onClick={(e) => {
                   e.preventDefault();
-                  grantChainConnectorRole.writeAsync &&
-                    toast.promise(grantChainConnectorRole.writeAsync(true), {
-                      pending: `Granting chain connector role to token manager linker`,
-                      success: `Granted chain connector role to token manager linker`,
-                      error: `Failed to grant chain connector role to token manager linker`,
-                    });
                 }}
-                disabled={!grantChainConnectorRole.writeAsync}
+                toast={{
+                  pending: `Granting chain connector role to token manager linker`,
+                  success: `Granted chain connector role to token manager linker`,
+                  error: `Failed to grant chain connector role to token manager linker`,
+                }}
               >
                 Assign Chain Connector Role
-              </button>
+              </SButton>
             ) : (
               <Link to="connect" className="btn btn-wide rounded-full text-sm">
                 Connect new chain

@@ -10,6 +10,10 @@ interface Props {
   trigger: React.ReactNode;
   title: string | React.ReactNode;
   description: string | React.ReactNode;
+  actionElement: (props: {
+    className?: string;
+    onClick: () => {};
+  }) => JSX.Element;
   onAction?: () => Promise<{ status: string; message?: string }>;
 }
 
@@ -19,6 +23,7 @@ export default function AlertDialog({
   trigger,
   title,
   description,
+  actionElement,
   onAction,
 }: Props) {
   const handleAction = useCallback(() => {
@@ -87,9 +92,10 @@ export default function AlertDialog({
                 </div>
               </AlertDialogPrimitive.Cancel>
               <div className="mt-4 flex justify-end space-x-2 w-full">
-                <button className="btn w-1/2" onClick={handleAction}>
-                  Yes
-                </button>
+                {actionElement({
+                  className: 'btn w-1/2',
+                  onClick: handleAction,
+                })}
                 <AlertDialogPrimitive.Cancel
                   className={'btn btn-outline w-1/2'}
                 >

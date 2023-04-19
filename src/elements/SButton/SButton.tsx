@@ -1,26 +1,60 @@
+import { PeopleIcon } from '@/components/Icons/Icons';
 import { useSContractWrite } from '@/features/network/hooks';
-import { PropsWithChildren } from 'react';
+import { ButtonHTMLAttributes, PropsWithChildren } from 'react';
+import { toast as toastify } from 'react-toastify';
 import { tw } from 'twind';
 
-type Props = {
-  className: string;
-  disabled?: boolean;
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   writer: ReturnType<typeof useSContractWrite>;
+  toast?: Parameters<typeof toastify.promise>[1];
+  onToast?: (promise: Promise<unknown>) => any;
 } & PropsWithChildren;
 
-export default function SButton({
-  className,
-  disabled,
+export function SButton({
   children,
+  className,
   writer,
+  toast,
+  onToast,
+  disabled,
+  title,
+  onClick,
+  ...rest
 }: Props) {
-  const _disabled = !writer.write && disabled;
+  const noAction = writer.action === 'none';
+  const _disabled = !writer.writeAsync || writer.isLoading || noAction;
+  const _title = noAction && writer.multisigData.trxId;
   return (
     <button
-      className={tw(className, writer.isLoading ? 'loading' : '')}
-      disabled={_disabled}
+      className={tw(
+        className,
+        writer.isLoading ? 'loading' : noAction ? 'pending' : '',
+      )}
+      disabled={_disabled || disabled}
+      onClick={async (e) => {
+        onClick && (await onClick(e));
+        const promise =
+          toast &&
+          writer.writeAsync &&
+          toastify.promise(writer.writeAsync(true), toast);
+        promise && onToast?.(promise);
+      }}
+      title={`${title || ''} ${_title ? '- Trx#' + _title : ''}`}
+      {...rest}
     >
-      {children}
+      {children}{' '}
+      {noAction ? (
+        <>
+          &emsp;
+          <PeopleIcon width="18" />{' '}
+          <span className="font-mono text-sm">
+            {writer.multisigData.countConfirmed}/
+            {writer.multisigData.countRequired}
+          </span>
+        </>
+      ) : (
+        ''
+      )}
     </button>
   );
 }

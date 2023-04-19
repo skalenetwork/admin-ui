@@ -9,6 +9,7 @@ import FileStorageReserve from './FileStorageReserve';
 import Hoverover from '@/components/Hoverover/Hoverover';
 import { ManagerIcon } from '@/components/Icons/Icons';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
+import { SButton } from '@/elements/SButton/SButton';
 import { useChainMetadata } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { useStorageSpace } from '@/features/storage/hooks';
@@ -16,7 +17,6 @@ import NotSupported from '@/screens/NotSupported';
 import { MinusCircledIcon } from '@radix-ui/react-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useNetwork } from 'wagmi';
 import type { WidgetWithAlertProps } from '../types';
 
@@ -35,7 +35,7 @@ const FormattedStatus = ({
     | 'no-auth'
     | 'pending'
     | 'executing'
-    | [boolean | 1, string];
+    | [boolean, string, undefined | number];
 }) => {
   return status === 'loading' ? (
     <span className="ml-6 text-sm text-[var(--gray11)]">
@@ -50,17 +50,19 @@ const FormattedStatus = ({
       Executing Change
     </span>
   ) : status[0] === true ? (
-    <span className="ml-6 text-sm text-[var(--green10)]">
-      {status[1] || 'Disabled'}
-    </span>
+    <div className="ml-6 text-sm text-[var(--green10)] inline-block">
+      {status[1] || 'Disabled'}{' '}
+      {status[2] === 1 && (
+        <span className="align-top inline-block mx-1 w-2 h-2 bg-[var(--yellow11)] opacity-75 rounded-md"></span>
+      )}
+    </div>
   ) : status[0] === false ? (
-    <span className="ml-6 text-sm text-[var(--red10)]">
-      {status[1] || 'Enabled'}
-    </span>
-  ) : status[0] === 1 ? (
-    <span className="ml-6 text-sm text-[var(--yellow11)]">
-      {status[1] || '-'}
-    </span>
+    <div className="ml-6 text-sm text-[var(--red10)] inline-block">
+      {status[1] || 'Enabled'}{' '}
+      {status[2] === 1 && (
+        <span className="align-top inline-block mx-1 w-2 h-2 bg-[var(--yellow11)] opacity-75 rounded-md"></span>
+      )}
+    </div>
   ) : (
     <></>
   );
@@ -84,12 +86,11 @@ export const WidgetConfigFcd = ({
     ? 'loading'
     : fcd.isLoading
     ? 'pending'
-    : fcd.action === 'none'
-    ? [1, 'Awaiting Approvals']
-    : ([fcd.isEnabled, !fcd.isEnabled ? 'Disabled' : 'Enabled'] as [
-        boolean,
-        string,
-      ]);
+    : ([
+        fcd.isEnabled,
+        !fcd.isEnabled ? 'Disabled' : 'Enabled',
+        fcd.action === 'none' && 1,
+      ] as [boolean, string, undefined | number]);
 
   return (
     <Card
@@ -113,27 +114,34 @@ export const WidgetConfigFcd = ({
             open={alertKey === id}
             onOpenChange={toggleAlert(id)}
             trigger={
-              <button className="btn btn-wide w-5/6" disabled={!fcd.writeAsync}>
+              <SButton className="btn btn-wide w-5/6" writer={fcd}>
                 {fcd.isEnabled ? 'Disable' : 'Enable'} FCD
-              </button>
+              </SButton>
             }
+            actionElement={({ className, onClick }) => (
+              <SButton
+                className={className}
+                writer={fcd}
+                onClick={onClick}
+                toast={{
+                  pending: 'Toggling FCD',
+                  success: 'FCD status changed',
+                  error: 'Failed to change FCD ',
+                }}
+                onToast={(promise) => {
+                  promise.then((data) => {
+                    fcd.refetch();
+                  });
+                }}
+              >
+                Yes
+              </SButton>
+            )}
             title={`${
               fcd.isEnabled ? 'Disable' : 'Enable'
             } Free Contract Deployment?`}
             description="Please confirm this action"
             onAction={async () => {
-              fcd.writeAsync &&
-                toast.promise(
-                  async () => {
-                    await fcd.writeAsync?.(true);
-                    return fcd.refetch();
-                  },
-                  {
-                    pending: 'Toggling FCD',
-                    success: 'FCD status changed',
-                    error: 'Failed to change FCD ',
-                  },
-                );
               return {
                 status: 'success',
               };
@@ -162,12 +170,11 @@ export const WidgetConfigMtm = ({
     ? 'loading'
     : mtm.isLoading
     ? 'pending'
-    : mtm.action === 'none'
-    ? [1, 'Awaiting Approvals']
-    : ([mtm.isEnabled, !mtm.isEnabled ? 'Disabled' : 'Enabled'] as [
-        boolean,
-        string,
-      ]);
+    : ([
+        mtm.isEnabled,
+        !mtm.isEnabled ? 'Disabled' : 'Enabled',
+        mtm.action === 'none' && 1,
+      ] as [boolean, string, undefined | number]);
   return (
     <Card
       full
@@ -190,30 +197,34 @@ export const WidgetConfigMtm = ({
               open={alertKey === id}
               onOpenChange={toggleAlert(id)}
               trigger={
-                <button
-                  className="btn btn-wide w-5/6"
-                  disabled={!mtm.writeAsync}
-                >
+                <SButton className="btn btn-wide w-5/6" writer={mtm}>
                   {mtm.isEnabled ? 'Disable' : 'Enable'} MTM
-                </button>
+                </SButton>
               }
+              actionElement={({ className, onClick }) => (
+                <SButton
+                  className={className}
+                  onClick={onClick}
+                  writer={mtm}
+                  toast={{
+                    pending: 'Toggling MTM',
+                    success: 'MTM status changed',
+                    error: 'Failed to change MTM',
+                  }}
+                  onToast={(promise) => {
+                    promise.then((data) => {
+                      mtm.refetch();
+                    });
+                  }}
+                >
+                  Yes
+                </SButton>
+              )}
               title={`${
                 mtm.isEnabled ? 'Disable' : 'Enable'
               } Multi-transaction mode?`}
               description="Please confirm this action"
               onAction={async () => {
-                mtm.writeAsync &&
-                  toast.promise(
-                    async () => {
-                      await mtm.writeAsync?.(true);
-                      return mtm.refetch();
-                    },
-                    {
-                      pending: 'Toggling MTM',
-                      success: 'MTM status changed',
-                      error: 'Failed to change MTM',
-                    },
-                  );
                 return {
                   status: 'success',
                 };
