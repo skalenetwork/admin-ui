@@ -600,20 +600,19 @@ export function useSContractWrite<
   // undefined = loading
   // null = not authorized / not available
 
-  let mnmAction =
-    existingTrxId === undefined
-      ? undefined
-      : !isAccountMultisigOwner
-      ? null
-      : existingTrxId < 0
-      ? 'submit'
-      : ownerHasConfirmed === undefined || existingTrxIsConfirmed === undefined
-      ? undefined
-      : ownerHasConfirmed === false
-      ? 'confirm'
-      : existingTrxIsConfirmed === true
-      ? 'execute'
-      : null;
+  let mnmAction = !isAccountMultisigOwner
+    ? null
+    : existingTrxId === undefined
+    ? undefined
+    : existingTrxId < 0
+    ? 'submit'
+    : ownerHasConfirmed === undefined || existingTrxIsConfirmed === undefined
+    ? undefined
+    : ownerHasConfirmed === false
+    ? 'confirm'
+    : existingTrxIsConfirmed === true
+    ? 'execute'
+    : undefined;
 
   ////
   // transaction initiated by EOA on multisig to marionette through to destination contract
@@ -786,7 +785,11 @@ export function useSContractWrite<
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
     mnm:
-      mnmAction === 'confirm' || mnmAction === 'execute'
+      mnmAction === null
+        ? {
+            action: null,
+          }
+        : mnmAction === 'confirm' || mnmAction === 'execute'
         ? {
             action: mnmAction,
             multisigData,
