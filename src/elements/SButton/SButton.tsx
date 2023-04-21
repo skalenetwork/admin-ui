@@ -30,22 +30,26 @@ export function SButton({
       ? 'preparing'
       : writer.isLoading
       ? 'loading'
+      : writer.isSuccess
+      ? 'success'
+      : writer.isError
+      ? 'error'
       : writer.action === 'none'
       ? 'pending'
       : '';
   const noAction = midStatus === 'pending';
   const _disabled = !writer.writeAsync || !!midStatus;
+  const textmoji =
+    writer.multisigData?.signerHasConfirmed === false
+      ? writer.multisigData?.countRemaining === 1
+        ? '▶️'
+        : '⊕'
+      : writer.multisigData?.countRemaining === 0
+      ? '▶️'
+      : '⏳';
   const _title =
     writer.multisigData?.trxId &&
-    `${
-      writer.multisigData?.signerHasConfirmed === false
-        ? writer.multisigData?.countRemaining === 1
-          ? '▶️'
-          : '⊕'
-        : writer.multisigData?.countRemaining === 0
-        ? '▶️'
-        : '⏳'
-    } msig tx#${writer.multisigData?.trxId}`;
+    `${textmoji} msig tx#${writer.multisigData?.trxId}`;
   return (
     <button
       className={tw(className, midStatus)}

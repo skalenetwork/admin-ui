@@ -49,14 +49,18 @@
     @apply cursor-default transition-all;
   }
 
-  button[disabled]:not(.loading):not(.pending),
-  .btn[disabled]:not(.loading):not(.pending) {
+  button[disabled]:not(.loading):not(.pending):not(.success):not(.error),
+  .btn[disabled]:not(.loading):not(.pending):not(.success):not(.error) {
     @apply opacity-50 grayscale;
   }
 
   button[disabled].loading,
-  .btn[disabled].loading {
-    @apply relative text-opacity-50 opacity-90;
+  .btn[disabled].loading,
+  button[disabled].success,
+  .btn[disabled].success,
+  button[disabled].error,
+  .btn[disabled].error {
+    @apply relative text-opacity-75 opacity-90;
   }
 
   button[disabled].pending,
@@ -70,6 +74,18 @@
   .btn[disabled].loading:before {
     content: '';
     @apply absolute -top-1 -right-1 z-50 h-3 w-3 animate-bounce rounded-full bg-[var(--yellow10)];
+  }
+
+  button[disabled].success:before,
+  .btn[disabled].success:before {
+    content: '';
+    @apply absolute -top-1 -right-1 z-50 h-3 w-3 rounded-full bg-[var(--green10)];
+  }
+
+  button[disabled].error:before,
+  .btn[disabled].error:before {
+    content: '';
+    @apply absolute -top-1 -right-1 z-50 h-3 w-3 rounded-full bg-[var(--red10)];
   }
 
   .btn.negative {

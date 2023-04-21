@@ -708,6 +708,7 @@ export function useSContractWrite<
           : params.overrides?.gasLimit,
     },
     onError: (err) => {
+      params.onError?.(err);
       // log(
       //   'check-write:eoa',
       //   `${id}.${name}`,
