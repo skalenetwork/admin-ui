@@ -21,6 +21,7 @@ import {
   CheckCircledIcon,
   ExclamationTriangleIcon,
 } from '@radix-ui/react-icons';
+import { getContract } from '@wagmi/core';
 import {
   Address,
   useAccount,
@@ -92,6 +93,35 @@ const SubmitButtonPair = ({
 
 type Token = { address: string; name: string };
 
+const supportsInterfaceAbi = [
+  {
+    inputs: [],
+    name: 'name',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes4',
+        name: 'interfaceId',
+        type: 'bytes4',
+      },
+    ],
+    name: 'supportsInterface',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
 export function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
@@ -117,7 +147,7 @@ export function ImaMapToken() {
   const handleOrigin = useSwitchNetwork({ chainId: originChain?.id });
   const handleTarget = useSwitchNetwork({ chainId: targetChain?.id });
 
-  const [originTokens] = useExplorer(
+  const [rawOriginTokens] = useExplorer(
     [
       {
         module: 'contract',
@@ -156,32 +186,90 @@ export function ImaMapToken() {
     network: originChain?.network,
   });
 
-  const originTokensFiltered: Token[] =
-    originTokens.isSuccess && originTokens?.data?.result
-      ? originTokens.data.result
-          .filter((c) => {
-            const matchable = liteEncodeAbiFunctions(JSON.parse(c['ABI']));
-            const abiMatches = wildcardLiteEncodedAbis.some((wildcard) => {
-              const foundInWildcard = matchable.filter((func) =>
-                wildcard.includes(func),
-              ).length;
-              const ratio = foundInWildcard / wildcard.length;
-              return ratio > 0.9;
-            });
-            return (
-              !abiMatches &&
-              !wildcardAddresses.includes(c.Address.toLowerCase())
-            );
-          })
-          .map((c: { Address: string; ContractName: string }) => ({
+  const originChainProvider = useProvider({
+    chainId: originChain?.id,
+  });
+
+  const standardInterfaceId =
+    standard === 'ERC721' || standard === 'ERC721_WITH_METADATA'
+      ? '0x80ac58cd'
+      : standard === 'ERC1155'
+      ? '0xd9b67a26'
+      : standard === 'ERC20'
+      ? '0x36372b07'
+      : undefined;
+
+  const originTokens = useQueries({
+    queries: (rawOriginTokens?.data?.result || []).map((c) => ({
+      enabled: !!originChain?.id,
+      queryKey: ['custom', originChain?.id, 'contractlistItemExt', c.Address],
+      queryFn: async () => {
+        const abi = JSON.parse(c['ABI']);
+        const matchable = liteEncodeAbiFunctions(abi);
+        const abiMatches = wildcardLiteEncodedAbis.some((wildcard) => {
+          const foundInWildcard = matchable.filter((func) =>
+            wildcard.includes(func),
+          ).length;
+          const ratio = foundInWildcard / wildcard.length;
+          return ratio > 0.9;
+        });
+        const isPredeployed =
+          abiMatches ||
+          wildcardAddresses.some(
+            (a) => a.toLowerCase() === c.Address.toLowerCase(),
+          );
+
+        const fetchIsClone = tokenManager.contract?.addedClones(c.Address);
+        const contract = getContract({
+          address: c.Address,
+          abi: supportsInterfaceAbi,
+          signerOrProvider: originChainProvider,
+        });
+        const fetchIsStandard = !standardInterfaceId
+          ? true
+          : isPredeployed
+          ? false
+          : contract.supportsInterface(standardInterfaceId);
+        const fetchName = contract.name();
+        return Promise.allSettled([
+          fetchIsClone,
+          fetchIsStandard,
+          fetchName,
+        ]).then(([isClone, isStandard, name]) => {
+          return {
             address: c.Address,
-            name: c.ContractName,
-          }))
-      : [];
+            name: name.status === 'fulfilled' ? name.value : c.ContractName,
+            supportsInterface:
+              (isStandard.status === 'fulfilled' &&
+                isStandard.value === true) ||
+              isStandard.status === 'rejected',
+            isClone: isClone.status === 'fulfilled' && isClone.value,
+            isPredeployed,
+          };
+        });
+      },
+    })),
+  });
+
+  const isOriginTokensReady = originTokens.every((ot) => !ot.isLoading);
+
+  const originTokensFiltered = !isOriginTokensReady
+    ? []
+    : originTokens.filter((ot) => {
+        return (
+          ot.data?.supportsInterface &&
+          !ot.data?.isClone &&
+          !ot.data?.isPredeployed
+        );
+      });
 
   const tokensFiltered = originIsForeign
     ? ethereumTokens
-    : { ...originTokens, data: originTokensFiltered };
+    : {
+        isLoading: !isOriginTokensReady,
+        isFetching: !isOriginTokensReady,
+        data: originTokensFiltered.map((ot) => ot.data),
+      };
 
   type OriginTokenData = {
     originContractAddress: string;
@@ -403,7 +491,7 @@ export function ImaMapToken() {
                   {tokensFiltered.isFetching || tokensFiltered.isLoading ? (
                     <Prelay>
                       <span className="animate-bounce px-2">ʕ￫ᴥ￩ʔ</span>{' '}
-                      Holdon... Bera fetching alot of tokens!
+                      Holdon... Fetching the tokens that can be cloned!
                     </Prelay>
                   ) : (
                     tokensFiltered.data.map((token) => (
