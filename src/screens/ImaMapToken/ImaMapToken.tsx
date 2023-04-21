@@ -122,6 +122,13 @@ const supportsInterfaceAbi = [
   },
 ] as const;
 
+const INTERFACE_ID = {
+  [TOKEN_STANDARD.ERC20.name]: '0x36372b07',
+  [TOKEN_STANDARD.ERC721.name]: '0x80ac58cd',
+  [TOKEN_STANDARD.ERC721_WITH_METADATA.name]: '0x5b5e139f',
+  [TOKEN_STANDARD.ERC1155.name]: '0xd9b67a26',
+};
+
 export function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
@@ -138,6 +145,9 @@ export function ImaMapToken() {
   const standard = (
     searchParam.get('standard') || ''
   ).toUpperCase() as keyof typeof TOKEN_STANDARD;
+
+  const standardInterfaceId = INTERFACE_ID[searchParam.get('standard')];
+
   const key = `${standard}OnChain_abi` as const;
   const tokenAbi = imaAbi[key];
 
@@ -190,18 +200,15 @@ export function ImaMapToken() {
     chainId: originChain?.id,
   });
 
-  const standardInterfaceId =
-    standard === 'ERC721' || standard === 'ERC721_WITH_METADATA'
-      ? '0x80ac58cd'
-      : standard === 'ERC1155'
-      ? '0xd9b67a26'
-      : standard === 'ERC20'
-      ? '0x36372b07'
-      : undefined;
+  const originTokensEnabled = !!(
+    originChain?.id &&
+    standard &&
+    tokenManager.contract
+  );
 
   const originTokens = useQueries({
     queries: (rawOriginTokens?.data?.result || []).map((c) => ({
-      enabled: !!originChain?.id,
+      enabled: originTokensEnabled,
       queryKey: ['custom', originChain?.id, 'contractlistItemExt', c.Address],
       queryFn: async () => {
         const abi = JSON.parse(c['ABI']);
@@ -240,9 +247,9 @@ export function ImaMapToken() {
             address: c.Address,
             name: name.status === 'fulfilled' ? name.value : c.ContractName,
             supportsInterface:
-              (isStandard.status === 'fulfilled' &&
-                isStandard.value === true) ||
-              isStandard.status === 'rejected',
+              isStandard.status === 'fulfilled'
+                ? isStandard.value
+                : standard === 'ERC20',
             isClone: isClone.status === 'fulfilled' && isClone.value,
             isPredeployed,
           };
@@ -251,7 +258,8 @@ export function ImaMapToken() {
     })),
   });
 
-  const isOriginTokensReady = originTokens.every((ot) => !ot.isLoading);
+  const isOriginTokensReady =
+    originTokensEnabled && originTokens.every((ot) => !ot.isLoading);
 
   const originTokensFiltered = !isOriginTokensReady
     ? []
@@ -486,7 +494,12 @@ export function ImaMapToken() {
                   (err) => {},
                 )}
               >
-                <p className="font-medium pb-4">Available tokens on origin:</p>
+                <p className="font-medium pb-4">
+                  Available tokens on origin:{' '}
+                  {tokensFiltered.isLoading
+                    ? 'ʕ￫ᴥ￩ʔ'
+                    : tokensFiltered.data.length}
+                </p>
                 <div className="flex flex-col h-36 overflow-auto ">
                   {tokensFiltered.isFetching || tokensFiltered.isLoading ? (
                     <Prelay>
