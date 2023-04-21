@@ -619,7 +619,7 @@ export function useSContractWrite<
   // transaction initiated by EOA on multisig to marionette through to destination contract
   // or on multisig contract directly in case of multisig self management
 
-  const { config: mnmConfig } = usePrepareContractWrite({
+  const mnmSubmitPrepare = usePrepareContractWrite({
     ...params,
     enabled:
       mnmAction === 'submit' &&
@@ -662,7 +662,7 @@ export function useSContractWrite<
       ? 'confirmTransaction'
       : undefined;
 
-  const { config: confirmConfig } = usePrepareContractWrite({
+  const mnmConfirmPrepare = usePrepareContractWrite({
     enabled: !!confirmFunction,
     address: multisig.address,
     abi: multisig.abi,
@@ -688,7 +688,7 @@ export function useSContractWrite<
     },
   });
 
-  const { config: eoaConfig } = usePrepareContractWrite({
+  const eoaPrepare = usePrepareContractWrite({
     ...params,
     enabled:
       !!(address && abi && name) &&
@@ -719,7 +719,7 @@ export function useSContractWrite<
   ////
   // setup writers to be exposed and handle resets
 
-  const _mnm = useContractWrite(mnmConfig);
+  const _mnm = useContractWrite(mnmSubmitPrepare.config);
   const _mnmWait = useWaitForTransaction({
     hash: _mnm.data?.hash,
     onSettled: (data, err) => {
@@ -733,7 +733,7 @@ export function useSContractWrite<
     },
   });
 
-  const mnmConfirmTx = useContractWrite(confirmConfig);
+  const mnmConfirmTx = useContractWrite(mnmConfirmPrepare.config);
   const mnmConfirmTxWait = useWaitForTransaction({
     hash: mnmConfirmTx.data?.hash,
     onSettled: (data, err) => {
@@ -747,7 +747,7 @@ export function useSContractWrite<
     },
   });
 
-  const _eoa = useContractWrite(eoaConfig);
+  const _eoa = useContractWrite(eoaPrepare.config);
   const _eoaWait = useWaitForTransaction({
     hash: _eoa.data?.hash,
     onSettled: (data, err) => {
@@ -806,7 +806,10 @@ export function useSContractWrite<
             writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
           }
         : {
-            action: 'none',
+            action:
+              mnmConfirmPrepare.isLoading || mnmSubmitPrepare.isLoading
+                ? 'wait'
+                : 'none',
             multisigData,
           },
   };
@@ -819,7 +822,8 @@ export function useSContractWrite<
   };
 
   return finalReturnData as typeof returnData &
-    (typeof returnData)['eoa'] & (typeof returnData)['mnm'] & {
+    (typeof returnData)['eoa'] &
+    (typeof returnData)['mnm'] & {
       writeAsync: ReturnType<typeof wrapWriteAsync> | undefined;
     };
 }

@@ -6,40 +6,61 @@ import { tw } from 'twind';
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   writer: ReturnType<typeof useSContractWrite>;
+  noWrite?: boolean;
   toast?: Parameters<typeof toastify.promise>[1];
-  onToast?: (promise: Promise<unknown>) => any;
+  onPromise?: (promise: Promise<unknown>) => any;
+  confirm?: boolean | number;
 } & PropsWithChildren;
 
 export function SButton({
   children,
   className,
   writer,
+  noWrite,
   toast,
-  onToast,
+  onPromise,
+  confirm = true,
   disabled,
   title,
   onClick,
   ...rest
 }: Props) {
-  const noAction = writer.action === 'none';
-  const _disabled = !writer.writeAsync || writer.isLoading || noAction;
-  const _title = noAction && writer.multisigData.trxId;
+  const midStatus =
+    writer.action === 'wait'
+      ? 'preparing'
+      : writer.isLoading
+      ? 'loading'
+      : writer.action === 'none'
+      ? 'pending'
+      : '';
+  const noAction = midStatus === 'pending';
+  const _disabled = !writer.writeAsync || !!midStatus;
+  const _title =
+    writer.multisigData?.trxId &&
+    `${
+      writer.multisigData?.signerHasConfirmed === false
+        ? writer.multisigData?.countRemaining === 1
+          ? '▶️'
+          : '⊕'
+        : writer.multisigData?.countRemaining === 0
+        ? '▶️'
+        : '⏳'
+    } msig tx#${writer.multisigData?.trxId}`;
   return (
     <button
-      className={tw(
-        className,
-        writer.isLoading ? 'loading' : noAction ? 'pending' : '',
-      )}
+      className={tw(className, midStatus)}
       disabled={_disabled || disabled}
       onClick={async (e) => {
         onClick && (await onClick(e));
         const promise =
-          toast &&
+          noWrite !== true &&
           writer.writeAsync &&
-          toastify.promise(writer.writeAsync(true), toast);
-        promise && onToast?.(promise);
+          (toast
+            ? toastify.promise(writer.writeAsync(confirm), toast)
+            : writer.writeAsync(confirm));
+        promise && onPromise?.(promise);
       }}
-      title={`${title || ''} ${_title ? '- Trx#' + _title : ''}`}
+      title={`${title || ''} ${_title || ''}`}
       {...rest}
     >
       {children}{' '}
@@ -48,8 +69,8 @@ export function SButton({
           &emsp;
           <PeopleIcon width="18" />{' '}
           <span className="font-mono text-sm">
-            {writer.multisigData.countConfirmed}/
-            {writer.multisigData.countRequired}
+            {writer.multisigData?.countConfirmed}/
+            {writer.multisigData?.countRequired}
           </span>
         </>
       ) : (

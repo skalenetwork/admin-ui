@@ -114,7 +114,7 @@ export const WidgetConfigFcd = ({
             open={alertKey === id}
             onOpenChange={toggleAlert(id)}
             trigger={
-              <SButton className="btn btn-wide w-5/6" writer={fcd}>
+              <SButton className="btn btn-wide w-5/6" writer={fcd} noWrite>
                 {fcd.isEnabled ? 'Disable' : 'Enable'} FCD
               </SButton>
             }
@@ -128,7 +128,7 @@ export const WidgetConfigFcd = ({
                   success: 'FCD status changed',
                   error: 'Failed to change FCD ',
                 }}
-                onToast={(promise) => {
+                onPromise={(promise) => {
                   promise.then((data) => {
                     fcd.refetch();
                   });
@@ -197,7 +197,7 @@ export const WidgetConfigMtm = ({
               open={alertKey === id}
               onOpenChange={toggleAlert(id)}
               trigger={
-                <SButton className="btn btn-wide w-5/6" writer={mtm}>
+                <SButton className="btn btn-wide w-5/6" writer={mtm} noWrite>
                   {mtm.isEnabled ? 'Disable' : 'Enable'} MTM
                 </SButton>
               }
