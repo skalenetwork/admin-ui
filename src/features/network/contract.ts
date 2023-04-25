@@ -44,6 +44,13 @@ namespace ContractManifestBase {
  */
 
 export const CONTRACT = {
+  PROXY_ADMIN: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:proxy_admin',
+    address: ADDRESS.PROXY_ADMIN_ADDRESS,
+    name: 'ProxyAdmin',
+  },
   FILESTORAGE: {
     network: NETWORK.SKALE,
     type: 'storage',

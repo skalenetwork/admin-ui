@@ -25,6 +25,12 @@ const marionetteExecArgs = getAbi('MARIONETTE')
   .find((f) => f.name === 'execute')
   .inputs.map((i) => i.type);
 
+const fmtnum = Intl.NumberFormat('en-US');
+const fmtcurr = Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+});
+
 export function WalletSelect({
   wallets,
   active,
@@ -75,6 +81,7 @@ export function Multisig() {
     balance,
     owners,
     counts: {
+      isError: countsIsError,
       data: {
         countTotalTrx,
         countPendingTrx,
@@ -264,7 +271,12 @@ export function Multisig() {
                   Finding the owners... just a moment!
                 </Prelay>
               ) : owners.isError ? (
-                'Failed to retrieve owners'
+                <Prelay>
+                  <span className="px-2">
+                    <ExclamationTriangleIcon />
+                  </span>{' '}
+                  Couldn't retrieve owners.
+                </Prelay>
               ) : owners.data ? (
                 owners.data.map((address, i) => (
                   <MultisigOwner

@@ -31,7 +31,6 @@ import {
   usePrepareContractWrite,
   usePrepareSendTransaction,
   useProvider,
-  useSendTransaction,
   useSigner,
   useSwitchNetwork,
   useToken,
@@ -40,8 +39,8 @@ import {
 
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import imaAbi from '@/features/network/abi/abi-ima.union';
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { BigNumber, ethers } from 'ethers';
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import { BigNumber, ContractFactory, ethers } from 'ethers';
 import { useEffect, useMemo } from 'react';
 
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
@@ -65,8 +64,10 @@ const SubmitButtonPair = ({
   stepNext,
   text = 'Submit',
   isReady = false,
+  isLoading = false,
 }: {
   isReady: boolean;
+  isLoading?: boolean;
   stepPrev?: () => void;
   stepNext?: () => void;
   text?: string;
@@ -84,7 +85,11 @@ const SubmitButtonPair = ({
           <CaretLeftIcon />
         </button>
       )}
-      <button className="btn" type="submit" disabled={!isReady}>
+      <button
+        className={tw('btn', isLoading ? 'loading' : '')}
+        type="submit"
+        disabled={!isReady || isLoading}
+      >
         {text}
       </button>
     </div>
@@ -129,6 +134,19 @@ const INTERFACE_ID = {
   [TOKEN_STANDARD.ERC1155.name]: '0xd9b67a26',
 };
 
+const OZ_ROLE_FRAGMENT = {
+  inputs: [],
+  outputs: [
+    {
+      internalType: 'bytes32',
+      name: '',
+      type: 'bytes32',
+    },
+  ],
+  stateMutability: 'view',
+  type: 'function',
+};
+
 export function ImaMapToken() {
   const { chainName } = useParams();
   const [searchParam] = useSearchParams();
@@ -149,7 +167,23 @@ export function ImaMapToken() {
   const standardInterfaceId = INTERFACE_ID[searchParam.get('standard')];
 
   const key = `${standard}OnChain_abi` as const;
-  const tokenAbi = imaAbi[key];
+
+  const tokenAbi = useMemo(() => {
+    let abi = imaAbi[key];
+    if (!abi.some((f) => f.name === 'MINTER_ROLE')) {
+      abi.push({
+        name: 'MINTER_ROLE',
+        ...OZ_ROLE_FRAGMENT,
+      });
+    }
+    if (!abi.some((f) => f.name === 'BURNER_ROLE')) {
+      abi.push({
+        name: 'BURNER_ROLE',
+        ...OZ_ROLE_FRAGMENT,
+      });
+    }
+    return abi;
+  }, [key]);
 
   const originChain = chains.find((c) => c.name === chainName);
   const originIsForeign = originChain?.network !== NETWORK.SKALE;
@@ -328,10 +362,11 @@ export function ImaMapToken() {
   ] as const;
 
   const cloneContractAddress = form[1].watch('cloneContractAddress');
-
-  const tokenAddress = form[1].getFieldState('cloneContractAddress').invalid
-    ? ''
-    : cloneContractAddress;
+  const tokenAddressIsValid = !form[1].getFieldState('cloneContractAddress')
+    .invalid;
+  const tokenAddress = useMemo(() => {
+    return tokenAddressIsValid ? cloneContractAddress : '';
+  }, [tokenAddressIsValid]);
 
   const targetContract = useContract({
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
@@ -348,18 +383,20 @@ export function ImaMapToken() {
         enabled: !!targetContract?.address,
         queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'MINTER_ROLE'],
         queryFn: async () => {
-          return targetContract?.MINTER_ROLE
-            ? await targetContract?.MINTER_ROLE?.()
-            : '';
+          if (!targetContract.MINTER_ROLE) {
+            throw Error('Cloned token role check is misconfigured');
+          }
+          return await targetContract?.MINTER_ROLE();
         },
       },
       {
         enabled: !!targetContract?.address,
         queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'BURNER_ROLE'],
         queryFn: async () => {
-          return targetContract?.BURNER_ROLE
-            ? await targetContract?.BURNER_ROLE?.()
-            : '';
+          if (!targetContract.BURNER_ROLE) {
+            throw Error('Cloned token role check is misconfigured');
+          }
+          return await targetContract?.BURNER_ROLE();
         },
       },
     ],
@@ -415,18 +452,36 @@ export function ImaMapToken() {
       data: toBeDeployedData,
       value: 0,
       from: address,
-      to: addresses.ZERO_ADDRESS,
+      to: BigNumber.from(0),
       gasPrice: 100000, // default value on Schain
     },
   });
-  const deployment = useSendTransaction(config);
+
+  const deployment = useMutation({
+    mutationKey: ['custom', 'ima-deployment', standard],
+    mutationFn: async () => {
+      const factory = new ContractFactory(
+        ERC20Standard['abi'],
+        ERC20Standard['bytecode'],
+        signer,
+      );
+      const contract = await factory.deploy(
+        name,
+        symbol,
+        BigNumber.from(decimals),
+        {
+          gasLimit: 1500000,
+          gasPrice: 100000,
+        },
+      );
+      await contract.deployed();
+      return contract;
+    },
+  });
 
   useEffect(() => {
     deployment.isSuccess &&
-      deployment.data?.wait().then((confirmedTx) => {
-        confirmedTx.contractAddress &&
-          form[1].setValue('cloneContractAddress', confirmedTx.contractAddress);
-      });
+      form[1].setValue('cloneContractAddress', deployment.data.address);
   }, [deployment.isSuccess]);
 
   const registerMainnetToken = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
@@ -449,7 +504,7 @@ export function ImaMapToken() {
     },
   );
 
-  const grantMinterRoleConfig = usePrepareContractWrite({
+  const { config: grantMinterRoleConfig } = usePrepareContractWrite({
     enabled: !!(tokenAddress && MINTER_ROLE && tokenManager.address),
     address: tokenAddress,
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
@@ -464,7 +519,7 @@ export function ImaMapToken() {
     },
   });
 
-  const grantBurnerRoleConfig = usePrepareContractWrite({
+  const { config: grantBurnerRoleConfig } = usePrepareContractWrite({
     enabled: !!(tokenAddress && BURNER_ROLE && tokenManager.address),
     address: tokenAddress,
     abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
@@ -662,7 +717,8 @@ export function ImaMapToken() {
                         <SubmitButtonPair
                           isReady={
                             targetContractInfo.isSuccess &&
-                            Boolean(MINTER_ROLE && BURNER_ROLE)
+                            !!(MINTER_ROLE && BURNER_ROLE) &&
+                            !deployment.isLoading
                           }
                           text="Next"
                           stepPrev={stepPrev}
@@ -681,15 +737,7 @@ export function ImaMapToken() {
                       <form
                         onSubmit={form[2].handleSubmit(
                           async (data) => {
-                            const response =
-                              await deployment.sendTransactionAsync?.();
-                            const receipt = await response?.wait();
-                            receipt &&
-                              form[1].setValue(
-                                'cloneContractAddress',
-                                receipt.contractAddress,
-                              );
-                            stepNext();
+                            await deployment.mutateAsync?.();
                           },
                           (err) => {},
                         )}
@@ -717,12 +765,12 @@ export function ImaMapToken() {
                             required="Contract decimals are required"
                           />
                           {deployment.isError ? (
-                            <p className="text-sm py-4">
+                            <p className="text-sm py-4 max-w-full">
                               <span className="text-[var(--red10)]">
                                 <ExclamationTriangleIcon />
                               </span>{' '}
                               Could not deploy the token -{' '}
-                              {deployment.error?.message}
+                              {deployment.error?.reason}
                               <br />
                               <button
                                 className="underline"
@@ -737,15 +785,45 @@ export function ImaMapToken() {
                           ) : (
                             <></>
                           )}
-                          <SubmitButtonPair
-                            isReady={
-                              form[2].formState.isValid &&
-                              Boolean(deployment.sendTransactionAsync)
-                            }
-                            text="Deploy Contract"
-                            stepPrev={stepPrev}
-                            stepNext={stepNext}
-                          />
+                          {deployment.isSuccess ? (
+                            <p className="text-sm py-4 max-w-full">
+                              <span className="text-[var(--green10)] align-middle">
+                                <CheckCircledIcon />
+                              </span>{' '}
+                              Contract successfully deployed at{' '}
+                              <code>{deployment.data?.address}</code>
+                            </p>
+                          ) : (
+                            <></>
+                          )}
+                          <div>
+                            <SubmitButtonPair
+                              isReady={
+                                form[2].formState.isValid &&
+                                !deployment.isSuccess
+                              }
+                              isLoading={deployment.isLoading}
+                              text={
+                                !deployment.isSuccess
+                                  ? 'Deploy Contract'
+                                  : 'Deployed'
+                              }
+                              stepPrev={stepPrev}
+                              stepNext={stepNext}
+                            />
+                            {deployment.isSuccess && (
+                              <button
+                                className="btn"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // @todo enable only on step-level clearance
+                                  stepNext();
+                                }}
+                              >
+                                Next
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </form>
                     </FormProvider>
@@ -817,13 +895,21 @@ export function ImaMapToken() {
                                 !MINTER_ROLE ||
                                 !BURNER_ROLE ||
                                 !grantBurnerRoleConfirmed.isIdle ||
-                                !grantMinterRoleConfirmed.isIdle
+                                !grantMinterRoleConfirmed.isIdle ||
+                                !(
+                                  !tmHasMinterRole.data &&
+                                  grantMinterRole.writeAsync
+                                ) ||
+                                !(
+                                  !tmHasBurnerRole.data &&
+                                  grantBurnerRole.writeAsync
+                                )
                               }
                               className="btn btn-outline py-3"
                               onClick={async (e) => {
                                 e.preventDefault();
-                                grantMinterRole.write?.();
-                                grantBurnerRole.write?.();
+                                await grantMinterRole.write?.();
+                                await grantBurnerRole.write?.();
                               }}
                             >
                               {grantBurnerRoleConfirmed.isIdle ||

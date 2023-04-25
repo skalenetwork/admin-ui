@@ -27,6 +27,7 @@ type RelaxedAbi = Readonly<
  * always 100% export as const to avoid nonsensical exceptions with indexing
  */
 export const ABI = {
+  PROXY_ADMIN: schainImaUnion['proxy_admin_abi'],
   FILESTORAGE: FileStorageABI,
   CONFIG_CONTROLLER: ConfigControllerABI,
   MULTISIG_WALLET: MultisigWalletABI,

@@ -1,6 +1,7 @@
 import {
   createBrowserRouter,
   Link,
+  Navigate,
   RouteObject,
   RouterProvider,
 } from 'react-router-dom';
@@ -77,6 +78,10 @@ const routes: RouteObject[] = [
         element: <Support />,
       },
     ],
+  },
+  {
+    path: '*',
+    element: <Navigate to={'/'} />,
   },
 ];
 
