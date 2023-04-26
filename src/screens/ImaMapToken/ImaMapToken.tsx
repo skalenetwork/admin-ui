@@ -24,12 +24,10 @@ import {
 import { getContract } from '@wagmi/core';
 import {
   Address,
-  useAccount,
   useContract,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
-  usePrepareSendTransaction,
   useProvider,
   useSigner,
   useSwitchNetwork,
@@ -40,12 +38,12 @@ import {
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import imaAbi from '@/features/network/abi/abi-ima.union';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
-import { BigNumber, ContractFactory, ethers } from 'ethers';
+import { BigNumber, ContractFactory } from 'ethers';
 import { useEffect, useMemo } from 'react';
 
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
 
-function liteEncodeAbiFunctions(abi) {
+function liteEncodeAbiFunctions(abi: Abi) {
   return abi
     .filter((a) => a.type === 'function')
     .map((i) => `${i.name};${i.inputs?.length};${i.outputs?.length}`);
@@ -127,12 +125,20 @@ const supportsInterfaceAbi = [
   },
 ] as const;
 
+type StandardName =
+  (typeof TOKEN_STANDARD)[keyof typeof TOKEN_STANDARD]['name'];
+type StandardKey = Uppercase<StandardName>;
+
 const INTERFACE_ID = {
   [TOKEN_STANDARD.ERC20.name]: '0x36372b07',
   [TOKEN_STANDARD.ERC721.name]: '0x80ac58cd',
   [TOKEN_STANDARD.ERC721_WITH_METADATA.name]: '0x5b5e139f',
   [TOKEN_STANDARD.ERC1155.name]: '0xd9b67a26',
 };
+
+function getStandardTokenInterfaceId(standardName: keyof typeof INTERFACE_ID) {
+  return INTERFACE_ID[standardName] as Address;
+}
 
 const OZ_ROLE_FRAGMENT = {
   inputs: [],
@@ -147,103 +153,348 @@ const OZ_ROLE_FRAGMENT = {
   type: 'function',
 };
 
-export function ImaMapToken() {
-  const { chainName } = useParams();
-  const [searchParam] = useSearchParams();
+function getStandardTokenAbi(name: StandardKey) {
+  const key = `${name}OnChain_abi` as const;
+  let abi = imaAbi[key];
+  if (!abi.some((f) => f.name === 'MINTER_ROLE')) {
+    abi.push({
+      name: 'MINTER_ROLE',
+      ...OZ_ROLE_FRAGMENT,
+    });
+  }
+  if (!abi.some((f) => f.name === 'BURNER_ROLE')) {
+    abi.push({
+      name: 'BURNER_ROLE',
+      ...OZ_ROLE_FRAGMENT,
+    });
+  }
+  return abi;
+}
 
-  const { chain: activeChain, chains } = useNetwork();
-  const account = useAccount();
+export function useMapTokenContext<S extends StandardName>({
+  targetChainId,
+  originChainId,
+  standardName,
+}: {
+  targetChainId?: number;
+  originChainId?: number;
+  standardName: S;
+}) {
+  const { chains } = useNetwork();
+  const originChain = originChainId
+    ? chains.find((chain) => chain.id === originChainId)
+    : undefined;
+  const targetChain = targetChainId
+    ? chains.find((chain) => chain.id === targetChainId)
+    : undefined;
 
-  const targetChainId = Number(searchParam.get('t'));
-  const targetChain = chains.find((c) => c.id === targetChainId);
+  if (!(originChain && targetChain && standardName)) {
+    return {};
+  }
 
-  const { data: signer } = useSigner();
-  const targetChainProvider = useProvider({ chainId: targetChainId });
+  const standard = standardName && (standardName.toUpperCase() as StandardKey);
+  const standardInterfaceId = getStandardTokenInterfaceId(standardName);
 
-  const standard = (
-    searchParam.get('standard') || ''
-  ).toUpperCase() as keyof typeof TOKEN_STANDARD;
+  return {
+    standard,
+    standardInterfaceId,
+    originChain,
+    targetChain,
+  };
+}
 
-  const standardInterfaceId = INTERFACE_ID[searchParam.get('standard')];
-
-  const key = `${standard}OnChain_abi` as const;
-
-  const tokenAbi = useMemo(() => {
-    let abi = imaAbi[key];
-    if (!abi.some((f) => f.name === 'MINTER_ROLE')) {
-      abi.push({
-        name: 'MINTER_ROLE',
-        ...OZ_ROLE_FRAGMENT,
-      });
-    }
-    if (!abi.some((f) => f.name === 'BURNER_ROLE')) {
-      abi.push({
-        name: 'BURNER_ROLE',
-        ...OZ_ROLE_FRAGMENT,
-      });
-    }
-    return abi;
-  }, [key]);
-
-  const originChain = chains.find((c) => c.name === chainName);
-  const originIsForeign = originChain?.network !== NETWORK.SKALE;
-
-  const handleOrigin = useSwitchNetwork({ chainId: originChain?.id });
-  const handleTarget = useSwitchNetwork({ chainId: targetChain?.id });
-
-  const [rawOriginTokens] = useExplorer(
-    [
-      {
-        module: 'contract',
-        action: 'listcontracts',
-        args: {
-          page: '1',
-          offset: '100',
-          filter: 'verified',
-        },
-      },
-    ],
-    {
-      enabled: Boolean(originChain && originChain.network === NETWORK.SKALE),
-      chainId: originChain?.id,
-    },
-  );
-
-  const ethereumTokens = useQuery({
-    enabled: originIsForeign,
-    queryKey: ['CUSTOM:ethereumTokens', 'name,address', 75],
+/**
+ * Fetch token details for contracts on ethereum mainnet
+ * @param param0
+ * @returns
+ */
+export function useEthereumTokens({
+  enabled,
+  count = 50,
+}: {
+  enabled?: boolean;
+  count?: number;
+}) {
+  return useQuery({
+    enabled: enabled !== undefined ? enabled : true,
+    queryKey: ['custom', 'ethereumTokens', 'name,address', count],
     initialData: () => [],
     queryFn: async () => {
       return fetch('https://tokens.coingecko.com/ethereum/all.json')
         .then((res) => res.json())
         .then((result: { tokens: Token[] }) => {
-          return result.tokens.slice(0, 75).map((token) => ({
+          return result.tokens.slice(0, count).map((token) => ({
             name: token.name,
             address: token.address,
           }));
         });
     },
   });
+}
 
-  const { api: tokenManagerApi, contract: tokenManager } = useTokenManager({
+type CommonTokenAbi = (typeof imaAbi)['ERC20OnChain_abi'];
+
+/**
+ * Use and modify access control of SChain token mintability and burnability
+ * @param param0
+ * @returns
+ */
+export function useSTokenMintBurnAccess({
+  chainId,
+  originChainId,
+  standardName,
+  tokenAddress,
+}: {
+  chainId?: number;
+  originChainId?: number;
+  standardName: StandardName;
+  tokenAddress?: Address;
+}) {
+  const standard = standardName && (standardName.toUpperCase() as StandardKey);
+
+  const { chain: activeChain, chains } = useNetwork();
+  const { data: signer } = useSigner();
+  const provider = useProvider({ chainId });
+  const originChain = chains.find((chain) => chain.id === originChainId);
+  const signerOrProvider = activeChain?.id === chainId ? signer : provider;
+
+  const tokenAbi = useMemo(() => {
+    return standard && getStandardTokenAbi(standard);
+  }, [standard]);
+
+  const targetContract = useContract({
+    abi: tokenAbi as CommonTokenAbi,
+    address: tokenAddress,
+    signerOrProvider,
+  });
+
+  // `network` allows selecting either token_manager or deposit_box
+  const { contract: originTokenManager } = useTokenManager({
     standard,
     network: originChain?.network,
   });
 
-  const originChainProvider = useProvider({
-    chainId: originChain?.id,
+  const roleHashesQuery = useQueries({
+    queries: [
+      {
+        enabled: !!targetContract?.address,
+        queryKey: ['custom', targetContract?.address, 'role', 'MINTER_ROLE'],
+        queryFn: async () => {
+          if (!targetContract?.MINTER_ROLE) {
+            throw Error('Cloned token role check is misconfigured');
+          }
+          return await targetContract?.MINTER_ROLE();
+        },
+      },
+      {
+        enabled: !!targetContract?.address,
+        queryKey: ['custom', targetContract?.address, 'role', 'BURNER_ROLE'],
+        queryFn: async () => {
+          if (!targetContract?.BURNER_ROLE) {
+            throw Error('Cloned token role check is misconfigured');
+          }
+          return await targetContract?.BURNER_ROLE();
+        },
+      },
+    ],
   });
 
-  const originTokensEnabled = !!(
-    originChain?.id &&
-    standard &&
-    tokenManager.contract
+  const MINTER_ROLE = roleHashesQuery[0].data;
+  const BURNER_ROLE = roleHashesQuery[1].data;
+
+  const tmHasMinterRole = useQuery({
+    enabled: !!(MINTER_ROLE && originTokenManager),
+    queryFn: async () => {
+      return targetContract?.hasRole
+        ? targetContract.hasRole(
+            MINTER_ROLE as Address,
+            originTokenManager?.address as Address,
+          )
+        : false;
+    },
+  });
+
+  const tmHasBurnerRole = useQuery({
+    enabled: !!(BURNER_ROLE && originTokenManager),
+    queryFn: async () => {
+      return targetContract?.hasRole
+        ? targetContract.hasRole(
+            BURNER_ROLE as Address,
+            originTokenManager?.address as Address,
+          )
+        : false;
+    },
+  });
+
+  const { config: grantMinterRoleConfig } = usePrepareContractWrite({
+    enabled: !!(tokenAddress && MINTER_ROLE && originTokenManager?.address),
+    address: tokenAddress,
+    abi: tokenAbi as CommonTokenAbi,
+    functionName: 'grantRole',
+    args: [MINTER_ROLE as Address, originTokenManager?.address as Address],
+  });
+  const grantMinterRole = useContractWrite(grantMinterRoleConfig);
+  const grantMinterRoleConfirmed = useWaitForTransaction({
+    hash: grantMinterRole.data?.hash,
+    onSuccess: () => {
+      tmHasMinterRole.refetch();
+    },
+  });
+
+  const { config: grantBurnerRoleConfig } = usePrepareContractWrite({
+    enabled: !!(tokenAddress && BURNER_ROLE && originTokenManager?.address),
+    address: tokenAddress,
+    abi: tokenAbi as CommonTokenAbi,
+    functionName: 'grantRole',
+    args: [BURNER_ROLE as Address, originTokenManager?.address as Address],
+  });
+  const grantBurnerRole = useContractWrite(grantBurnerRoleConfig);
+  const grantBurnerRoleConfirmed = useWaitForTransaction({
+    hash: grantBurnerRole.data?.hash,
+    onSuccess: () => {
+      tmHasBurnerRole.refetch();
+    },
+  });
+
+  return {
+    MINTER_ROLE,
+    BURNER_ROLE,
+    hasAccessControl: MINTER_ROLE && BURNER_ROLE,
+    isMinterOriginTM: tmHasMinterRole,
+    isBurnerOriginTM: tmHasBurnerRole,
+    grantMinterRoleToOriginTM: {
+      ...grantMinterRole,
+      confirmed: grantMinterRoleConfirmed,
+    },
+    grantBurnerRoleToOriginTM: {
+      ...grantBurnerRole,
+      confirmed: grantBurnerRoleConfirmed,
+    },
+  };
+}
+
+/**
+ * Use final registration of cloned tokens with token manager and deposit box
+ * @param param0
+ * @returns
+ */
+export function useSTokenRegistration({
+  chainId,
+  originChainId,
+  standardName,
+  tokenAddress,
+  originTokenAddress,
+  enabled,
+}: {
+  chainId?: number;
+  originChainId?: number;
+  standardName: StandardName;
+  tokenAddress?: Address;
+  originTokenAddress?: Address;
+  enabled?: boolean;
+}) {
+  const _enabled = enabled === undefined ? true : !!enabled;
+  const standard = standardName && (standardName.toUpperCase() as StandardKey);
+
+  const { chains } = useNetwork();
+  const targetChain = chains.find((chain) => chain.id === chainId);
+  const originChain = chains.find((chain) => chain.id === originChainId);
+
+  const mode =
+    originChain === undefined
+      ? undefined
+      : originChain.network === NETWORK.SKALE
+      ? 's2s'
+      : 'f2s';
+
+  const registerOnForeignChain = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
+    enabled:
+      _enabled && !!(targetChain && originTokenAddress && mode === 'f2s'),
+    name: `add${standard}TokenByOwner`,
+    args: [targetChain?.name, originTokenAddress],
+  });
+
+  const registerOnSchain = useSContractWrite(
+    `TOKEN_MANAGER_${standard as StandardKey}`,
+    {
+      enabled:
+        _enabled && !!(originChain && originTokenAddress && tokenAddress),
+      name: `add${standard}TokenByOwner`,
+      args: [
+        originChain?.network === NETWORK.ETHEREUM
+          ? 'Mainnet'
+          : originChain?.name,
+        originTokenAddress,
+        tokenAddress,
+      ],
+    },
   );
 
-  const originTokens = useQueries({
-    queries: (rawOriginTokens?.data?.result || []).map((c) => ({
-      enabled: originTokensEnabled,
-      queryKey: ['custom', originChain?.id, 'contractlistItemExt', c.Address],
+  return {
+    mode,
+    registerOnForeignChain,
+    registerOnSchain,
+  };
+}
+
+/**
+ * Extract SChain deployed tokens with network metadata
+ * @param param0
+ * @returns
+ */
+export function useSchainTokens({
+  chainId,
+  standardName,
+}: {
+  chainId?: number;
+  standardName: StandardName;
+}) {
+  const { chains } = useNetwork();
+  const chain = chainId
+    ? chains.find(
+        (chain) => chain.id === chainId && chain.network === NETWORK.SKALE,
+      )
+    : undefined;
+  const provider = useProvider({
+    chainId: chain?.id,
+  });
+
+  const standardInterfaceId = getStandardTokenInterfaceId(standardName);
+
+  const page = 1;
+  const offset = 100;
+
+  const [contractList] = useExplorer(
+    [
+      {
+        module: 'contract',
+        action: 'listcontracts',
+        args: {
+          page: String(page),
+          offset: String(offset),
+          filter: 'verified',
+        },
+      },
+    ],
+    {
+      enabled: !!chain,
+      chainId: chain?.id,
+    },
+  );
+
+  const standard = standardName && (standardName.toUpperCase() as StandardKey);
+
+  const { contract: tokenManager } = useTokenManager({
+    standard,
+    network: chain?.network,
+  });
+
+  const enabled = !!(chain?.id && standard && tokenManager?.contract);
+
+  const tokens = useQueries({
+    queries: (contractList?.data?.result || []).map((c) => ({
+      enabled,
+      queryKey: ['custom', chain?.id, 'contractlistItemExt', c.Address],
       queryFn: async () => {
         const abi = JSON.parse(c['ABI']);
         const matchable = liteEncodeAbiFunctions(abi);
@@ -260,11 +511,13 @@ export function ImaMapToken() {
             (a) => a.toLowerCase() === c.Address.toLowerCase(),
           );
 
-        const fetchIsClone = tokenManager.contract?.addedClones(c.Address);
+        const fetchIsClone = tokenManager?.contract?.addedClones(c.Address) as
+          | undefined
+          | Promise<boolean | undefined>;
         const contract = getContract({
           address: c.Address,
           abi: supportsInterfaceAbi,
-          signerOrProvider: originChainProvider,
+          signerOrProvider: provider,
         });
         const fetchIsStandard = !standardInterfaceId
           ? true
@@ -292,9 +545,43 @@ export function ImaMapToken() {
     })),
   });
 
-  const isOriginTokensReady =
-    originTokensEnabled && originTokens.every((ot) => !ot.isLoading);
+  return {
+    isLoading: enabled && tokens.some((ot) => ot.isLoading),
+    data: tokens,
+  };
+}
 
+export function ImaMapToken() {
+  const { chain: activeChain, chains } = useNetwork();
+  const { data: signer } = useSigner();
+
+  const { chainName } = useParams();
+  const [searchParam] = useSearchParams();
+  const originChainId = chains.find((c) => c.name === chainName)?.id;
+
+  const standardName = searchParam.get('standard') as StandardName;
+
+  const { standard, targetChain, originChain } = useMapTokenContext({
+    standardName,
+    targetChainId: Number(searchParam.get('t')),
+    originChainId: originChainId,
+  });
+  const originIsForeign = originChain?.network !== NETWORK.SKALE;
+
+  const handleOrigin = useSwitchNetwork({ chainId: originChain?.id });
+  const handleTarget = useSwitchNetwork({ chainId: targetChain?.id });
+
+  const { contract: tokenManager } = useTokenManager({
+    standard,
+    network: originChain?.network,
+  });
+
+  const { data: originTokens, isLoading: isOriginTokensLoading } =
+    useSchainTokens({
+      chainId: originChain?.id,
+      standardName,
+    });
+  const isOriginTokensReady = originTokens && !isOriginTokensLoading;
   const originTokensFiltered = !isOriginTokensReady
     ? []
     : originTokens.filter((ot) => {
@@ -304,17 +591,16 @@ export function ImaMapToken() {
           !ot.data?.isPredeployed
         );
       });
+  const tokensFiltered = {
+    isLoading: !isOriginTokensReady,
+    isFetching: !isOriginTokensReady,
+    data: originTokensFiltered.map((ot) => ot.data),
+  };
 
-  const tokensFiltered = originIsForeign
-    ? ethereumTokens
-    : {
-        isLoading: !isOriginTokensReady,
-        isFetching: !isOriginTokensReady,
-        data: originTokensFiltered.map((ot) => ot.data),
-      };
+  // form start
 
   type OriginTokenData = {
-    originContractAddress: string;
+    originContractAddress: Address;
   };
   type CloneTokenPreData = {
     name: string;
@@ -322,10 +608,10 @@ export function ImaMapToken() {
     decimals: number;
   };
   type CloneTokenData = {
-    cloneContractAddress: string;
+    cloneContractAddress: Address;
   };
   type PermissionData = {
-    tokenManagerRoleAddress: string;
+    tokenManagerRoleAddress: Address;
   };
 
   const form = [
@@ -356,107 +642,42 @@ export function ImaMapToken() {
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
-        tokenManagerRoleAddress: tokenManager.address,
+        tokenManagerRoleAddress: tokenManager?.address,
       },
     }),
   ] as const;
 
+  const originContractAddress = form[0].watch('originContractAddress');
   const cloneContractAddress = form[1].watch('cloneContractAddress');
-  const tokenAddressIsValid = !form[1].getFieldState('cloneContractAddress')
-    .invalid;
+  const cloneContractAddressIsValid = !form[1].getFieldState(
+    'cloneContractAddress',
+  ).invalid;
   const tokenAddress = useMemo(() => {
-    return tokenAddressIsValid ? cloneContractAddress : '';
-  }, [tokenAddressIsValid]);
+    return cloneContractAddressIsValid ? cloneContractAddress : '';
+  }, [cloneContractAddressIsValid]);
 
-  const targetContract = useContract({
-    abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
-    address: form[1].getFieldState('cloneContractAddress').invalid
-      ? ''
-      : cloneContractAddress,
-    signerOrProvider:
-      activeChain?.id === targetChainId ? signer : targetChainProvider,
-  });
-
-  const roleHashesQuery = useQueries({
-    queries: [
-      {
-        enabled: !!targetContract?.address,
-        queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'MINTER_ROLE'],
-        queryFn: async () => {
-          if (!targetContract.MINTER_ROLE) {
-            throw Error('Cloned token role check is misconfigured');
-          }
-          return await targetContract?.MINTER_ROLE();
-        },
-      },
-      {
-        enabled: !!targetContract?.address,
-        queryKey: [`CUSTOM:${targetContract?.address}`, 'role', 'BURNER_ROLE'],
-        queryFn: async () => {
-          if (!targetContract.BURNER_ROLE) {
-            throw Error('Cloned token role check is misconfigured');
-          }
-          return await targetContract?.BURNER_ROLE();
-        },
-      },
-    ],
-  });
-
-  const MINTER_ROLE = roleHashesQuery[0].data;
-  const BURNER_ROLE = roleHashesQuery[1].data;
-
-  const tmHasMinterRole = useQuery({
-    enabled: Boolean(MINTER_ROLE && tokenManager),
-    queryFn: async () => {
-      return targetContract?.hasRole
-        ? targetContract.hasRole(MINTER_ROLE as Address, tokenManager.address)
-        : false;
-    },
-  });
-
-  const tmHasBurnerRole = useQuery({
-    enabled: Boolean(BURNER_ROLE && tokenManager),
-    queryFn: async () => {
-      return targetContract?.hasRole
-        ? targetContract.hasRole(BURNER_ROLE as Address, tokenManager.address)
-        : false;
-    },
-  });
+  // form end
 
   const targetContractInfo = useToken({
-    address: form[1].getFieldState('cloneContractAddress').invalid
-      ? ''
-      : cloneContractAddress,
+    address: tokenAddress,
   });
 
-  const name = form[2].watch('name');
-  const symbol = form[2].watch('symbol');
-  const decimals = form[2].watch('decimals');
-
-  const constructorParams = useMemo(() => {
-    return !(name && symbol && decimals)
-      ? ''
-      : ethers.utils.defaultAbiCoder.encode(
-          ['string', 'string', 'uint256'],
-          [name, symbol, BigNumber.from(decimals)],
-        );
-  }, [name, symbol, decimals]);
-
-  const { address } = useAccount();
-
-  const toBeDeployedData = ERC20Standard.bytecode + constructorParams.slice(2);
-
-  const { config } = usePrepareSendTransaction({
-    request: {
-      gasLimit: 1500000,
-      data: toBeDeployedData,
-      value: 0,
-      from: address,
-      to: BigNumber.from(0),
-      gasPrice: 100000, // default value on Schain
-    },
+  const {
+    BURNER_ROLE,
+    MINTER_ROLE,
+    grantBurnerRoleToOriginTM: grantBurnerRole,
+    grantMinterRoleToOriginTM: grantMinterRole,
+    isBurnerOriginTM: tmHasBurnerRole,
+    isMinterOriginTM: tmHasMinterRole,
+  } = useSTokenMintBurnAccess({
+    chainId: targetChain?.id,
+    standardName,
+    tokenAddress,
   });
+  const grantMinterRoleConfirmed = grantMinterRole.confirmed;
+  const grantBurnerRoleConfirmed = grantBurnerRole.confirmed;
 
+  const { name, symbol, decimals } = form[2].watch();
   const deployment = useMutation({
     mutationKey: ['custom', 'ima-deployment', standard],
     mutationFn: async () => {
@@ -484,54 +705,13 @@ export function ImaMapToken() {
       form[1].setValue('cloneContractAddress', deployment.data.address);
   }, [deployment.isSuccess]);
 
-  const registerMainnetToken = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
-    enabled: form[0].formState.isValid && !!targetChain,
-    name: `add${standard}TokenByOwner`,
-    args: [targetChain?.name, form[0].getValues('originContractAddress')],
-  });
-
-  const addTokenByOwner = useSContractWrite(
-    `TOKEN_MANAGER_${standard}` as 'TOKEN_MANAGER_ERC20',
-    {
-      name: `add${standard}TokenByOwner`,
-      args: [
-        originChain?.network === NETWORK.ETHEREUM
-          ? 'Mainnet'
-          : originChain?.name,
-        form[0].watch('originContractAddress'),
-        form[1].watch('cloneContractAddress'),
-      ],
-    },
-  );
-
-  const { config: grantMinterRoleConfig } = usePrepareContractWrite({
-    enabled: !!(tokenAddress && MINTER_ROLE && tokenManager.address),
-    address: tokenAddress,
-    abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
-    functionName: 'grantRole',
-    args: [MINTER_ROLE, tokenManager.address],
-  });
-  const grantMinterRole = useContractWrite(grantMinterRoleConfig);
-  const grantMinterRoleConfirmed = useWaitForTransaction({
-    hash: grantMinterRole.data?.hash,
-    onSuccess: () => {
-      tmHasMinterRole.refetch();
-    },
-  });
-
-  const { config: grantBurnerRoleConfig } = usePrepareContractWrite({
-    enabled: !!(tokenAddress && BURNER_ROLE && tokenManager.address),
-    address: tokenAddress,
-    abi: tokenAbi as (typeof imaAbi)['ERC20OnChain_abi'],
-    functionName: 'grantRole',
-    args: [BURNER_ROLE, tokenManager.address],
-  });
-  const grantBurnerRole = useContractWrite(grantBurnerRoleConfig);
-  const grantBurnerRoleConfirmed = useWaitForTransaction({
-    hash: grantBurnerRole.data?.hash,
-    onSuccess: () => {
-      tmHasBurnerRole.refetch();
-    },
+  const { registerOnSchain, registerOnForeignChain } = useSTokenRegistration({
+    chainId: targetChain?.id,
+    originChainId: originChain?.id,
+    standardName,
+    tokenAddress: tokenAddress as Address,
+    originTokenAddress: originContractAddress as Address,
+    enabled: form[0].formState.isValid,
   });
 
   const steps: Parameters<typeof Stepper>[0]['steps'] = standard
@@ -980,7 +1160,7 @@ export function ImaMapToken() {
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
-                await addTokenByOwner.writeAsync?.(true);
+                await registerOnSchain.writeAsync?.(true);
                 form.forEach((f) => f.reset());
                 markComplete();
               }}
@@ -1009,20 +1189,20 @@ export function ImaMapToken() {
                     value={form[1].getValues('cloneContractAddress')}
                   />
                 </fieldset>
-                {addTokenByOwner.isError ? (
+                {registerOnSchain.isError ? (
                   <p className="text-sm py-4">
                     <span className="text-[var(--red10)]">
                       <ExclamationTriangleIcon />
                     </span>{' '}
                     Could not register the mapped token -{' '}
-                    {addTokenByOwner.error?.message} :{' '}
-                    {addTokenByOwner.error?.error?.message}
+                    {registerOnSchain.error?.message} :{' '}
+                    {registerOnSchain.error?.error?.message}
                     <br />
                     <button
                       className="underline"
                       onClick={(e) => {
                         e.preventDefault();
-                        addTokenByOwner.reset?.();
+                        registerOnSchain.reset?.();
                       }}
                     >
                       Reset to try again
@@ -1032,7 +1212,7 @@ export function ImaMapToken() {
                   <></>
                 )}
                 <SubmitButtonPair
-                  isReady={!!addTokenByOwner.writeAsync}
+                  isReady={!!registerOnSchain.writeAsync}
                   text="Confirm"
                   stepPrev={stepPrev}
                   stepNext={stepNext}
@@ -1056,8 +1236,7 @@ export function ImaMapToken() {
             await new Promise((resolve, reject) =>
               window.setTimeout(() => resolve(0), 4000),
             );
-            const addTokenByOwnerResponse =
-              await registerMainnetToken.writeAsync?.();
+            await registerOnForeignChain.writeAsync?.();
           } catch (e) {
             console.error('tokenManagerApi tokenByOwner', e);
             // @todo abort here
@@ -1093,7 +1272,7 @@ export function ImaMapToken() {
             </p>
           )}
           <SubmitButtonPair
-            isReady={registerMainnetToken.isSuccess}
+            isReady={registerOnForeignChain.isSuccess}
             text="Confirm"
             stepPrev={async () => {
               await handleTarget.switchNetworkAsync?.();

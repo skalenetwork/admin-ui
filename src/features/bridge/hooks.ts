@@ -38,10 +38,12 @@ export function useTokenManager<T extends TokenStandard>({
 }: TokenTypeProps<T>) {
   const prefix = network === NETWORK.SKALE ? 'TOKEN_MANAGER' : 'DEPOSIT_BOX';
   const id = `${prefix}_${standard}` as const;
-  return {
-    contract: useSContract({ id }),
-    api: useSContractApi({ id }),
-  };
+  return !standard
+    ? {}
+    : {
+        contract: useSContract({ id }),
+        api: useSContractApi({ id }),
+      };
 }
 
 export function useToggleAutodeploy<T extends TokenStandard>({

@@ -11,13 +11,13 @@ export default function RouterCrumb() {
         crumbs.map(({ match, breadcrumb }, index) => (
           <>
             {index > 0 && (
-              <span className="text-[var(--gray8)]">
+              <span key={index} className="text-[var(--gray8)]">
                 <ChevronRightIcon className="h-5" />
               </span>
             )}
             <NavLink
+              key={index + match.pathname}
               className="text-xs text-[var(--gray10)] px-2 uppercase"
-              key={match.pathname}
               to={match.pathname}
             >
               {breadcrumb}

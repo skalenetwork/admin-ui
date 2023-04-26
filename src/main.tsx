@@ -24,6 +24,7 @@ tailwindSetup({
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
 import { createClient, WagmiConfig } from 'wagmi';
 import { provider, chains } from './provider';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const alchemyId = 'alchemy_id';
 const wagmiClient = createClient(
@@ -53,6 +54,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <App />
           </MotionConfig>
         </ConnectKitProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </WagmiConfig>
     </QueryClientProvider>
   </React.StrictMode>,

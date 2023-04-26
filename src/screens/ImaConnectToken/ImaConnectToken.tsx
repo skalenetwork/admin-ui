@@ -17,6 +17,7 @@ export function ImaConnectToken() {
         <div className="flex flex-col justify-around gap-4">
           {Object.values(TOKEN_STANDARD).map((standard) => (
             <Link
+              key={standard.name}
               to={`?standard=${standard.name}`}
               className="btn btn-wide inline-block"
             >
