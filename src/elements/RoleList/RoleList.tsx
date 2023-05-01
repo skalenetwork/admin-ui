@@ -65,7 +65,9 @@ export function RoleList({}: Props) {
   const account = useAccount();
   const { chain } = useNetwork();
   const allContracts = useSContracts({
-    id: Object.keys(CONTRACT) as ContractId[],
+    id: Object.keys(CONTRACT).filter(
+      (key) => !!CONTRACT[key].address,
+    ) as ContractId[],
   });
   const filteredContracts = allContracts.filter(
     (contract) =>

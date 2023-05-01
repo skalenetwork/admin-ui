@@ -19,14 +19,20 @@ type SwapKeyValue<
 };
 
 namespace ContractManifestBase {
-  export type ContractType = 'sudo' | 'ima:bridge' | 'ima:message' | 'storage';
-  export type Item = {
+  export type ContractType =
+    | 'sudo'
+    | 'sudo:manager'
+    | 'ima:bridge'
+    | 'ima:message'
+    | 'storage'
+    | 'standard';
+  export type Item<TContractType = ContractType> = {
     [key: string]: {
       network: (typeof NETWORK)[keyof typeof NETWORK];
-      type: ContractType;
+      type: TContractType;
       key: string;
       name: string;
-      address: `0x${string}`;
+      address: TContractType extends 'standard' ? undefined : `0x${string}`;
     };
   };
 }
@@ -211,6 +217,13 @@ export const CONTRACT = {
     key: 'foreign:linker',
     address: mainnetImaUnion['linker_address'],
     name: 'Linker',
+  },
+  STANDARD_ERC20: {
+    network: NETWORK.SKALE,
+    type: 'standard',
+    key: 'schain:standard:erc20',
+    address: undefined,
+    name: 'StandardERC20',
   },
 } as const satisfies ContractManifestBase.Item;
 
