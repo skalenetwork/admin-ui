@@ -6,15 +6,6 @@ SKALE Chain — Admin UI
 <span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">DEVELOPER GUIDE</span>
 </div>
 
-# Install
-
-Use node version ^18.12
-
-```bash
-yarn
-yarn dev
-```
-
 # Prelude
 
 <img src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
@@ -29,33 +20,100 @@ To build a flying car that actually flies:
 
 <br clear="both">
 
-# Exposed Packages
+Use node version `^18.12`
 
-Following are being built along-side `admin-ui` app specifically for re-usability across ecosystem.
+# Setup
 
-- `src/features`
-- `src/screens`
-- `src/components`: Reusable common components on SKALE's design system, built with headless accessible libraries
-- `src/elements`: JSX UI Elements (ideally framework-agnostic)
-- `src/types`
+- Install dependencies
+
+```
+yarn install
+```
+
+- Refresh known Schains
+
+```bash
+yarn compile:chains
+```
+
+- Run DApp locally
+
+```bash
+yarn dev
+```
+
+- Or, Build for production
+
+```bash
+yarn build:app
+```
+
+Build output goes to `dist`, from where it can be deployed to any static host.
+
+# Structure
+
+This repo follows a _lite microfrontend_ architecture, which means there will be parallels in design decisions, but not a zealous overlap. On further reviews, if enough antipatterns are found, a suitable name for this architecture should be _meshfrontend_.
+
+The aim is to strike a balance between:
+
+1. Re-usability of _features_ by ecosystem projects
+2. Maintainable contributions from across communities
+
+When in that phase, this architecture would be ground-zero for:
+
+1. Restructuring to multi-repo, and / or
+2. Improved bundling within this repo
+
+# Packages
+
+For re-usability across the ecosystem, following is distinctly made available from the repository.
+
+:package: Intuitive react hook libraries integrated with SKALE Network - `src/features`
+
+:crystal_ball: UI compositions including various flows for Schain management - `src/screens`
+
+:bricks: Reusable common components following SKALE's design system, built with headless accessible libraries - `src/components`
+
+:droplet: JSX UI Elements with some context dependency - `src/elements`
+
+:goggles: Well-typed interfaces exported alongside relevant modules
 
 # :package: Features
 
-Features are an implementation detail of the _app-level usability_ of the network capabilities. All features expose vanilla-ts, as well as react hooks that function within a provided `wagmi`+`react-query` context (built-in caching).
+SKALE Network capabilities are divided into features by usability domains.
 
-Following is the architecture breakdown of the founding feature.
+All features require `wagmi` + `react-query` context, exporting:
+
+1. TypeScript utility functions
+2. React TS hooks
+
+Current features include:
+
+1. network
+2. interim (domain TBD)
+3. analytics
+4. bridge (token bridging)
+5. icm (interchain messaging)
+6. multisig
+7. storage
+
+Following is a breakdown of the foundational feature.
 
 ## Network feature
 
 `@/features/network`
 
-A groundwork extensively supporting typescript interfaces across network building blocks.
+Network feature offers extensive support for network building blocks, such as SKALE pre-deployed contracts.
+
+All transactional operations are integrated with SKALE access control.
 
 - Use typed contracts
 - Use utility APIs on top of contracts
 - Use convenience hooks
 
-Network feature builds a configuration layer into it, with interfaces that may be extended as needed, though persisting a base structure and scope.
+Network feature is based on a configuration layer.
+
+> :scroll: Configuration layer is independently scalable. It employs the least common format, which can be versioned, and extended to match change in the network complexity.
 
 ### Configuration: Constants
 
@@ -68,37 +126,37 @@ None-to-slow-changing data
 
 Slow-to-medium-changing data
 
-Manifests are typed exports and currently hand-compiled. These should evolve to be compile-targets of releases made within `skalenetwork/*`.
+Manifests cater to contracts, ABIs, and wrapper APIs.
 
-First class TypeScript support allows dynamic typing from ABIs enabling TS compatibility with core packages like `ethers` and `abitype`.
+> :scroll: Manifests can best evolve to become compile-targets of releases made within `skalenetwork/*`. Following that, they may become a standalone distribution.
 
 - **`manifest.ts`** Re-export of manifests and utility methods
 
-- **`contract.ts`** Entry point of all manifests with indexed contracts (origin of `ContractId`) and relevant types
+- **`contract.ts`** Entry point of following manifests, indexing pre-deployed and other known network contracts with `ContractId`
 
 - **`abi/abi.ts`** Re-export of individual ABIs `abi/abi-*.ts`, indexed by `ContractId`
 
 - **`api.ts`** Re-export of standard initiators for individual APIs imported from various ecosystem libraries, indexed by `ContractId`
 
-> Why redistribute JSON ABIs as .ts files? We need the narrowest `Abi` type, producible by a `const` assertion. TS currently doesn't _(want to)_ support JSON `as const` https://github.com/microsoft/TypeScript/issues/32063
+> **_Why redistribute JSON ABIs as .ts files?_** We need the narrowest `Abi` type, producible by a `const` assertion. TS currently doesn't _(want to)_ support JSON `as const` https://github.com/microsoft/TypeScript/issues/32063
 
 Example usage of exposed getters:
 
 ```ts
 const address = getSContractProp('CONFIG_CONTROLLER', 'address');
-
 const abi = getAbi('CONFIG_CONTROLLER');
 
-build.contractIdFromAddress(address);
+// and reverse
 
-const { abi, address } = build.addressAbiPair('CONFIG_CONTROLLER');
+const contractId = build.contractIdFromAddress(address);
+const { abi, address } = build.addressAbiPair(contractId);
 ```
 
 ### Configuration: Registry
 
 Medium-to-fast changing data
 
-Registry points to files published externally to feature scope, from any source. It dynamically fetches source data in runtime, produces the parsed object and exposes predefined types for it. Just kidding... it's currently not exactly that organized, but it's an easy implementation, and when the use cases extend from barely 2 this is a good mental model for quick implementation. Following is already implemented though.
+Registry is a loose implementation around the idea of registering off-chain / near-chain metadata within a module.
 
 Presently registered metadata includes:
 
@@ -110,14 +168,11 @@ Presently registered metadata includes:
 
 # :crystal_ball: Screens
 
-In current micro-mono hybrid architecture, screens are HOC compositions of stateless `elements`.
+It may help to think of screens as _portals_ to stateful features.
 
-:crystal_ball: It might help to think of screens as portals of stateful features.
+Screens are composed of UI widgets linked to UI flows that execute operations on SChain.
 
-This directly enables:
-
-1. Portability of client-agnostic stateful features, and submodules.
-2. Portability of stateful screens (react).
+They are like pages served in any frontend; Except, all _screens_ are exported independent of each other, and usable in any DApp.
 
 # SDK Usage
 
@@ -146,14 +201,17 @@ Refer to [wagmi docs](https://wagmi.sh/react/getting-started) for complete setup
 
 ## Examples
 
-- **Read** from pre-deployed contract
+**Read a single value** from a pre-deployed contract
 
 ```tsx
-// single-read
 const { data } = useSContractRead('TOKEN_MANAGER_ERC20', {
   name: 'automaticDeploy',
 });
+```
 
+**Read multiple values** from a pre-deployed contract
+
+```tsx
 // multi-read fits best with TS for similarly typed return values
 const { data, status, refetch } = useSContractReads('CONFIG_CONTROLLER', {
   reads: [
@@ -167,57 +225,102 @@ const { data, status, refetch } = useSContractReads('CONFIG_CONTROLLER', {
 });
 ```
 
-- **Write** to pre-deployed contract
+**Write** to a pre-deployed contract
 
 ```ts
 import { useSContractWrite } from '@skalenetwork/admin-ui/features';
 
 const writer = useSContractWrite('TOKEN_MANAGER_LINKER', {
   name: 'connectSChain',
-  args: ['staging-aware-chief-gianfar']
+  args: ['staging-aware-chief-gianfar'],
 });
-
-const handleSubmit = useCallback(() => {
-  write?.write();
-}. [writer.write]);
-
-const handleSubmitWithConfirm = useCallback(async () => {
-  if(!writer.writeAsync) return;
-  await writer.writeAsync(true);
-}, [writer.writeAsync]);
-
 ```
 
-What's in the writer?
+handle with side effects
 
 ```tsx
-// writer exposes full state through lifecycle of contract mutation
+const { isLoading, isSuccess, isConfirmed, receipt } = writer;
 
+useEffect(() => {
+  // when confirmed
+}, [receipt]);
+
+const handleSubmit = useCallback(() => {
+  writer?.write();
+}. [writer.write]);
+```
+
+handle with promises
+
+```tsx
+const handleSubmitWithConfirm = useCallback(async () => {
+  if (!writer.writeAsync) return;
+  const receipt = await writer.writeAsync(true);
+}, [writer.writeAsync]);
+```
+
+**What else is in the `writer`?**
+
+`writer` exposes `status` of the contract mutation through its lifecycle.
+
+- from `idle`
+- through `loading`
+- to `success` or `error`
+- back to `idle` if auto or manually `reset()`
+
+```tsx
 const { eoa, mnm, ...rest } = writer;
+```
 
-// eoa = writer with Externally Owned Account as signer
-// mnm = writer with Multisig Owner as signer
+- `eoa` writer where Externally Owned Account (EOA) is signer
 
-// rest is copy of either eoa or mnm depending on current authorization
+- `mnm` writer where EOA is owner of `MultiSig`, and submits a transaction that is routed through `Marionette`
 
-// exposing default outputs of useContractWrite from wagmi and some extras
+- `rest` is copy of either `eoa` or `mnm`, whichever is authorized, where precedence is given to `eoa`
 
+`writer.writeAsync` or `writer.write` execute an already prepared transaction. These methods will only be available if:
+
+1. `args` are passed as expected into `useSContractWrite` options
+2. there are no authorization exceptions
+3. there are no `require` failures in method call
+
+:arrow_upper_right: [Learn more](https://wagmi.sh/react/prepare-hooks) about underlying contract call preparation done by `wagmi`
+
+Both `writer`s extend the return data of `wagmi`.`useContractWrite`, with more state values.
+
+```tsx
 const { action, multisigData, receipt, isConfirmed, isFailed } = rest;
 
-const isUsingExternallyOwnedAccount = action === 'eoa';
-
-const isUsingMultisigConfirm = action === 'confirm';
-const isUsingMultisigExecute = action === 'execute';
-const isUsingMultisigSubmit = action === 'submit';
+const natureOfDestinationContractCallThroughMariontteViaMultisig = {
+  isConfirmExistingIdenticalTx: action === 'confirm',
+  isExecuteExistingIdenticalTx: action === 'execute',
+  isSubmitNewTx: action === 'submit',
+};
 
 const countMultisigConfirmations = multisigData?.countConfirmed;
 const countMultisigRequiredConfirmations = multisigData?.countRequired;
 ```
 
-- **Guard** UI actions from unready writer
+**Guard** UI actions from unready writer
+
+```tsx
+<button disabled={!!writer.writeAsync}>Guarded Action</button>
+```
+
+**Guard and guide** action with a well-formatted button using `SButton` element
 
 ```jsx
-<button disabled={!!writer.writeAsync}>Guarded Action</button>
+<SButton writer={writer}>Guarded Action</SButton>
+```
+
+**Preview a guarded action** button without `writer` execution on click
+
+```jsx
+// usage as a preview that opens a separate flow
+
+<SButton writer={writer} noWrite onClick={(e) => openModal()}>
+  Open Modal
+</SButton>
 ```
 
 ---
