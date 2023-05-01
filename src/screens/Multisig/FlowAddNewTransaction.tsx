@@ -1,6 +1,7 @@
 import { Abi, AbiFunction } from 'abitype';
 import { ethers } from 'ethers';
 import {
+  FormEventHandler,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -279,7 +280,7 @@ export function FlowAddNewTransaction({
       : [contractAddress, 0, infoForm.encoded],
     overrides: {
       ...(gasPrice ? { gasPrice } : {}),
-      ...(nonce > counts.data.countTotalTrx ? { nonce } : {}),
+      ...(nonce > Number(counts.data.countTotalTrx) ? { nonce } : {}),
     },
   });
   const writeAsync =
@@ -287,7 +288,7 @@ export function FlowAddNewTransaction({
       ? submitTransaction.writeAsync
       : submitTransaction.mnm?.writeAsync;
 
-  const handleFinalSubmit = useCallback(
+  const handleFinalSubmit: FormEventHandler<HTMLFormElement> = useCallback(
     async (lastFormData) => {
       const data = {
         ...form[0].getValues(),
@@ -312,12 +313,13 @@ export function FlowAddNewTransaction({
                 render: ({ data }) => (
                   <>
                     <p>Transaction submitted {data?.hash}</p>
-                    {counts.data.countReqdConfirms > 1 && (
-                      <p className="font-semibold">
-                        Pending: Requires {counts.data.countReqdConfirms - 1}{' '}
-                        more confirmations to succeed
-                      </p>
-                    )}
+                    {counts.data.countReqdConfirms &&
+                      counts.data.countReqdConfirms > 1 && (
+                        <p className="font-semibold">
+                          Pending: Requires {counts.data.countReqdConfirms - 1}{' '}
+                          more confirmations to succeed
+                        </p>
+                      )}
                   </>
                 ),
               },

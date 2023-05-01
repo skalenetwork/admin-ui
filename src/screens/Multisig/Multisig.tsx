@@ -248,6 +248,7 @@ export function Multisig() {
                       toggleAlert={toggleAlert}
                       owners={owners?.data || []}
                       onSubmit={(data) => {
+                        owners.refetch();
                         setCachedOwners({
                           ...cachedOwners,
                           [data.ownerAddress]: {

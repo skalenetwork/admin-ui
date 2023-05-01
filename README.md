@@ -164,8 +164,6 @@ Presently registered metadata includes:
 - `skale-network`: `metadata/mainnet/chains.json`
 - `admin-ui`: `metadata/roles.json`
 
-> Note: All configuration is scalable to allow a versioned design, which will make up for a more diligent network feature.
-
 # :crystal_ball: Screens
 
 It may help to think of screens as _portals_ to stateful features.
@@ -174,15 +172,15 @@ Screens are composed of UI widgets linked to UI flows that execute operations on
 
 They are like pages served in any frontend; Except, all _screens_ are exported independent of each other, and usable in any DApp.
 
-# SDK Usage
-
-@ v0.3 packages are unbundled exports i.e. they can only be used as direct imports into TS projects. [TO BE TESTED]
+# Usage of packages
 
 ## Install
 
 ```sh
 yarn add skalenetwork/admin-ui
 ```
+
+> `@v0.3.0` packages can only be used as TS imports.
 
 ## Setup
 

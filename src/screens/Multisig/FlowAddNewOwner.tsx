@@ -1,7 +1,12 @@
 import Dialog from '@/components/Dialog/Dialog';
 import Field from '@/elements/Field/Field';
 import { useSContractWrite } from '@/features/network/hooks';
-import { useCallback, useLayoutEffect, useState } from 'react';
+import {
+  FormEventHandler,
+  useCallback,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { AlertProps } from '../types';
@@ -61,7 +66,7 @@ export function FlowAddNewOwner({
     args: [form[0].watch('ownerAddress') as `0x{string}`],
   });
 
-  const handleFinalSubmit = useCallback(
+  const handleFinalSubmit: FormEventHandler<HTMLFormElement> = useCallback(
     async (e) => {
       e.preventDefault();
       const data = {
@@ -69,21 +74,23 @@ export function FlowAddNewOwner({
         ...form[1].getValues(),
       };
       addOwner.writeAsync &&
-        toast.promise(
-          async () => {
-            const response = await addOwner.writeAsync(true).finally(() => {
-              form[0].reset();
-              form[1].reset();
-            });
-            return response;
-          },
-          {
-            pending: `Adding owner - ${data.ownerName}`,
-            success: `Added owner - ${data.ownerName}`,
-            error: `Failed to add owner - ${data.ownerName}`,
-          },
-        );
-      onSubmit(data);
+        toast
+          .promise(
+            async () => {
+              const response = await addOwner.writeAsync?.(true);
+              return response;
+            },
+            {
+              pending: `Adding owner - ${data.ownerName}`,
+              success: `Added owner - ${data.ownerName}`,
+              error: `Failed to add owner - ${data.ownerName}`,
+            },
+          )
+          .then((data) => {
+            form[0].reset();
+            form[1].reset();
+            onSubmit(data);
+          });
       toggleAlert(id)(false);
     },
     [form],

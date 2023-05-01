@@ -139,10 +139,7 @@ export function useSContract<
 }
 
 /**
- * Use network contract SDK wrapper instance
- * @todo make consistent with useTypedContract signature
- * @todo after wrapper registration in manifest: refactor to remove injection
- * @todo consider consuming useTypedContract within
+ * Use external library wrapper for predeployed contract
  * @param param0
  * @returns
  */
