@@ -55,7 +55,6 @@ export const ABI = {
   LINKER: mainnetImaUnion['linker_abi'],
   DEPOSIT_BOX_ERC721_WITH_METADATA:
     mainnetImaUnion['deposit_box_erc721_with_metadata_abi'],
-  STANDARD_ERC20: schainImaUnion['ERC20OnChain_abi'],
 } as const satisfies {
   [key in ContractId as ContractId]: Abi | RelaxedAbi;
 };

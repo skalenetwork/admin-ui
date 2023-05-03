@@ -218,13 +218,6 @@ export const CONTRACT = {
     address: mainnetImaUnion['linker_address'],
     name: 'Linker',
   },
-  STANDARD_ERC20: {
-    network: NETWORK.SKALE,
-    type: 'standard',
-    key: 'schain:standard:erc20',
-    address: undefined,
-    name: 'StandardERC20',
-  },
 } as const satisfies ContractManifestBase.Item;
 
 export type ContractManifest = typeof CONTRACT;
