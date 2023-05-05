@@ -551,6 +551,8 @@ export function useSchainTokens({
   };
 }
 
+export function useSTokenDeploy({}: {}) {}
+
 export function ImaMapToken() {
   const { chain: activeChain, chains } = useNetwork();
   const { data: signer } = useSigner();
@@ -678,6 +680,7 @@ export function ImaMapToken() {
   const grantBurnerRoleConfirmed = grantBurnerRole.confirmed;
 
   const { name, symbol, decimals } = form[2].watch();
+
   const deployment = useMutation({
     mutationKey: ['custom', 'ima-deployment', standard],
     mutationFn: async () => {

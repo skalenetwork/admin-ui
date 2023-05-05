@@ -88,7 +88,7 @@ export function useChainConnect({ chainName }: { chainName: string }) {
   const { chain: originChain, chains } = useNetwork();
   const targetChain = chains.find((chain) => chain.name === chainName);
 
-  const { data, isLoading, isSuccess, isError } = useSContractReads(
+  const { data, isLoading, isSuccess, isError, refetch } = useSContractReads(
     'TOKEN_MANAGER_LINKER',
     {
       enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
@@ -131,6 +131,7 @@ export function useChainConnect({ chainName }: { chainName: string }) {
     isError,
     connect,
     status,
+    refetch,
   };
 }
 

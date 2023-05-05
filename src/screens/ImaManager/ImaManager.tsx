@@ -31,7 +31,6 @@ import { motion } from 'framer-motion';
 import humanizeDuration from 'humanize-duration';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { tw } from 'twind';
 import { useNetwork } from 'wagmi';
 import { AlertProps } from '../types';
@@ -86,7 +85,11 @@ const SelectedPeerChainItem = ({
   name: string;
 }) => {
   const { chain, chains } = useNetwork();
-  const { status: connectionStatus, connect } = useChainConnect({
+  const {
+    status: connectionStatus,
+    connect,
+    refetchConnection,
+  } = useChainConnect({
     chainName: name,
   });
 
@@ -221,20 +224,22 @@ const SelectedPeerChainItem = ({
                   <code>TokenManagerLinker</code>
                 </small>
               ) : (
-                <button
-                  onClick={() => {
-                    connect?.writeAsync &&
-                      toast.promise(connect.writeAsync(true), {
-                        pending: `Accepting request from ${name}`,
-                        success: `Request accepted from ${name}`,
-                        error: `Failed to accept request from ${name}`,
-                      });
+                <SButton
+                  writer={connect}
+                  toast={{
+                    pending: `Accepting request from ${name}`,
+                    success: `Request accepted from ${name}`,
+                    error: `Failed to accept request from ${name}`,
+                  }}
+                  onPromise={(promise) => {
+                    promise.then((res) => {
+                      refetchConnection();
+                    });
                   }}
                   className="btn btn-outline m-auto w-2/3 rounded-full"
-                  disabled={!connect.writeAsync}
                 >
                   Accept request
-                </button>
+                </SButton>
               )
             ) : (
               <>
@@ -498,6 +503,11 @@ export function ImaManager() {
               <SButton
                 className="btn rounded-full"
                 writer={grantChainConnectorRole}
+                onPromise={(promise) => {
+                  promise.then((res) => {
+                    hasChainConnectorRole.refetch();
+                  });
+                }}
                 onClick={(e) => {
                   e.preventDefault();
                 }}
