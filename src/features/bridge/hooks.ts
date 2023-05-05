@@ -1,8 +1,3 @@
-import {
-  useSContractApi,
-  useSContractRead,
-  useSContractWrite,
-} from '@/features/network/hooks';
 /**
  * @namespace Bridge
  * @module BridgeHooks
@@ -13,12 +8,14 @@ import { CONTRACT } from '@/features/network/contract';
 import {
   useExplorer,
   useSContract,
+  useSContractApi,
+  useSContractRead,
   useSContractReads,
+  useSContractWrite,
 } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { useQuery } from '@tanstack/react-query';
-
 import { ethers } from 'ethers';
 import { useNetwork } from 'wagmi';
 import { toSentenceCase } from '../../utils';
