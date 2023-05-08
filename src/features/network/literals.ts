@@ -51,3 +51,6 @@ export const TOKEN_STANDARD = {
     label: 'ERC-1155',
   },
 } as const;
+
+export type StandardKey = keyof typeof TOKEN_STANDARD;
+export type StandardName = (typeof TOKEN_STANDARD)[StandardKey]['name'];
