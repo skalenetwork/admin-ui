@@ -245,7 +245,9 @@ const SelectedPeerChainItem = ({
               <>
                 <span className="font-medium">Mapped Tokens: </span>
                 <Dialog
-                  title={`${selectedStandard?.label} Tokens`}
+                  title={`${
+                    selectedStandard ? selectedStandard.label : ''
+                  } Tokens`}
                   description={''}
                   trigger={
                     <button className="">

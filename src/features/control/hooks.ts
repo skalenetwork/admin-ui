@@ -7,7 +7,6 @@ import {
   useSContractApi,
   useSContractRead,
   useSContractReads,
-  useSContractRoles,
   useSContractWrite,
 } from '@/features/network/hooks';
 import { TOKEN_STANDARD } from '@/features/network/literals';
@@ -156,7 +155,6 @@ function useDeployStandardContract(props: DeployStandardProps) {
  */
 export function useSTokenDeploy(props: DeployStandardProps) {
   const account = useAccount();
-
   const deployment = useDeployStandardContract(props);
 
   const isMultisigOwner = useSContractRead('MULTISIG_WALLET', {
@@ -166,66 +164,77 @@ export function useSTokenDeploy(props: DeployStandardProps) {
   });
   const msigReqdConfirms = useSContractRead('MULTISIG_WALLET', {
     name: 'required',
+    select: (data) => {
+      return data.toNumber?.();
+    },
+  });
+  const isEoaWhitelisted = useSContractRead('CONFIG_CONTROLLER', {
+    enabled: !!account.address,
+    name: 'isAddressWhitelisted',
+    args: [account.address],
   });
 
-  const roles = useSContractRoles('CONFIG_CONTROLLER', [
-    'DEPLOYER_ADMIN_ROLE',
-    'DEPLOYER_ROLE',
-  ]);
-  const {
-    data: [deployerAdminRole, deployerRole],
-  } = roles;
-  const eoaHasDeployerAdminRole = deployerAdminRole.permissions.signer === true;
-  const eoaHasDeployerRole = deployerRole.permissions.signer === true;
-
   const addSelfToWhitelist = useSContractWrite('CONFIG_CONTROLLER', {
-    enabled: !!account.address,
+    enabled: !!account.address && isEoaWhitelisted.data === false,
     name: 'addToWhitelist',
     args: [account.address],
   });
   const removeSelfFromWhitelist = useSContractWrite('CONFIG_CONTROLLER', {
-    enabled: !!account.address,
+    enabled: !!(account.address && addSelfToWhitelist.isSuccess),
     name: 'removeFromWhitelist',
     args: [account.address],
   });
 
-  const isLoadingReads = [isMultisigOwner, msigReqdConfirms, roles].some(
-    (i) => i.isLoading,
-  );
+  const isPreparing: boolean = [
+    isMultisigOwner,
+    isEoaWhitelisted,
+    msigReqdConfirms,
+  ].some((one) => one.isLoading);
 
-  if (!eoaHasDeployerRole && eoaHasDeployerAdminRole) {
-  }
+  // EOA-initiated safest deployment
+  // if signer is not whitelisted but can solely self-whitelist: whitelist -> deploy -> unwhitelist
 
-  const sequencedWriters = [
-    addSelfToWhitelist,
-    {
-      ...deployment,
-      writeAsync: deployment.mutateAsync && (() => deployment.mutateAsync()),
-    },
-    removeSelfFromWhitelist,
-  ];
-  const writeAsync = useMemo(
-    () => {
-      if (
-        isLoadingReads ||
-        msigReqdConfirms.data === 1 ||
-        sequencedWriters.some((writer) => !writer.writeAsync)
-      ) {
+  const shouldWhitelist =
+    !isPreparing &&
+    isEoaWhitelisted.data === false &&
+    !!(
+      (isMultisigOwner.data && msigReqdConfirms.data === 1) ||
+      addSelfToWhitelist.eoa.writeAsync
+    );
+
+  const writeAsync = useMemo(() => {
+    if (isPreparing || !shouldWhitelist) {
+      return;
+    }
+    return async () => {
+      let response;
+      if (isEoaWhitelisted.data === true) {
+        response = await deployment.mutateAsync();
         return;
       }
-      return async () => {
-        for await (const writer of sequencedWriters) {
-          await writer.writeAsync?.(true);
-        }
-      };
-    },
-    sequencedWriters.map((writer) => writer.writeAsync),
-  );
+      await addSelfToWhitelist.writeAsync?.(true);
+      response = await deployment.mutateAsync().finally(async () => {
+        await removeSelfFromWhitelist.writeAsync?.(true);
+      });
+      return response;
+    };
+  }, [
+    isPreparing,
+    shouldWhitelist,
+    deployment.mutateAsync,
+    addSelfToWhitelist.writeAsync,
+    removeSelfFromWhitelist.writeAsync,
+  ]);
 
   return {
-    isLoading: sequencedWriters.some((w) => w.isLoading),
-    isSuccess: sequencedWriters.some((w) => w.isSuccess),
-    isError: sequencedWriters.some((w) => w.isError),
-    writeAsync,
+    isPreparing,
+    isPreWhitelisted: isEoaWhitelisted.data,
+    shouldManualDeploy: !shouldWhitelist,
+    deploy: writeAsync && {
+      isSuccess: deployment.isSuccess,
+      isError: deployment.isError,
+      isLoading: deployment.isLoading,
+      writeAsync,
+    },
   };
 }

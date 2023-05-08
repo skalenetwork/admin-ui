@@ -89,8 +89,8 @@ All features require `wagmi` + `react-query` context, exporting:
 
 Current features include:
 
-1. network
-2. interim (domain TBD)
+1. network (primitives)
+2. control
 3. analytics
 4. bridge (token bridging)
 5. icm (interchain messaging)

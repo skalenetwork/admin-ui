@@ -10,7 +10,7 @@ import { ConnectKitButton } from 'connectkit';
 import { FcdIcon, GithubIcon, MtmIcon } from '@/components/Icons/Icons';
 import RoleList from '@/elements/RoleList/RoleList';
 import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
-import { useConfigController } from '@/features/interim/hooks';
+import { useConfigController } from '@/features/control/hooks';
 import { FlagIcon } from '@heroicons/react/24/solid';
 import {
   CaretDownIcon,
