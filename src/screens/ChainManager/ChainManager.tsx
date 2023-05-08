@@ -1,6 +1,6 @@
 import Card from '@/components/Card/Card';
 
-import { useConfigController, useFcd, useMtm } from '@/features/interim/hooks';
+import { useConfigController, useFcd, useMtm } from '@/features/control/hooks';
 import { useCallback, useEffect, useState } from 'react';
 
 import AlertDialog from '@/components/AlertDialog/AlertDialog';

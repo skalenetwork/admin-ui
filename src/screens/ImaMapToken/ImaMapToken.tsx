@@ -1,27 +1,25 @@
 import Card from '@/components/Card/Card';
 import Stepper from '@/components/Stepper/Stepper';
+import { Tabs } from '@/components/Tabs/Tabs';
 import Field from '@/elements/Field/Field';
 import { NiceAddress } from '@/elements/NiceAddress/NiceAddress';
+import { useTokenManager } from '@/features/bridge';
 import { ABI } from '@/features/network/abi/abi';
-import ERC20Standard from '@/features/network/abi/erc20-standard.json';
+import * as addresses from '@/features/network/address';
 import { CONTRACT } from '@/features/network/contract';
 import { useExplorer, useSContractWrite } from '@/features/network/hooks';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
 import ImaConnectToken from '@/screens/ImaConnectToken/ImaConnectToken';
 import Prelay from '@/screens/Prelay';
-import { FormProvider, useForm } from 'react-hook-form';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { tw } from 'twind';
-
-import { Tabs } from '@/components/Tabs/Tabs';
-import { useTokenManager } from '@/features/bridge';
-import * as addresses from '@/features/network/address';
 import {
   CaretLeftIcon,
   CheckCircledIcon,
   ExclamationTriangleIcon,
 } from '@radix-ui/react-icons';
 import { getContract } from '@wagmi/core';
+import { FormProvider, useForm } from 'react-hook-form';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { tw } from 'twind';
 import {
   Address,
   useContract,
@@ -36,9 +34,10 @@ import {
 } from 'wagmi';
 
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
+import { useSTokenDeploy } from '@/features/control/hooks';
 import imaAbi from '@/features/network/abi/abi-ima.union';
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
-import { BigNumber, ContractFactory } from 'ethers';
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { BigNumber } from 'ethers';
 import { useEffect, useMemo } from 'react';
 
 const wildcardAddresses = Object.values(addresses).map((x) => x.toLowerCase());
@@ -551,8 +550,6 @@ export function useSchainTokens({
   };
 }
 
-export function useSTokenDeploy({}: {}) {}
-
 export function ImaMapToken() {
   const { chain: activeChain, chains } = useNetwork();
   const { data: signer } = useSigner();
@@ -681,32 +678,20 @@ export function ImaMapToken() {
 
   const { name, symbol, decimals } = form[2].watch();
 
-  const deployment = useMutation({
-    mutationKey: ['custom', 'ima-deployment', standard],
-    mutationFn: async () => {
-      const factory = new ContractFactory(
-        ERC20Standard['abi'],
-        ERC20Standard['bytecode'],
-        signer,
-      );
-      const contract = await factory.deploy(
-        name,
-        symbol,
-        BigNumber.from(decimals),
-        {
-          gasLimit: 1500000,
-          gasPrice: 100000,
-        },
-      );
-      await contract.deployed();
-      return contract;
-    },
+  const deployment = useSTokenDeploy({
+    name,
+    symbol,
+    decimals: BigNumber.from(decimals),
+    standard: 'erc20',
   });
 
   useEffect(() => {
-    deployment.isSuccess &&
-      form[1].setValue('cloneContractAddress', deployment.data.address);
-  }, [deployment.isSuccess]);
+    deployment.deploy?.isSuccess &&
+      form[1].setValue(
+        'cloneContractAddress',
+        deployment.deploy?.data?.address,
+      );
+  }, [deployment.deploy?.isSuccess]);
 
   const { registerOnSchain, registerOnForeignChain } = useSTokenRegistration({
     chainId: targetChain?.id,
@@ -901,7 +886,7 @@ export function ImaMapToken() {
                           isReady={
                             targetContractInfo.isSuccess &&
                             !!(MINTER_ROLE && BURNER_ROLE) &&
-                            !deployment.isLoading
+                            !deployment.deploy?.isLoading
                           }
                           text="Next"
                           stepPrev={stepPrev}
@@ -920,7 +905,7 @@ export function ImaMapToken() {
                       <form
                         onSubmit={form[2].handleSubmit(
                           async (data) => {
-                            await deployment.mutateAsync?.();
+                            await deployment.deploy?.writeAsync?.();
                           },
                           (err) => {},
                         )}
@@ -947,19 +932,19 @@ export function ImaMapToken() {
                             placeholder="18"
                             required="Contract decimals are required"
                           />
-                          {deployment.isError ? (
+                          {deployment.deploy?.isError ? (
                             <p className="text-sm py-4 max-w-full">
                               <span className="text-[var(--red10)]">
                                 <ExclamationTriangleIcon />
                               </span>{' '}
                               Could not deploy the token -{' '}
-                              {deployment.error?.reason}
+                              {deployment.deploy?.error?.reason}
                               <br />
                               <button
                                 className="underline"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  deployment.reset?.();
+                                  deployment.deploy?.reset?.();
                                 }}
                               >
                                 Reset to try again
@@ -968,13 +953,13 @@ export function ImaMapToken() {
                           ) : (
                             <></>
                           )}
-                          {deployment.isSuccess ? (
+                          {deployment.deploy?.isSuccess ? (
                             <p className="text-sm py-4 max-w-full">
                               <span className="text-[var(--green10)] align-middle">
                                 <CheckCircledIcon />
                               </span>{' '}
                               Contract successfully deployed at{' '}
-                              <code>{deployment.data?.address}</code>
+                              <code>{deployment.deploy?.data?.address}</code>
                             </p>
                           ) : (
                             <></>
@@ -983,18 +968,18 @@ export function ImaMapToken() {
                             <SubmitButtonPair
                               isReady={
                                 form[2].formState.isValid &&
-                                !deployment.isSuccess
+                                !deployment.deploy?.isSuccess
                               }
-                              isLoading={deployment.isLoading}
+                              isLoading={deployment.deploy?.isLoading}
                               text={
-                                !deployment.isSuccess
+                                !deployment.deploy?.isSuccess
                                   ? 'Deploy Contract'
                                   : 'Deployed'
                               }
                               stepPrev={stepPrev}
                               stepNext={stepNext}
                             />
-                            {deployment.isSuccess && (
+                            {deployment.deploy?.isSuccess && (
                               <button
                                 className="btn"
                                 onClick={(e) => {
