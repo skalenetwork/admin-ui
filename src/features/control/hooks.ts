@@ -231,9 +231,9 @@ export function useSTokenDeploy(props: DeployStandardProps) {
     isPreWhitelisted: isEoaWhitelisted.data,
     shouldManualDeploy: !shouldWhitelist,
     deploy: writeAsync && {
-      isSuccess: deployment.isSuccess,
-      isError: deployment.isError,
-      isLoading: deployment.isLoading,
+      ...deployment,
+      mutate: undefined,
+      mutateAsync: undefined,
       writeAsync,
     },
   };
