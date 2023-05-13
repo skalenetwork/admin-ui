@@ -6,11 +6,9 @@ import {
   PermissionData,
   useImaMapTokenContext,
 } from '@/screens/ImaMapToken/context';
+import { ErrorMessage } from '@/screens/ImaMapToken/ErrorMessage';
 import { SubmitButtonPair } from '@/screens/ImaMapToken/SubmitButtonPair';
-import {
-  CheckCircledIcon,
-  ExclamationTriangleIcon,
-} from '@radix-ui/react-icons';
+import { CheckCircledIcon } from '@radix-ui/react-icons';
 import { FormProvider } from 'react-hook-form';
 import { tw } from 'twind';
 
@@ -19,10 +17,13 @@ export const StepThree = (props: {
   stepPrev: () => void;
 }) => {
   const { stepNext, stepPrev } = props;
-  const { forms, originChain, targetChain, standard } = useImaMapTokenContext();
-  const form = forms[3];
+  const { forms, targetChain, standard, cloneTokenAddress } =
+    useImaMapTokenContext();
+  const form = forms.permission;
   const standardName = standard?.toLowerCase() as StandardName;
   const {
+    minterRole,
+    burnerRole,
     BURNER_ROLE,
     MINTER_ROLE,
     grantBurnerRoleToOriginTM: grantBurnerRole,
@@ -32,15 +33,24 @@ export const StepThree = (props: {
   } = useSTokenMintBurnAccess({
     chainId: targetChain?.id,
     standardName,
-    tokenAddress,
+    tokenAddress: cloneTokenAddress,
   });
   const grantMinterRoleConfirmed = grantMinterRole.confirmed;
   const grantBurnerRoleConfirmed = grantBurnerRole.confirmed;
 
+  const isRoleGrantingDisabled =
+    (!minterRole.isLoading &&
+      !burnerRole.isLoading &&
+      (!MINTER_ROLE || !BURNER_ROLE)) ||
+    !grantBurnerRoleConfirmed.isIdle ||
+    !grantMinterRoleConfirmed.isIdle ||
+    !(!tmHasMinterRole.data && grantMinterRole.writeAsync) ||
+    !(!tmHasBurnerRole.data && grantBurnerRole.writeAsync);
+
   return (
     <FormProvider {...form}>
       <form
-        onSubmit={forms[2].handleSubmit(
+        onSubmit={form.handleSubmit(
           async (data) => {
             stepNext();
           },
@@ -91,16 +101,7 @@ export const StepThree = (props: {
                   />
                   <div className="my-6 flex flex-row">
                     <button
-                      disabled={
-                        !MINTER_ROLE ||
-                        !BURNER_ROLE ||
-                        !grantBurnerRoleConfirmed.isIdle ||
-                        !grantMinterRoleConfirmed.isIdle ||
-                        !(
-                          !tmHasMinterRole.data && grantMinterRole.writeAsync
-                        ) ||
-                        !(!tmHasBurnerRole.data && grantBurnerRole.writeAsync)
-                      }
+                      disabled={isRoleGrantingDisabled}
                       className="btn btn-outline py-3"
                       onClick={async (e) => {
                         e.preventDefault();
@@ -118,41 +119,40 @@ export const StepThree = (props: {
               </>
             )}
           </Card>
-          {grantBurnerRoleConfirmed.isError ||
-          grantBurnerRole.isError ||
-          grantMinterRoleConfirmed.isError ||
-          grantMinterRole.isError ? (
-            <p className="text-sm py-4">
-              <span className="text-[var(--red10)]">
-                <ExclamationTriangleIcon />
-              </span>{' '}
-              {(grantBurnerRoleConfirmed.isError || grantBurnerRole.isError) &&
-                `Failed to grant burner role - ${
-                  grantBurnerRole.error?.message ||
-                  grantBurnerRoleConfirmed.error?.message ||
-                  ''
-                }`}
-              <br></br>
-              {(grantMinterRoleConfirmed.isError || grantMinterRole.isError) &&
-                `Failed to grant minter role - ${
-                  grantMinterRole.error?.message ||
-                  grantMinterRoleConfirmed.error?.message ||
-                  ''
-                }`}
-              <br></br>
-              <button
-                className="underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  grantMinterRole.reset();
-                  grantBurnerRole.reset();
-                }}
-              >
-                Reset to try again
-              </button>
-            </p>
-          ) : (
-            <></>
+          {(!MINTER_ROLE ||
+            !BURNER_ROLE ||
+            grantBurnerRoleConfirmed.isError ||
+            grantBurnerRole.isError ||
+            grantMinterRoleConfirmed.isError ||
+            grantMinterRole.isError) && (
+            <ErrorMessage
+              errors={[
+                (!BURNER_ROLE || !MINTER_ROLE) &&
+                  `Contract does not seem to have OZ minter and burner roles`,
+                (grantBurnerRoleConfirmed.isError || grantBurnerRole.isError) &&
+                  `Failed to grant burner role - ${
+                    grantBurnerRole.error?.message ||
+                    grantBurnerRoleConfirmed.error?.message ||
+                    ''
+                  }`,
+                (grantMinterRoleConfirmed.isError || grantMinterRole.isError) &&
+                  `Failed to grant minter role - ${
+                    grantMinterRole.error?.message ||
+                    grantMinterRoleConfirmed.error?.message ||
+                    ''
+                  }`,
+                <button
+                  className="underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    grantMinterRole.reset();
+                    grantBurnerRole.reset();
+                  }}
+                >
+                  Reset to try again
+                </button>,
+              ]}
+            />
           )}
           <SubmitButtonPair
             isReady={Boolean(tmHasBurnerRole.data && tmHasMinterRole.data)}

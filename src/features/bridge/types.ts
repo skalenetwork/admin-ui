@@ -1,9 +1,9 @@
-import imaAbi from '@/features/network/abi/abi-ima.union';
+import erc20Standard from '@/features/network/abi/erc20-standard';
 import { NETWORK } from '@/features/network/literals';
 
 export type Token = { address: string; name: string };
 
-export type CommonTokenAbi = (typeof imaAbi)['ERC20OnChain_abi'];
+export type CommonTokenAbi = (typeof erc20Standard)['abi'];
 
 export type TokenTypeProps<S> = {
   standard: S;

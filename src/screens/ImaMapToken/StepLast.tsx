@@ -1,32 +1,37 @@
 import { useSTokenRegistration } from '@/features/bridge';
+import { StandardName } from '@/features/network/literals';
 import { useImaMapTokenContext } from '@/screens/ImaMapToken/context';
+import { ErrorMessage } from '@/screens/ImaMapToken/ErrorMessage';
+import { SubmitButtonPair } from '@/screens/ImaMapToken/SubmitButtonPair';
+import { Address } from 'abitype';
 
 export const StepLast = (props: {
   stepNext: () => void;
   stepPrev: () => void;
   markComplete: () => void;
 }) => {
-  const { stepPrev } = props;
-  const { forms, originChain, targetChain, standard, tokenAddress } =
+  const { stepPrev, markComplete } = props;
+  const { forms, originChain, targetChain, standard, cloneTokenAddress } =
     useImaMapTokenContext();
+  const standardName = standard?.toLowerCase() as StandardName;
 
-  const originForm = form[0];
+  const originForm = forms.originToken;
   const originContractAddress = originForm.watch('originContractAddress');
 
   const { registerOnSchain } = useSTokenRegistration({
+    enabled: originForm.formState.isValid,
     chainId: targetChain?.id,
     originChainId: originChain?.id,
     standardName,
-    tokenAddress: tokenAddress as Address,
+    tokenAddress: cloneTokenAddress as Address,
     originTokenAddress: originContractAddress as Address,
-    enabled: originForm.formState.isValid,
   });
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault();
         await registerOnSchain.writeAsync?.(true);
-        forms.forEach((f) => f.reset());
+        Object.values(forms).forEach((f) => f.reset());
         markComplete();
       }}
     >
@@ -37,50 +42,39 @@ export const StepLast = (props: {
             Origin token on{' '}
             <span className="font-semibold">{originChain?.name}</span>
           </label>
-          <input
-            type="text"
-            readOnly
-            value={form[0].getValues('originContractAddress')}
-          />
+          <input type="text" readOnly value={originContractAddress} />
         </fieldset>
         <fieldset className="w-full">
           <label htmlFor="" className="text-xs">
             Target token on{' '}
             <span className="font-semibold">{targetChain?.name}</span>
           </label>
-          <input
-            type="text"
-            readOnly
-            value={form[1].getValues('cloneContractAddress')}
-          />
+          <input type="text" readOnly value={cloneTokenAddress} />
         </fieldset>
-        {registerOnSchain.isError ? (
-          <p className="text-sm py-4">
-            <span className="text-[var(--red10)]">
-              <ExclamationTriangleIcon />
-            </span>{' '}
-            Could not register the mapped token -{' '}
-            {registerOnSchain.error?.message} :{' '}
-            {registerOnSchain.error?.error?.message}
-            <br />
-            <button
-              className="underline"
-              onClick={(e) => {
-                e.preventDefault();
-                registerOnSchain.reset?.();
-              }}
-            >
-              Reset to try again
-            </button>
-          </p>
-        ) : (
-          <></>
+        {registerOnSchain.isError && (
+          <ErrorMessage
+            errors={[
+              <>
+                Could not register the mapped token -{' '}
+                {registerOnSchain.error?.message} :{' '}
+                {registerOnSchain.error?.error?.message}
+              </>,
+              <button
+                className="underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  registerOnSchain.reset?.();
+                }}
+              >
+                Reset to try again
+              </button>,
+            ]}
+          />
         )}
         <SubmitButtonPair
           isReady={!!registerOnSchain.writeAsync}
           text="Confirm"
           stepPrev={stepPrev}
-          stepNext={stepNext}
         />
       </div>
     </form>

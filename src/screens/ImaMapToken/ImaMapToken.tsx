@@ -11,17 +11,17 @@ import { StepLast } from '@/screens/ImaMapToken/StepLast';
 import { StepOne } from '@/screens/ImaMapToken/StepOne';
 import { StepThree } from '@/screens/ImaMapToken/StepThree';
 import { StepTwo } from '@/screens/ImaMapToken/StepTwo';
-import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useNetwork } from 'wagmi';
-import type {
+import { Address, useNetwork } from 'wagmi';
+import {
   CloneTokenData,
   CloneTokenPreData,
+  ImaMapTokenContext,
   OriginTokenData,
   PermissionData,
+  useWatchValidField,
 } from './context';
-import { ImaMapTokenContext } from './context';
 
 export function ImaMapToken() {
   const { chain: activeChain, chains } = useNetwork();
@@ -46,22 +46,22 @@ export function ImaMapToken() {
 
   // form start
 
-  const form = [
-    useForm<OriginTokenData>({
+  const form = {
+    originToken: useForm<OriginTokenData>({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
         originContractAddress: '',
       },
     }),
-    useForm<CloneTokenData>({
+    cloneToken: useForm<CloneTokenData>({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
         cloneContractAddress: '',
       },
     }),
-    useForm<CloneTokenPreData>({
+    cloneTokenInit: useForm<CloneTokenPreData>({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
@@ -70,22 +70,23 @@ export function ImaMapToken() {
         decimals: 18,
       },
     }),
-    useForm<PermissionData>({
+    permission: useForm<PermissionData>({
       mode: 'all',
       reValidateMode: 'onChange',
       defaultValues: {
         tokenManagerRoleAddress: tokenManager?.address,
       },
     }),
-  ] as const;
+  } as const;
 
-  const cloneContractAddress = form[1].watch('cloneContractAddress');
-  const cloneContractAddressIsValid = !form[1].getFieldState(
+  const alreadyCloneTokenAddress = useWatchValidField(
+    form.cloneToken,
     'cloneContractAddress',
-  ).invalid;
-  const tokenAddress = useMemo(() => {
-    return cloneContractAddressIsValid ? cloneContractAddress : '';
-  }, [cloneContractAddressIsValid]);
+  );
+  const deployedCloneTokenAddress = useWatchValidField(
+    form.cloneTokenInit,
+    'cloneContractAddress',
+  );
 
   // form end
 
@@ -134,13 +135,16 @@ export function ImaMapToken() {
     ),
   };
 
+  const cloneTokenAddress = (deployedCloneTokenAddress ||
+    alreadyCloneTokenAddress) as Address;
+
   return standard ? (
     <ImaMapTokenContext.Provider
       value={{
         standard,
         originChain,
         targetChain,
-        tokenAddress,
+        cloneTokenAddress,
         forms: form,
       }}
     >

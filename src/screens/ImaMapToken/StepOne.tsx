@@ -17,7 +17,7 @@ export const StepOne = (props: {
 }) => {
   const { stepNext } = props;
   const { forms, originChain, standard } = useImaMapTokenContext();
-  const form = forms[0];
+  const form = forms.originToken;
 
   const { data: originTokens, isLoading: isOriginTokensLoading } =
     useSchainTokens({

@@ -40,8 +40,8 @@ export function useSTokenMintBurnAccess({
   const signerOrProvider = activeChain?.id === chainId ? signer : provider;
 
   const tokenAbi = useMemo(() => {
-    return standard && getStandardTokenAbi(standard);
-  }, [standard]);
+    return standardName && getStandardTokenAbi(standard);
+  }, [standardName]);
 
   const targetContract = useContract({
     abi: tokenAbi as CommonTokenAbi,
@@ -138,6 +138,8 @@ export function useSTokenMintBurnAccess({
   });
 
   return {
+    minterRole: roleHashesQuery[0],
+    burnerRole: roleHashesQuery[1],
     MINTER_ROLE,
     BURNER_ROLE,
     hasAccessControl: MINTER_ROLE && BURNER_ROLE,
