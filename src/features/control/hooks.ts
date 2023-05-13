@@ -123,7 +123,7 @@ function useDeployStandardContract(props: DeployStandardProps) {
       }
       const factory = new ContractFactory(abi, bytecode, signer);
       const contract = await factory.deploy(name, symbol, {
-        gasLimit: 1500000,
+        // gasLimit: 1500000,
         gasPrice: 100000,
       });
       await contract.deployed();

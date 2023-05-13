@@ -8,9 +8,8 @@ import {
 } from '@/screens/ImaMapToken/context';
 import { ErrorMessage } from '@/screens/ImaMapToken/ErrorMessage';
 import { SubmitButtonPair } from '@/screens/ImaMapToken/SubmitButtonPair';
-import { CheckCircledIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, MinusCircledIcon } from '@radix-ui/react-icons';
 import { FormProvider } from 'react-hook-form';
-import { tw } from 'twind';
 
 export const StepThree = (props: {
   stepNext: () => void;
@@ -64,14 +63,10 @@ export const StepThree = (props: {
             heading={
               <div className="flex justify-between items-center">
                 <h4 className="inline">Authorize Token Manager</h4> {}
-                <span
-                  className={tw`text-sm text-[var(${
-                    !tmHasBurnerRole.data || !tmHasMinterRole.data
-                      ? '--gray10'
-                      : '--green10'
-                  })]`}
-                >
-                  {!tmHasBurnerRole.data || !tmHasMinterRole.data ? (
+                <span className="text-sm text-[var(--green10)] mx-2 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--white)]">
+                  {tmHasMinterRole.isLoading || tmHasBurnerRole.isLoading ? (
+                    <MinusCircledIcon className="animate-spin" />
+                  ) : !tmHasBurnerRole.data || !tmHasMinterRole.data ? (
                     'Not assigned to token manager'
                   ) : (
                     <CheckCircledIcon />
@@ -80,8 +75,12 @@ export const StepThree = (props: {
               </div>
             }
           >
-            {tmHasBurnerRole.data && tmHasMinterRole.data ? (
-              <>Minting and burning permissions are set correctly</>
+            {tmHasMinterRole.isLoading || tmHasBurnerRole.isLoading ? (
+              <></>
+            ) : tmHasBurnerRole.data && tmHasMinterRole.data ? (
+              <span className="text-sm">
+                Minting and burning permissions are set correctly
+              </span>
             ) : (
               <>
                 <p className="text-sm text-[var(--blue10)]">
@@ -119,15 +118,17 @@ export const StepThree = (props: {
               </>
             )}
           </Card>
-          {(!MINTER_ROLE ||
-            !BURNER_ROLE ||
+          {((!burnerRole.isLoading && !BURNER_ROLE) ||
+            (!minterRole.isLoading && !MINTER_ROLE) ||
             grantBurnerRoleConfirmed.isError ||
             grantBurnerRole.isError ||
             grantMinterRoleConfirmed.isError ||
             grantMinterRole.isError) && (
             <ErrorMessage
               errors={[
-                (!BURNER_ROLE || !MINTER_ROLE) &&
+                (minterRole.isError || burnerRole.isError) &&
+                  `Could not fetch contract access information`,
+                (!BURNER_ROLE || !BURNER_ROLE) &&
                   `Contract does not seem to have OZ minter and burner roles`,
                 (grantBurnerRoleConfirmed.isError || grantBurnerRole.isError) &&
                   `Failed to grant burner role - ${
@@ -145,6 +146,8 @@ export const StepThree = (props: {
                   className="underline"
                   onClick={(e) => {
                     e.preventDefault();
+                    minterRole.refetch();
+                    burnerRole.refetch();
                     grantMinterRole.reset();
                     grantBurnerRole.reset();
                   }}

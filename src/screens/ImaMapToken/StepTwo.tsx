@@ -96,6 +96,7 @@ const AlreadyDeployedForm = (props: {
               value: /^0x[a-fA-F0-9]{40}$/,
               message: 'Address is invalid',
             }}
+            showResetter
           />
           <fieldset
             className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
@@ -158,15 +159,18 @@ const StandardDeployForm = (props: {
     }
     const { name, symbol } = originContractInfo.data;
 
-    const cloneSymbol =
-      symbol?.length &&
-      (symbol[0].toLowerCase() === 'w'
-        ? symbol.slice(1).toUpperCase()
-        : symbol);
-    const cloneName = name
-      .split(' ')
-      .filter((w) => w.toLowerCase() !== 'wrapped')
-      .join(' ');
+    const cloneSymbol = !symbol?.length
+      ? undefined
+      : symbol[0] === 'w'
+      ? symbol.slice(1).toUpperCase()
+      : symbol;
+
+    const cloneName = !name?.length
+      ? undefined
+      : name
+          .split(' ')
+          .filter((w) => w.toLowerCase() !== 'wrapped')
+          .join(' ');
 
     cloneSymbol && form.setValue('symbol', cloneSymbol);
     cloneName && form.setValue('name', cloneName);
@@ -291,7 +295,7 @@ const StandardDeployForm = (props: {
           </div>
           <div>
             <SubmitButtonPair
-              isReady={form.formState.isValid && !deployment.deploy?.isSuccess}
+              isReady={form.formState.isValid && deployment.deploy?.isSuccess}
               text="Next"
               stepPrev={stepPrev}
               stepNext={stepNext}
