@@ -67,7 +67,7 @@ export function ImaMapToken() {
       defaultValues: {
         name: '',
         symbol: '',
-        decimals: 18,
+        cloneContractAddress: '',
       },
     }),
     permission: useForm<PermissionData>({

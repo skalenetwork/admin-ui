@@ -63,13 +63,17 @@ export const StepThree = (props: {
             heading={
               <div className="flex justify-between items-center">
                 <h4 className="inline">Authorize Token Manager</h4> {}
-                <span className="text-sm text-[var(--green10)] mx-2 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--white)]">
+                <span className="text-sm">
                   {tmHasMinterRole.isLoading || tmHasBurnerRole.isLoading ? (
-                    <MinusCircledIcon className="animate-spin" />
+                    <span className="text-[var(--gray10)] mx-2 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--white)]">
+                      <MinusCircledIcon className="animate-spin" />
+                    </span>
                   ) : !tmHasBurnerRole.data || !tmHasMinterRole.data ? (
                     'Not assigned to token manager'
                   ) : (
-                    <CheckCircledIcon />
+                    <span className="text-[var(--green10)] mx-2 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--white)]">
+                      <CheckCircledIcon />
+                    </span>
                   )}
                 </span>
               </div>
@@ -104,11 +108,11 @@ export const StepThree = (props: {
                       className="btn btn-outline py-3"
                       onClick={async (e) => {
                         e.preventDefault();
-                        await grantMinterRole.write?.();
-                        await grantBurnerRole.write?.();
+                        await grantMinterRole.writeAsync?.(true);
+                        await grantBurnerRole.writeAsync?.(true);
                       }}
                     >
-                      {grantBurnerRoleConfirmed.isIdle ||
+                      {grantBurnerRoleConfirmed.isIdle &&
                       grantMinterRoleConfirmed.isIdle
                         ? `Re-assign roles`
                         : `Reassigning roles...`}

@@ -50,8 +50,8 @@ export const useWatchValidField = <
   name: TFieldName,
 ) => {
   const fieldValue = form.watch(name);
-  const isFieldValid = !form.getFieldState(name).invalid;
+  const isFieldValid = !form.getFieldState(name, form.formState).invalid;
   return useMemo(() => {
     return isFieldValid ? fieldValue : '';
-  }, [isFieldValid]);
+  }, [isFieldValid, fieldValue]);
 };

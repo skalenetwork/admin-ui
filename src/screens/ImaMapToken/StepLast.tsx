@@ -73,6 +73,7 @@ export const StepLast = (props: {
         )}
         <SubmitButtonPair
           isReady={!!registerOnSchain.writeAsync}
+          isLoading={registerOnSchain.isLoading}
           text="Confirm"
           stepPrev={stepPrev}
         />

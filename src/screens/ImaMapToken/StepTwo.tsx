@@ -152,6 +152,28 @@ const StandardDeployForm = (props: {
   });
 
   useEffect(() => {
+    if (form.formState.isSubmitted) {
+      return;
+    }
+    form.register('name', {
+      required: true,
+    });
+    form.register('symbol', {
+      required: true,
+    });
+    form.register('cloneContractAddress', {
+      required: true,
+      pattern: {
+        value: /^0x[a-fA-F0-9]{40}$/,
+        message: 'Address is invalid',
+      },
+    });
+  }, [form.register]);
+
+  useEffect(() => {
+    if (form.formState.isSubmitted) {
+      return;
+    }
     if (!originContractInfo.data) {
       form.resetField('name');
       form.resetField('symbol');
@@ -187,30 +209,10 @@ const StandardDeployForm = (props: {
     standard: 'erc20',
   });
 
-  form.register('name', {
-    required: true,
-  });
-  form.register('symbol', {
-    required: true,
-  });
-  form.register('cloneContractAddress', {
-    required: true,
-    pattern: {
-      value: /^0x[a-fA-F0-9]{40}$/,
-      message: 'Address is invalid',
-    },
-  });
-
-  useEffect(() => {
-    if (!deployment.deploy?.isSuccess) {
-      return;
-    }
-    form.setValue(
-      'cloneContractAddress',
-      deployment.deploy?.data?.address as Address,
-    );
-    form.trigger('cloneContractAddress');
-  }, [deployment.deploy?.isSuccess]);
+  const { isDirty } = form.getFieldState(
+    'cloneContractAddress',
+    form.formState,
+  );
 
   return (
     <FormProvider {...form}>
@@ -243,7 +245,7 @@ const StandardDeployForm = (props: {
             className={deployment.deploy?.isLoading ? 'animate-pulse' : ''}
           >
             <label htmlFor="">Deployed contract address</label>
-            <p className="input-like">{deployment.deploy?.data?.address}</p>
+            <p className="input-like">{form.watch('cloneContractAddress')}</p>
           </fieldset>
         </div>
         <div className="h-full w-1/2 m-auto">
@@ -275,16 +277,24 @@ const StandardDeployForm = (props: {
                 <CheckCircledIcon />
               </span>{' '}
               Contract successfully deployed at{' '}
-              <code>{deployment.deploy?.data?.address}</code>
+              <code className="inline-block">
+                {deployment.deploy?.data?.address}
+              </code>
             </p>
           ) : (
             <></>
           )}
           <div className="text-center">
-            {deployment.deploy?.writeAsync && (
+            {deployment.deploy?.writeAsync && !isDirty && (
               <SButton
                 className="btn mx-auto mt-4 rounded-full"
                 writer={deployment.deploy}
+                onPromise={(promise) => {
+                  promise.then((contract) => {
+                    form.setValue('cloneContractAddress', contract.address);
+                    form.trigger('cloneContractAddress');
+                  });
+                }}
                 onClick={(e) => {
                   e.preventDefault();
                 }}
@@ -295,7 +305,7 @@ const StandardDeployForm = (props: {
           </div>
           <div>
             <SubmitButtonPair
-              isReady={form.formState.isValid && deployment.deploy?.isSuccess}
+              isReady={form.formState.isValid}
               text="Next"
               stepPrev={stepPrev}
               stepNext={stepNext}

@@ -122,8 +122,7 @@ function useDeployStandardContract(props: DeployStandardProps) {
         return;
       }
       const factory = new ContractFactory(abi, bytecode, signer);
-      const contract = await factory.deploy(name, symbol, {
-        // gasLimit: 1500000,
+      const contract = await factory.deploy(name, symbol, decimals, {
         gasPrice: 100000,
       });
       await contract.deployed();
@@ -166,7 +165,10 @@ export function useSTokenDeploy(props: DeployStandardProps) {
     args: [account.address],
   });
   const removeSelfFromWhitelist = useSContractWrite('CONFIG_CONTROLLER', {
-    enabled: !!(account.address && addSelfToWhitelist.isSuccess),
+    enabled: !!(
+      account.address &&
+      (addSelfToWhitelist.eoa.isSuccess || addSelfToWhitelist.mnm.isSuccess)
+    ),
     name: 'removeFromWhitelist',
     args: [account.address],
   });

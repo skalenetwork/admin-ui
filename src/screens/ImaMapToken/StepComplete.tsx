@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export const StepComplete = () => {
   return (
     <div className="w-1/2 m-auto flex h-full flex-col justify-center gap-4">
