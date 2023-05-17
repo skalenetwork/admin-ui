@@ -1,12 +1,8 @@
-import { chains as skaleChains } from '@/features/network/chains/chains';
-import { configureChains, mainnet as ethereumMainnet } from 'wagmi';
+import { configureChains } from 'wagmi';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import skaleConfig from '../skale.config';
 
-const chains = [
-  ethereumMainnet,
-  ...Object.values(skaleChains.staging),
-  ...Object.values(skaleChains.mainnet),
-];
+const { chains } = skaleConfig;
 
 const { provider } = configureChains(chains, [
   jsonRpcProvider({

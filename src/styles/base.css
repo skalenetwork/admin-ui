@@ -124,7 +124,13 @@
   input[data-error],
   select[data-error],
   textarea[data-error] {
-    @apply border-[var(--red10)];
+    @apply !border-[var(--red10)];
+  }
+
+  input[data-warn],
+  select[data-warn],
+  textarea[data-warn] {
+    @apply !border-[var(--yellow11)];
   }
 
   input[disabled]:not([type='submit']),

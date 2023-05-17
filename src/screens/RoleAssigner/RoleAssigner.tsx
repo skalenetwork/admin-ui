@@ -1,18 +1,19 @@
 import { CrownIcon } from '@/components/Icons/Icons';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
 import Field from '@/elements/Field/Field';
+import { SButton } from '@/elements/SButton/SButton';
 import { addresses } from '@/features/network';
 import { ContractDetailList, ContractId } from '@/features/network/contract';
 import {
   useRoleAccess,
-  useSContract,
+  useRolesAccess,
   useSContractRead,
   useSContractWrite,
 } from '@/features/network/hooks';
 import { NETWORK } from '@/features/network/literals';
 import { build, CONTRACT } from '@/features/network/manifest';
 import NotSupported from '@/screens/NotSupported';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useAccount, useNetwork } from 'wagmi';
 import rolesMetadata from '../../metadata/roles.json';
@@ -21,6 +22,14 @@ type FormData = {
   contractAddress: ContractDetailList['address'];
   role: string;
   assigneeAddress: string;
+};
+
+const ROLE_RELATIVES = {
+  CONFIG_CONTROLLER: {
+    DEPLOYER_ROLE: {
+      parents: ['DEPLOYER_ADMIN_ROLE'],
+    },
+  },
 };
 
 export function RoleAssigner() {
@@ -44,50 +53,80 @@ export function RoleAssigner() {
     return build.contractIdFromAddress(contractAddress);
   }, [contractAddress]);
 
-  const { contract, abi } = useSContract({
-    id: selectedContractId,
-  });
+  const { abi } = build.addressAbiPair(selectedContractId);
 
-  const accessAdminRole = useRoleAccess(
-    selectedContractId,
+  const parentRoleNames = [
     'DEFAULT_ADMIN_ROLE',
-  );
+    ...(ROLE_RELATIVES[selectedContractId]?.[role]?.parents || []),
+  ];
 
-  const roles =
-    abi && (accessAdminRole.data?.allow.mnm || accessAdminRole.data?.allow.eoa)
-      ? abi
-          .filter(
-            ({ type, name }) => type === 'function' && name.includes('_ROLE'),
-          )
-          .map((fragment) => fragment.name)
-      : [];
+  const parentRoles = useRolesAccess(selectedContractId, parentRoleNames);
 
-  const { data: roleHash } = useSContractRead(selectedContractId, {
-    enabled: !!role,
-    name: role,
-  });
+  const isAllowed = parentRoles.isLoading
+    ? undefined
+    : parentRoles.data?.some(
+        (parentRole) => parentRole?.allow.eoa || parentRole?.allow.mnm,
+      );
 
-  const notAllowed =
-    accessAdminRole.data?.allow.mnm === false &&
-    accessAdminRole.data?.allow.eoa === false;
+  const roles = abi
+    .filter(({ type, name }) => type === 'function' && name.includes('_ROLE'))
+    .map((fragment) => fragment.name);
+
+  const selectedRoleAccess = useRoleAccess(selectedContractId, role);
+  const roleHash = selectedRoleAccess.data?.hash;
 
   useEffect(() => {
-    !notAllowed && form.setValue('role', roles[0]);
+    form.setValue('role', roles[0]);
     form.trigger('role');
-  }, [contractAddress, notAllowed, roles[0]]);
+  }, [contractAddress, roles[0]]);
 
   const roleDescription = useMemo(() => {
     const foundRole = rolesMetadata.find((item) => item.name === role);
     return foundRole ? foundRole.description : '';
   }, [role, contractAddress]);
 
-  const grantRole = useSContractWrite(selectedContractId, {
+  const assigneeHasRole = useSContractRead(selectedContractId, {
     enabled: !!(roleHash && assigneeAddress),
-    name: 'grantRole',
+    name: 'hasRole',
+    args: [roleHash, assigneeAddress],
+  });
+
+  const roleActionName = !assigneeHasRole.isSuccess
+    ? undefined
+    : assigneeHasRole.data === true
+    ? 'revokeRole'
+    : assigneeHasRole.data === false
+    ? 'grantRole'
+    : undefined;
+
+  const grantOrRevokeRole = useSContractWrite(selectedContractId, {
+    enabled: !!(roleHash && assigneeAddress && roleActionName),
+    name: roleActionName,
     args: [roleHash, assigneeAddress],
   });
 
   const isOffnet = chain?.network !== NETWORK.SKALE;
+
+  const isPreparing =
+    form.formState.isValid &&
+    (assigneeHasRole.isLoading || selectedRoleAccess.isFetching);
+
+  const validateRole = useCallback(
+    (val: string) => {
+      return !val
+        ? 'Role is required'
+        : parentRoles.isLoading
+        ? 'Assessing access level'
+        : !isAllowed
+        ? 'Not authorized to administer the role'
+        : true;
+    },
+    [parentRoles.isLoading, isAllowed],
+  );
+
+  useEffect(() => {
+    form.trigger('role');
+  }, [parentRoles.isLoading, isAllowed]);
 
   return (
     <div
@@ -110,8 +149,9 @@ export function RoleAssigner() {
       <div>
         <FormProvider {...form}>
           <form
-            onSubmit={form.handleSubmit((data) => {
-              grantRole.writeAsync?.();
+            onSubmit={form.handleSubmit(async (data) => {
+              await grantOrRevokeRole.writeAsync?.(true);
+              assigneeHasRole.refetch();
             })}
           >
             <div className="grid grid-cols-2">
@@ -149,15 +189,7 @@ export function RoleAssigner() {
                     ))}
                   </select>
                 )}
-                disabled={notAllowed}
-                validate={(val) =>
-                  !!val ||
-                  (accessAdminRole.isLoading
-                    ? '...'
-                    : notAllowed
-                    ? 'No access to role grantor on the selected contract'
-                    : 'Role is required')
-                }
+                validate={validateRole}
                 placeholder="Choose a role"
               />
               <div className="pt-4 px-4">
@@ -183,8 +215,9 @@ export function RoleAssigner() {
                   <input type="text" id="contract_list" list="contract_list" />
                 )}
                 required="Assignee address is required"
-                disabled={notAllowed || !role}
+                disabled={!isAllowed || !role}
                 placeholder="0x..."
+                showResetter
               />
               <div className="pt-4 px-4">
                 <div className="my-2 flex flex-row gap-4">
@@ -214,13 +247,42 @@ export function RoleAssigner() {
                 </div>
               </div>
             </div>
-            <button
-              type="submit"
-              className="btn mt-4"
-              disabled={!form.formState.isValid || !grantRole.writeAsync}
-            >
-              Assign Role
-            </button>
+            <div className="flex items-center mt-4 gap-4">
+              <SButton
+                className="btn"
+                type="submit"
+                writer={grantOrRevokeRole}
+                noWrite
+                disabled={isPreparing}
+              >
+                {isPreparing ? (
+                  <p className="animate-bounce">. . .</p>
+                ) : roleActionName === 'grantRole' ? (
+                  'Assign Role'
+                ) : roleActionName === 'revokeRole' ? (
+                  'Revoke Role'
+                ) : (
+                  '---'
+                )}
+              </SButton>
+              {(grantOrRevokeRole.isError || grantOrRevokeRole.isSuccess) && (
+                <button
+                  className="btn btn-outline"
+                  onClick={() => {
+                    grantOrRevokeRole.reset();
+                    grantOrRevokeRole.isSuccess && assigneeHasRole.refetch();
+                    form.reset();
+                  }}
+                >
+                  Reset
+                </button>
+              )}
+              <small>
+                {parentRoles.isLoading
+                  ? 'Retrieving contract access information..'
+                  : grantOrRevokeRole.isError ? grantOrRevokeRole.error?.message : ''}
+              </small>
+            </div>
           </form>
         </FormProvider>
       </div>

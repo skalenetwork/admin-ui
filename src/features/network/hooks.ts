@@ -782,9 +782,9 @@ export function useSContractWrite<
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
     mnm:
-      mnmAction === null
+      (mnmAction === null || mnmAction === undefined)
         ? {
-            action: null,
+            action: mnmAction,
           }
         : mnmAction === 'confirm' || mnmAction === 'execute'
         ? {

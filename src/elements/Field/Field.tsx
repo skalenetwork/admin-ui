@@ -94,14 +94,17 @@ function Field<T extends FieldValues>({
               ref: field.ref,
               value: field.value,
               disabled,
-              'data-error': error || undefined,
+              'data-warn': error?.type === 'warning' || undefined,
+              'data-error': (!!error && error.type !== 'warning') || undefined,
             })
           }
         />
         <div
-          className={`p-0.5 text-right text-xs text-[var(--red10)] ${
-            !error ? 'opacity-0' : ''
-          }`}
+          className={`p-0.5 text-right text-xs ${
+            error?.type === 'warning'
+              ? 'text-[var(--yellow11)]'
+              : 'text-[var(--red10)]'
+          } ${!error ? 'opacity-0' : ''}`}
         >
           {error ? (
             <>

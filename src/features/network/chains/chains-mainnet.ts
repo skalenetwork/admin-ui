@@ -388,6 +388,32 @@ export const mainnet = {
     },
     testnet: false
   },
+  'light-vast-diphda': {
+    id: 2139927552,
+    name: 'light-vast-diphda',
+    network: 'skale',
+    nativeCurrency: { decimals: 18, name: 'SFuel', symbol: 'sFUEL' },
+    rpcUrls: {
+      default: {
+        http: [ 'https://mainnet.skalenodes.com/v1/light-vast-diphda' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/light-vast-diphda' ]
+      },
+      public: {
+        http: [ 'https://mainnet.skalenodes.com/v1/light-vast-diphda' ],
+        webSocket: [ 'https://mainnet.skalenodes.com/v1/ws/light-vast-diphda' ]
+      },
+      filestorage: {
+        http: [ 'https://mainnet.skalenodes.com/fs/light-vast-diphda' ]
+      }
+    },
+    blockExplorers: {
+      default: {
+        name: 'SKALE Explorer',
+        url: 'https://light-vast-diphda.explorer.mainnet.skalenodes.com/'
+      }
+    },
+    testnet: false
+  },
   'green-giddy-denebola': {
     id: 1482601649,
     name: 'green-giddy-denebola',
