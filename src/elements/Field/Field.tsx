@@ -42,6 +42,7 @@ function Field<T extends FieldValues>({
     control: formControl,
     formState: { errors, defaultValues },
     resetField,
+    trigger,
   } = useFormContext<T>();
 
   const error = errors[name];
@@ -72,6 +73,7 @@ function Field<T extends FieldValues>({
                   resetField(name, {
                     defaultValue: defaultValues?.[name],
                   });
+                  trigger(name);
                 }}
               >
                 <EraserIcon />

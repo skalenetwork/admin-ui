@@ -2,20 +2,18 @@
  * @namespace Config
  * @module ConfigHooks
  */
-import ERC20Standard from '@/features/network/abi/erc20-standard.json';
+import { STANDARD_CONTRACT } from '@/features/control/lib';
 import {
   useSContractApi,
   useSContractRead,
   useSContractReads,
   useSContractWrite,
 } from '@/features/network/hooks';
-import { TOKEN_STANDARD } from '@/features/network/literals';
+import type { StandardKey, StandardName } from '@/features/network/literals';
 import { useMutation } from '@tanstack/react-query';
-import { BigNumber, ContractFactory } from 'ethers';
+import { ContractFactory } from 'ethers';
 import { useMemo } from 'react';
 import { useAccount, useSigner } from 'wagmi';
-const standards = Object.values(TOKEN_STANDARD);
-type TokenStandard = Uppercase<(typeof standards)[number]['name']>;
 
 export function useConfigController() {
   const {
@@ -104,16 +102,7 @@ type DeployProps = {
 };
 
 type DeployStandardProps = DeployProps & {
-  standard: Lowercase<TokenStandard>;
-};
-
-const STANDARD_CONTRACT: {
-  [key in TokenStandard]: { abi: any; bytecode: string };
-} = {
-  ERC20: {
-    abi: ERC20Standard['abi'],
-    bytecode: ERC20Standard['bytecode'],
-  },
+  standard: StandardName;
 };
 
 /**
@@ -124,7 +113,7 @@ const STANDARD_CONTRACT: {
 function useDeployStandardContract(props: DeployStandardProps) {
   const { name, symbol, decimals, standard } = props;
   const { data: signer } = useSigner();
-  const standardKey = standard && (standard.toUpperCase() as TokenStandard);
+  const standardKey = standard && (standard.toUpperCase() as StandardKey);
   return useMutation({
     mutationKey: ['custom', 'ima-deployment', props],
     mutationFn: async () => {
@@ -133,15 +122,9 @@ function useDeployStandardContract(props: DeployStandardProps) {
         return;
       }
       const factory = new ContractFactory(abi, bytecode, signer);
-      const contract = await factory.deploy(
-        name,
-        symbol,
-        BigNumber.from(decimals),
-        {
-          gasLimit: 1500000,
-          gasPrice: 100000,
-        },
-      );
+      const contract = await factory.deploy(name, symbol, decimals, {
+        gasPrice: 100000,
+      });
       await contract.deployed();
       return contract;
     },
@@ -156,6 +139,8 @@ function useDeployStandardContract(props: DeployStandardProps) {
 export function useSTokenDeploy(props: DeployStandardProps) {
   const account = useAccount();
   const deployment = useDeployStandardContract(props);
+
+  const hasParams = !!(props.symbol && props.name && props.decimals);
 
   const isMultisigOwner = useSContractRead('MULTISIG_WALLET', {
     enabled: !!account.address,
@@ -180,7 +165,10 @@ export function useSTokenDeploy(props: DeployStandardProps) {
     args: [account.address],
   });
   const removeSelfFromWhitelist = useSContractWrite('CONFIG_CONTROLLER', {
-    enabled: !!(account.address && addSelfToWhitelist.isSuccess),
+    enabled: !!(
+      account.address &&
+      (addSelfToWhitelist.eoa.isSuccess || addSelfToWhitelist.mnm.isSuccess)
+    ),
     name: 'removeFromWhitelist',
     args: [account.address],
   });
@@ -194,21 +182,20 @@ export function useSTokenDeploy(props: DeployStandardProps) {
   // EOA-initiated safest deployment
   // if signer is not whitelisted but can solely self-whitelist: whitelist -> deploy -> unwhitelist
 
-  const shouldWhitelist =
-    !isPreparing &&
-    isEoaWhitelisted.data === false &&
-    !!(
-      (isMultisigOwner.data && msigReqdConfirms.data === 1) ||
-      addSelfToWhitelist.eoa.writeAsync
-    );
+  const shouldWhitelist = !isPreparing && isEoaWhitelisted.data === false;
+  const canSelfWhitelist = !!(
+    (isMultisigOwner.data && msigReqdConfirms.data === 1) ||
+    addSelfToWhitelist.eoa.writeAsync
+  );
+  const mustWhitelist = shouldWhitelist && canSelfWhitelist;
 
   const writeAsync = useMemo(() => {
-    if (isPreparing || !shouldWhitelist) {
+    if (isPreparing || !hasParams || (shouldWhitelist && !canSelfWhitelist)) {
       return;
     }
     return async () => {
       let response;
-      if (isEoaWhitelisted.data === true) {
+      if (!mustWhitelist) {
         response = await deployment.mutateAsync();
         return;
       }

@@ -1,5 +1,6 @@
 import { addresses } from '@/features/network';
 import { ABI } from '@/features/network/abi/abi';
+import erc20Standard from '@/features/network/abi/erc20-standard';
 import { liteEncodeAbiFunctions } from '@/features/network/abi/utils';
 import { CONTRACT } from '@/features/network/contract';
 import { NETWORK, TOKEN_STANDARD } from '@/features/network/literals';
@@ -52,6 +53,10 @@ export const INTERFACE_ID = {
   [TOKEN_STANDARD.ERC721_WITH_METADATA.name]: '0x5b5e139f',
   [TOKEN_STANDARD.ERC1155.name]: '0xd9b67a26',
 };
+
+export const STANDARD_CONTRACT = {
+  [TOKEN_STANDARD.ERC20.name]: erc20Standard,
+} as const;
 
 export function getStandardTokenInterfaceId(
   standardName: keyof typeof INTERFACE_ID,
