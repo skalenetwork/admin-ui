@@ -10,6 +10,7 @@ import { NETWORK } from '@/features/network/literals';
 import type { Entries } from 'type-fest';
 
 import mainnetImaUnion from './abi/abi-ima-mainnet.union';
+import schainImaUnion from './abi/abi-ima.union';
 
 type SwapKeyValue<
   T extends Record<string, S>,
@@ -103,7 +104,7 @@ export const CONTRACT = {
     network: NETWORK.SKALE,
     type: 'ima:message',
     key: 'schain:message_proxy',
-    address: ADDRESS.MESSAGE_PROXY_FOR_SCHAIN_ADDRESS,
+    address: schainImaUnion['message_proxy_chain_address'],
     name: 'MessageProxyForSchain',
   },
   MANAGER_WALLETS_ON_MAINNET: {
@@ -131,56 +132,56 @@ export const CONTRACT = {
     network: NETWORK.SKALE,
     type: 'sudo',
     key: 'schain:community:locker',
-    address: ADDRESS.COMMUNITY_LOCKER_ADDRESS,
+    address: schainImaUnion['community_locker_address'],
     name: 'CommunityLocker',
   },
   TOKEN_MANAGER_ETH: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:eth',
-    address: ADDRESS.TOKEN_MANAGER_ETH_ADDRESS,
+    address: schainImaUnion['token_manager_eth_address'],
     name: 'TokenManagerEth',
   },
   TOKEN_MANAGER_ERC20: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:erc20',
-    address: ADDRESS.TOKEN_MANAGER_ERC20_ADDRESS,
+    address: schainImaUnion['token_manager_erc20_address'],
     name: 'TokenManagerERC20',
   },
   TOKEN_MANAGER_ERC721: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:erc721',
-    address: ADDRESS.TOKEN_MANAGER_ERC721_ADDRESS,
+    address: schainImaUnion['token_manager_erc721_address'],
     name: 'TokenManagerERC721',
   },
   TOKEN_MANAGER_ERC721_WITH_METADATA: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:erc721_with_metadata',
-    address: ADDRESS.TOKEN_MANAGER_ERC721_WITH_METADATA_ADDRESS,
+    address: schainImaUnion['token_manager_erc721_with_metadata_address'],
     name: 'TokenManagerERC721WithMetadata',
   },
   TOKEN_MANAGER_ERC1155: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:erc1155',
-    address: ADDRESS.TOKEN_MANAGER_ERC1155_ADDRESS,
+    address: schainImaUnion['token_manager_erc1155_address'],
     name: 'TokenManagerERC1155',
   },
   TOKEN_MANAGER_LINKER: {
     network: NETWORK.SKALE,
     type: 'ima:bridge',
     key: 'schain:tokenmanager:linker',
-    address: ADDRESS.TOKEN_MANAGER_LINKER_ADDRESS,
+    address: schainImaUnion['token_manager_linker_address'],
     name: 'TokenManagerLinker',
   },
   DEPOSIT_BOX_ETH: {
     network: NETWORK.ETHEREUM,
     type: 'ima:bridge',
     key: 'foreign:depositbox:eth',
-    address: ADDRESS.DEPOSIT_BOX_ETH_ADDRESS,
+    address: mainnetImaUnion['deposit_box_eth_address'],
     name: 'DepositBoxEth',
   },
   DEPOSIT_BOX_ERC20: {
