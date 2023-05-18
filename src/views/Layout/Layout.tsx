@@ -11,6 +11,7 @@ import { FcdIcon, GithubIcon, MtmIcon } from '@/components/Icons/Icons';
 import RoleList from '@/elements/RoleList/RoleList';
 import RouterCrumb from '@/elements/RouterCrumb/RouterCrumb';
 import { useConfigController } from '@/features/control/hooks';
+import { useNetworkInfo } from '@/features/network/hooks';
 import { FlagIcon } from '@heroicons/react/24/solid';
 import {
   CaretDownIcon,
@@ -43,6 +44,8 @@ export default function Layout() {
   const { flags, connected } = useConfigController();
 
   const fetchingCount = useIsFetching();
+
+  const { chainInfo } = useNetworkInfo();
 
   return (
     <>
@@ -134,7 +137,8 @@ export default function Layout() {
                 <CaretRightIcon />
               </span>
               <p>
-                <span className="font-medium">Chain:</span> {chain?.name}
+                <span className="font-medium">Chain:</span>{' '}
+                {chainInfo?.alias || chain?.name}
               </p>
               <p>
                 <span className="font-medium">ID:</span> {chain?.id}

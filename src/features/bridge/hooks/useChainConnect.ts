@@ -38,8 +38,10 @@ export function useChainConnect({ chainName }: { chainName: string }) {
     args: [chainName],
   });
 
-  const status: ConnectionStatus =
-    originConnected === true && targetConnected === true
+  const status: ConnectionStatus | undefined =
+    originConnected === undefined || targetConnected === undefined
+      ? undefined
+      : originConnected === true && targetConnected === true
       ? 'full'
       : originConnected === true
       ? 'origin'

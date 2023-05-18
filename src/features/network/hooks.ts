@@ -705,7 +705,7 @@ export function useSContractWrite<
     },
     onError: (err) => {
       params.onError?.(err);
-      // log(
+      // console.log(
       //   'check-write:eoa',
       //   `${id}.${name}`,
       //   err?.data ? `\n${err.data.code} : ${err.data.message}` : '',
@@ -782,7 +782,7 @@ export function useSContractWrite<
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
     mnm:
-      (mnmAction === null || mnmAction === undefined)
+      mnmAction === null || mnmAction === undefined
         ? {
             action: mnmAction,
           }
@@ -1141,6 +1141,17 @@ export function useEvents<
   };
 }
 
+export function useNetworkInfo() {
+  const { chain } = useNetwork();
+  const { data } = useChainMetadata({
+    networkType: chain?.testnet ? 'staging' : 'mainnet',
+  });
+
+  return {
+    chainInfo: chain && data && data[chain.name],
+  };
+}
+
 export function useChainMetadata({
   networkType = 'staging',
 }: {
@@ -1149,7 +1160,7 @@ export function useChainMetadata({
   const { chain } = useNetwork();
   const query = useQuery({
     enabled: networkType !== undefined && !!chain,
-    queryKey: ['offchain', `metadata:${networkType}`] as const,
+    queryKey: [chain?.id, 'offchain', `metadata:${networkType}`] as const,
     queryFn: (): Promise<{ [key: string]: ChainManifestItem }> | undefined => {
       return !chain
         ? undefined

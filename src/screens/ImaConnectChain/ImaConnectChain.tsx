@@ -1,13 +1,13 @@
 import Card from '@/components/Card/Card';
 import { withErrorBoundary } from '@/elements/ErrorBoundary/ErrorBoundary';
+import { SButton } from '@/elements/SButton/SButton';
 import { useChainConnect } from '@/features/bridge';
 import { NETWORK } from '@/features/network/literals';
 import NotSupported from '@/screens/NotSupported';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useNetwork } from 'wagmi';
 
 export function ImaConnectChain() {
@@ -19,22 +19,6 @@ export function ImaConnectChain() {
   });
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (chain?.connect.isSuccess) {
-      navigate(`/ima_manager/token_map/${selectedChainName}`);
-      chain?.connect.reset?.();
-    }
-  }, [chain?.connect.isSuccess]);
-
-  const handleSubmit = useCallback(() => {
-    chain?.connect?.writeAsync &&
-      toast.promise(chain?.connect?.writeAsync(true), {
-        pending: `Connecting to chain ${name}`,
-        success: `Connected to chain ${name}`,
-        error: `Failed to connect to chain ${name}`,
-      });
-  }, [chain?.connect?.writeAsync]);
 
   return originChain?.network !== NETWORK.SKALE ? (
     <NotSupported>
@@ -58,6 +42,7 @@ export function ImaConnectChain() {
             });
             return Boolean(originChain.testnet) !==
               Boolean(someChain.testnet) ||
+              someChain.network !== NETWORK.SKALE ||
               chain.status !== 'none' ||
               someChain.name === originChain?.name ? (
               <></>
@@ -86,19 +71,23 @@ export function ImaConnectChain() {
         </ToggleGroup.Root>
       </Card>
       <div className="flex justify-center items-center p-4">
-        <button
+        <SButton
           className="btn btn-wide"
-          onClick={() => {
-            handleSubmit();
+          writer={chain?.connect}
+          toast={{
+            pending: `Connecting to chain`,
+            success: `Connected to chain`,
+            error: `Failed to connect to chain`,
           }}
-          disabled={
-            !selectedChainName ||
-            !chain?.connect?.write ||
-            chain?.connect?.isLoading
-          }
+          onPromise={(promise) => {
+            promise.then((res) => {
+              navigate(`/ima_manager/token_map/${selectedChainName}`);
+              chain?.connect.reset?.();
+            });
+          }}
         >
           Connect
-        </button>
+        </SButton>
       </div>
     </div>
   );
