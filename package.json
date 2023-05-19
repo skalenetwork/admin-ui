@@ -22,7 +22,6 @@
     "build:app": "cross-env NODE_ENV=production vite build --mode production",
     "build:app:staging": "vite build --mode staging",
     "preview": "vite preview",
-    "postinstall": "tsc --outDir ./build --project tsconfig.build.json",
     "prepare": "husky install",
     "lint": "eslint . --ext .ts,.tsx",
     "prettier": "prettier --check ./src",
