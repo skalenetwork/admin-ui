@@ -1,5 +1,6 @@
 {
   "name": "skale-admin-ui",
+  "type": "module",
   "version": "0.2.0",
   "license": "AGPL-3.0",
   "author": {
