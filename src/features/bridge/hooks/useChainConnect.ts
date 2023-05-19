@@ -1,9 +1,10 @@
 import { useSContractReads, useSContractWrite } from '@/features/network/hooks';
+import { NETWORK } from '@/features/network/literals';
 import { ConnectionStatus } from '@/features/network/types';
 import { useNetwork } from 'wagmi';
 
 /**
- * Manage chain connectivity and statuses
+ * Manage Schain connectivity and statuses
  * @param param0
  */
 export function useChainConnect({ chainName }: { chainName: string }) {
@@ -13,7 +14,7 @@ export function useChainConnect({ chainName }: { chainName: string }) {
   const { data, isLoading, isSuccess, isError, refetch } = useSContractReads(
     'TOKEN_MANAGER_LINKER',
     {
-      enabled: !!(targetChain && originChain && chainName !== 'ethereum'),
+      enabled: !!(originChain && targetChain?.network === NETWORK.SKALE),
       reads: [
         {
           name: 'hasSchain',
