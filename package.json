@@ -1,5 +1,5 @@
 {
-  "name": "skale-admin-ui",
+  "name": "@skalenetwork/admin",
   "type": "module",
   "version": "0.2.0",
   "license": "AGPL-3.0",
@@ -7,29 +7,11 @@
     "name": "Adil Shaikh",
     "email": "hello@adils.me"
   },
-  "exports": {
-    ".": null,
-    "./portals/*": "./build/screens/*",
-    "./components/*": "./build/components/*",
-    "./elements/*": "./build/elements/*",
-    "./features/*": "./build/features/*",
-    "./types": "./build/types"
-  },
   "scripts": {
-    "typedoc": "typedoc --out docs --entryPointStrategy expand src/features/*** --skipErrorChecking --plugin typedoc-theme-hierarchy --theme hierarchy",
-    "compile:chains": "npx ts-node --project ./scripts/tsconfig.scripts.json --transpileOnly ./scripts/compile-chains.ts",
-    "dev": "vite",
-    "build:app": "cross-env NODE_ENV=production vite build --mode production",
-    "build:app:staging": "vite build --mode staging",
-    "preview": "vite preview",
-    "prepare": "husky install",
-    "lint": "eslint . --ext .ts,.tsx",
-    "prettier": "prettier --check ./src",
-    "prettier:fix": "prettier --write ./src",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "build:app": "pnpm --filter @skalenetwork/admin-ui build"
   },
   "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@hookform/error-message": "^2.0.1",
@@ -37,10 +19,13 @@
     "@radix-ui/react-icons": "^1.1.1",
     "@reduxjs/toolkit": "^1.9.1",
     "@skalenetwork/ima-js": "2.0.1-develop.0",
-    "@skaleproject/skale.js": "^0.2.1",
+    "@skaleproject/config-controller": "^0.3.1-1",
+    "@skaleproject/multisig-wallet": "^0.5.1-1",
     "@tanstack/query-core": "^4.20.4",
     "@tanstack/react-query": "^4.20.9",
     "@tanstack/react-query-devtools": "^4.29.5",
+    "@wagmi/core": "0.10.11",
+    "assert": "^2.0.0",
     "buffer": "^6.0.3",
     "connectkit": "^1.1.1",
     "ethers": "^5.7.2",
@@ -50,7 +35,6 @@
     "lodash.debounce": "^4.0.8",
     "pretty-bytes": "^6.0.0",
     "process": "^0.11.10",
-    "radix-ui": "^1.0.1",
     "react": "^18.2.0",
     "react-charts": "^3.0.0-beta.51",
     "react-dom": "^18.2.0",
