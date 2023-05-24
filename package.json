@@ -8,7 +8,9 @@
     "email": "hello@adils.me"
   },
   "scripts": {
-    "build:app": "pnpm --filter @skalenetwork/admin-ui build"
+    "build:app": "pnpm --filter @skalenetwork/admin-ui build",
+    "dev:app": "pnpm --filter @skalenetwork/admin-ui dev",
+    "compile:chains": "pnpm --filter @skalenetwork/feat compile:chains"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",

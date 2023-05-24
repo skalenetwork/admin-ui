@@ -1,6 +1,6 @@
 <div align="center" style="background: black; color: white; padding: 20px 0; border-radius: 5px;">
 <h2 style="color: white;">
-<img valign="middle" src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/public/logo.png" alt="skale" width="48" /><br>
+<img valign="middle" src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/app/public/logo.png" alt="skale" width="48" /><br>
 SKALE Chain — Admin UI
 </h2>
 <span style="font-size: small; padding: 2px 10px; letter-spacing: 2px; color: white; border-radius: 3px; font-weight: 700">DEVELOPER GUIDE</span>
@@ -8,7 +8,7 @@ SKALE Chain — Admin UI
 
 # Prelude
 
-<img src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
+<img src="https://raw.githubusercontent.com/skalenetwork/admin-ui/main/app/public/mascot.png" style="border-radius: 5px; display: block" align="left" width="136" height="136">
 
 To build a flying car that actually flies:
 
@@ -27,28 +27,28 @@ Use node version `^18.12`
 - Install dependencies
 
 ```
-yarn install
+pnpm install
 ```
 
 - Refresh known Schains
 
 ```bash
-yarn compile:chains
+pnpm compile:chains
 ```
 
 - Run DApp locally
 
 ```bash
-yarn dev
+pnpm dev:app
 ```
 
 - Or, Build for production
 
 ```bash
-yarn build:app
+pnpm build:app
 ```
 
-Build output goes to `dist`, from where it can be deployed to any static host.
+Build output goes to `app/dist`, from where it can be deployed to any static host.
 
 # Structure
 
@@ -59,24 +59,21 @@ The aim is to strike a balance between:
 1. Re-usability of _features_ by ecosystem projects
 2. Maintainable contributions from across communities
 
-When in that phase, this architecture would be ground-zero for:
-
-1. Restructuring to multi-repo, and / or
-2. Improved bundling within this repo
-
 # Packages
 
 For re-usability across the ecosystem, following is distinctly made available from the repository.
 
-:package: Intuitive react hook libraries integrated with SKALE Network - `src/features`
+:package: Intuitive react hook libraries integrated with SKALE Network - `@skalenetwork/feat`
 
-:crystal_ball: UI compositions including various flows for Schain management - `src/screens`
+:crystal_ball: UI compositions including various flows for Schain management - `@skalenetwork/admin-ui/screens`
 
-:bricks: Reusable common components following SKALE's design system, built with headless accessible libraries - `src/components`
+:bricks: Reusable common components following SKALE's design system, built with headless accessible libraries - `@skalenetwork/ux/components`
 
-:droplet: JSX UI Elements with some context dependency - `src/elements`
+:droplet: JSX UI Elements with some context dependency - `@skalenetwork/ux/elements`
 
 :goggles: Well-typed interfaces exported alongside relevant modules
+
+> :scroll: Package exports can currently only be imported as TS, and require necessary aliasing in `tsconfig`, and in js bundling. Example with vite+TS can be found in `/app`
 
 # :package: Features
 
@@ -172,15 +169,13 @@ Screens are composed of UI widgets linked to UI flows that execute operations on
 
 They are like pages served in any frontend; Except, all _screens_ are exported independent of each other, and usable in any DApp.
 
-# Usage of packages
+# Usage of `feat`ures
 
 ## Install
 
 ```sh
-yarn add skalenetwork/admin-ui
+pnpm install -P @skalenetwork/feat
 ```
-
-> `@v0.3.0` packages can only be used as TS imports.
 
 ## Setup
 
@@ -305,7 +300,7 @@ const countMultisigRequiredConfirmations = multisigData?.countRequired;
 <button disabled={!!writer.writeAsync}>Guarded Action</button>
 ```
 
-**Guard and guide** action with a well-formatted button using `SButton` element
+**Guard and guide** action with a well-formatted button using `SButton` element from `@skalenetwork/ux/elements`
 
 ```jsx
 <SButton writer={writer}>Guarded Action</SButton>
@@ -330,7 +325,7 @@ const countMultisigRequiredConfirmations = multisigData?.countRequired;
 Among features, ICM (inter-chain messaging) is a domain that would horizontally complete `@/features`.
 
 Diagram highlighting typical cross-chain interaction. On the contrary, arbitrary message passing is more suitable for `icm` whereas `multsig` could be one of the consumers of `icm` when supporting foreign multisigs.
-![](./public/icm.png)
+![](./app/public/icm.png)
 
 # Links
 
