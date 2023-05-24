@@ -1,0 +1,19 @@
+{
+  "name": "@skalenetwork/feat",
+  "type": "module",
+  "version": "1.0.0",
+  "license": "AGPL-3.0",
+  "author": {
+    "name": "Adil Shaikh",
+    "email": "hello@adils.me"
+  },
+  "scripts": {
+    "typedoc": "typedoc --out docs --entryPointStrategy expand src/features/*** --skipErrorChecking --plugin typedoc-theme-hierarchy --theme hierarchy",
+    "compile:chains": "npx tsx ./network/scripts/compile-chains.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "prettier": "prettier --check ./*",
+    "prettier:fix": "prettier --write ./*"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

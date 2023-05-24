@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["../packages/ux/components/*"],
+      "@/elements/*": ["../packages/ux/elements/*"],
+      "@/features/*": ["../packages/features/*"],
+      "@/app/*": ["./src/*"]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@skalenetwork/ux",
+  "type": "module",
+  "version": "0.3.0",
+  "license": "AGPL-3.0",
+  "author": {
+    "name": "Adil Shaikh",
+    "email": "hello@adils.me"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx",
+    "prettier": "prettier --check ./*",
+    "prettier:fix": "prettier --write ./*"
+  },
+  "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.0.3",
+    "@radix-ui/react-avatar": "^1.0.2",
+    "@radix-ui/react-dialog": "^1.0.3",
+    "@radix-ui/react-hover-card": "^1.0.5",
+    "@radix-ui/react-popover": "^1.0.5",
+    "@radix-ui/react-progress": "^1.0.2",
+    "@radix-ui/react-scroll-area": "^1.0.3",
+    "@radix-ui/react-select": "^1.2.1",
+    "@radix-ui/react-switch": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.3",
+    "@radix-ui/react-tooltip": "^1.0.5",
+    "@skalenetwork/feat": "workspace:^"
+  }
+}
