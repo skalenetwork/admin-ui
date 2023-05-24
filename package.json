@@ -45,6 +45,7 @@
     "react-singleton-hook": "^4.0.1",
     "react-use": "^17.4.0",
     "tailwindcss-radix": "^2.7.0",
+    "tsx": "^3.12.7",
     "twind": "^0.16.19",
     "use-react-router-breadcrumbs": "^4.0.1",
     "utils": "^0.3.1",

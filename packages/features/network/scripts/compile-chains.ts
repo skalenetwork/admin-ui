@@ -7,10 +7,7 @@ import { ethers } from 'ethers';
 import * as fs from 'fs';
 import * as util from 'util';
 import { Chain } from 'wagmi';
-import {
-  buildBlockExplorers,
-  buildRpcUrls,
-} from '../chains/lib';
+import { buildBlockExplorers, buildRpcUrls } from '../chains/lib';
 import { CURRENCY, NETWORK } from '../literals';
 
 const HOST = 'skalenodes.com';
@@ -110,14 +107,8 @@ export const ${networkType} = ${util.inspect(
 (async () => {
   try {
     await Promise.all([
-      compileChains(
-        'staging',
-        './src/features/network/chains/chains-staging3.ts',
-      ),
-      compileChains(
-        'mainnet',
-        './src/features/network/chains/chains-mainnet.ts',
-      ),
+      compileChains('staging', './network/chains/chains-staging3.ts'),
+      compileChains('mainnet', './network/chains/chains-mainnet.ts'),
     ]);
   } catch (e) {
     console.error(e);

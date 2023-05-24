@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typedoc": "typedoc --out docs --entryPointStrategy expand src/features/*** --skipErrorChecking --plugin typedoc-theme-hierarchy --theme hierarchy",
-    "compile:chains": "npx ts-node --project ./network/scripts/tsconfig.scripts.json --transpileOnly ./network/scripts/compile-chains.ts",
+    "compile:chains": "npx tsx ./network/scripts/compile-chains.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "prettier": "prettier --check ./*",
     "prettier:fix": "prettier --write ./*"
