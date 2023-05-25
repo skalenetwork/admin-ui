@@ -10,6 +10,7 @@ export type OriginTokenData = {
 export type CloneTokenPreData = {
   name: string;
   symbol: string;
+  uri: string;
   cloneContractAddress: Address;
 };
 export type CloneTokenData = {
@@ -20,7 +21,7 @@ export type PermissionData = {
 };
 
 type State = {
-  standard?: StandardKey;
+  standard?: Exclude<StandardKey, 'ETH'>;
   originChain?: Chain;
   targetChain?: Chain;
   forms: {

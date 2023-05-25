@@ -5,16 +5,18 @@ import {
 } from '@/app/screens/ImaMapToken/context';
 import { ErrorMessage } from '@/app/screens/ImaMapToken/ErrorMessage';
 import { SubmitButtonPair } from '@/app/screens/ImaMapToken/SubmitButtonPair';
+import erc1155Standard from '@/features/network/abi/erc1155-standard';
+import erc721Standard from '@/features/network/abi/erc721-standard';
 import { CheckCircledIcon, CheckIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useSTokenMintBurnAccess } from '@skalenetwork/feat/bridge';
 import { useSTokenDeploy } from '@skalenetwork/feat/control/hooks';
-import { StandardName } from '@skalenetwork/feat/network/literals';
+import { StandardKey, StandardName } from '@skalenetwork/feat/network/literals';
 import { Tabs } from '@skalenetwork/ux/components/Tabs/Tabs';
 import Field from '@skalenetwork/ux/elements/Field/Field';
 import { SButton } from '@skalenetwork/ux/elements/SButton/SButton';
 import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { Address, useToken } from 'wagmi';
+import { Address, useContractRead, useContractReads, useToken } from 'wagmi';
 
 const useTokenErrors = ({
   contractInfo,
@@ -53,16 +55,17 @@ const AlreadyDeployedForm = (props: {
     'cloneContractAddress',
   ) as Address;
 
-  const standardName = standard?.toLowerCase() as StandardName;
+  const standardName = standard?.toLowerCase() as Exclude<StandardName, 'eth'>;
   const { BURNER_ROLE, MINTER_ROLE } = useSTokenMintBurnAccess({
     chainId: targetChain?.id,
     standardName,
     tokenAddress,
   });
 
-  const targetContractInfo = useToken({
+  const targetContractInfos = useStandardToken(standard, {
     address: tokenAddress,
   });
+  const targetContractInfo = targetContractInfos[standardName];
 
   const errors = useTokenErrors({
     mintable: !!MINTER_ROLE,
@@ -98,26 +101,41 @@ const AlreadyDeployedForm = (props: {
             }}
             showResetter
           />
-          <fieldset
-            className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
-          >
-            <label htmlFor="">Contract symbol</label>
-            <p className="input-like">{targetContractInfo.data?.symbol}</p>
-          </fieldset>
-          <fieldset
-            className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
-          >
-            <label htmlFor="">Contract name</label>
-            <p className="input-like">{targetContractInfo?.data?.name}</p>
-          </fieldset>
-          <fieldset
-            className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
-          >
-            <label htmlFor="">Number of decimals</label>
-            <p className="input-like" aria-readonly={true}>
-              {targetContractInfo.data?.decimals}
-            </p>
-          </fieldset>
+          {standardName !== 'erc1155' && (
+            <>
+              <fieldset
+                className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
+              >
+                <label htmlFor="">Contract symbol</label>
+                <p className="input-like">{targetContractInfo.data?.symbol}</p>
+              </fieldset>
+              <fieldset
+                className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
+              >
+                <label htmlFor="">Contract name</label>
+                <p className="input-like">{targetContractInfo?.data?.name}</p>
+              </fieldset>
+            </>
+          )}
+          {standardName === 'erc20' ? (
+            <fieldset
+              className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
+            >
+              <label htmlFor="">Number of decimals</label>
+              <p className="input-like" aria-readonly={true}>
+                {targetContractInfo.data?.decimals}
+              </p>
+            </fieldset>
+          ) : (
+            <fieldset
+              className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
+            >
+              <label htmlFor="">URI</label>
+              <p className="input-like" aria-readonly={true}>
+                {targetContractInfo.data?.uri}
+              </p>
+            </fieldset>
+          )}
         </div>
         <ErrorMessage errors={errors} />
         <SubmitButtonPair
@@ -133,34 +151,112 @@ const AlreadyDeployedForm = (props: {
   );
 };
 
+const useStandardToken = (
+  standard: Exclude<StandardKey, 'ETH'> | undefined,
+  { address, chainId }: { address: Address; chainId?: number },
+) => {
+  const erc20 = useToken({
+    enabled: standard === 'ERC20',
+    chainId,
+  });
+
+  const erc721 = useContractReads({
+    enabled: standard === 'ERC721' || standard === 'ERC721_WITH_METADATA',
+    contracts: [
+      {
+        abi: erc721Standard['abi'],
+        address,
+        functionName: 'name',
+        chainId,
+      },
+      {
+        abi: erc721Standard['abi'],
+        address,
+        functionName: 'symbol',
+        chainId,
+      },
+      {
+        abi: erc721Standard['abi'],
+        address,
+        functionName: 'uri',
+        chainId,
+      },
+    ],
+  });
+
+  const erc1155 = useContractRead({
+    enabled: standard === 'ERC1155',
+    abi: erc1155Standard['abi'],
+    address,
+    functionName: 'uri',
+    chainId,
+  });
+
+  const erc721Data = {
+    name: erc721.data?.[0],
+    symbol: erc721.data?.[1],
+    uri: erc721.data?.[2],
+  };
+
+  const dataset = {
+    erc20: erc20,
+    erc721: {
+      ...erc721,
+      data: erc721Data,
+    },
+    erc721_with_metadata: {
+      ...erc721,
+      data: erc721Data,
+    },
+    erc1155: {
+      ...erc1155,
+      data: {
+        uri: erc1155.data,
+      },
+    },
+  };
+
+  return dataset;
+};
+
 const StandardDeployForm = (props: {
   stepNext: () => void;
   stepPrev: () => void;
 }) => {
   const { stepPrev, stepNext } = props;
-  const { forms, originChain } = useImaMapTokenContext();
+  const { forms, originChain, standard } = useImaMapTokenContext();
   const form = forms.cloneTokenInit;
+
+  const standardName = standard?.toLowerCase() as Exclude<StandardName, 'eth'>;
 
   const tokenAddress = useWatchValidField(
     forms.originToken,
     'originContractAddress',
   );
 
-  const originContractInfo = useToken({
-    address: tokenAddress,
+  const originContractInfos = useStandardToken(standard, {
+    address: tokenAddress as Address,
     chainId: originChain?.id,
   });
+  const originContractInfo = originContractInfos[standardName];
 
   useEffect(() => {
-    if (form.formState.isSubmitted) {
+    if (form.formState.isSubmitted || !form.register) {
       return;
     }
-    form.register('name', {
-      required: true,
-    });
-    form.register('symbol', {
-      required: true,
-    });
+    if (standard !== 'ERC1155') {
+      form.register('name', {
+        required: true,
+      });
+      form.register('symbol', {
+        required: true,
+      });
+    }
+    if (standard === 'ERC1155' || standard === 'ERC721_WITH_METADATA') {
+      form.register('uri', {
+        required: true,
+      });
+    }
     form.register('cloneContractAddress', {
       required: true,
       pattern: {
@@ -171,15 +267,17 @@ const StandardDeployForm = (props: {
   }, [form.register]);
 
   useEffect(() => {
+    const { data } = originContractInfo;
     if (form.formState.isSubmitted) {
       return;
     }
-    if (!originContractInfo.data) {
+    if (!data) {
       form.resetField('name');
       form.resetField('symbol');
+      form.resetField('uri');
       return;
     }
-    const { name, symbol } = originContractInfo.data;
+    const { name, symbol, uri } = data;
 
     const cloneSymbol = !symbol?.length
       ? undefined
@@ -196,17 +294,18 @@ const StandardDeployForm = (props: {
 
     cloneSymbol && form.setValue('symbol', cloneSymbol);
     cloneName && form.setValue('name', cloneName);
+    uri && form.setValue('uri', uri);
     form.trigger('symbol');
     form.trigger('name');
+    form.trigger('uri');
   }, [originContractInfo.isSuccess]);
 
   const { name, symbol } = form.watch();
   const decimals = originContractInfo.data?.decimals;
-  const deployment = useSTokenDeploy({
+  const deployment = useSTokenDeploy('erc20', {
     name,
     symbol,
     decimals,
-    standard: 'erc20',
   });
 
   const { isDirty } = form.getFieldState(
@@ -225,22 +324,28 @@ const StandardDeployForm = (props: {
         )}
       >
         <div className="grid grid-cols-2 grid-rows-2 h-full gap-4 m-auto">
-          <fieldset
-            className={originContractInfo.isLoading ? 'animate-pulse' : ''}
-          >
-            <label htmlFor="">Contract symbol</label>
-            <p className="input-like">{symbol}</p>
-          </fieldset>
-          <fieldset>
-            <label htmlFor="">Contract name</label>
-            <p className="input-like">{name}</p>
-          </fieldset>
-          <fieldset>
-            <label htmlFor="">Contract decimals</label>
-            <p className="input-like" aria-readonly={true}>
-              {decimals}
-            </p>
-          </fieldset>
+          {standardName !== 'erc1155' && (
+            <>
+              <fieldset
+                className={originContractInfo.isLoading ? 'animate-pulse' : ''}
+              >
+                <label htmlFor="">Contract symbol</label>
+                <p className="input-like">{symbol}</p>
+              </fieldset>
+              <fieldset>
+                <label htmlFor="">Contract name</label>
+                <p className="input-like">{name}</p>
+              </fieldset>
+            </>
+          )}
+          {standardName === 'erc20' && (
+            <fieldset>
+              <label htmlFor="">Contract decimals</label>
+              <p className="input-like" aria-readonly={true}>
+                {decimals}
+              </p>
+            </fieldset>
+          )}
           <fieldset
             className={deployment.deploy?.isLoading ? 'animate-pulse' : ''}
           >

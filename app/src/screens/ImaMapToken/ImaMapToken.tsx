@@ -7,7 +7,11 @@ import { StepOne } from '@/app/screens/ImaMapToken/StepOne';
 import { StepThree } from '@/app/screens/ImaMapToken/StepThree';
 import { StepTwo } from '@/app/screens/ImaMapToken/StepTwo';
 import { useTokenManager } from '@skalenetwork/feat/bridge';
-import { NETWORK, StandardName } from '@skalenetwork/feat/network/literals';
+import {
+  NETWORK,
+  StandardName,
+  TOKEN_STANDARD,
+} from '@skalenetwork/feat/network/literals';
 import Card from '@skalenetwork/ux/components/Card/Card';
 import Stepper from '@skalenetwork/ux/components/Stepper/Stepper';
 import { withErrorBoundary } from '@skalenetwork/ux/elements/ErrorBoundary/ErrorBoundary';
@@ -149,7 +153,12 @@ export function ImaMapToken() {
       }}
     >
       <div className="grid h-full w-full rounded-lg bg-[var(--white)]">
-        <Card full heading={`Add ${standard} with ${chainName}`}>
+        <Card
+          full
+          heading={`Add ${
+            TOKEN_STANDARD[standard]?.label || ''
+          } with ${chainName}`}
+        >
           <Stepper
             steps={
               !originIsForeign
