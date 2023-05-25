@@ -26,7 +26,7 @@ export function useSchainTokens({
   standardName,
 }: {
   chainId?: number;
-  standardName: StandardName;
+  standardName: Exclude<StandardName, 'eth'>;
 }) {
   const { chains } = useNetwork();
   const chain = chainId
@@ -102,6 +102,13 @@ export function useSchainTokens({
           ? true
           : isPredeployed
           ? false
+          : standard === 'ERC721' || standard === 'ERC721_WITH_METADATA'
+          ? Promise.all([
+              contract.supportsInterface(getStandardTokenInterfaceId('erc721')),
+              contract.supportsInterface(
+                getStandardTokenInterfaceId('erc721_with_metadata'),
+              ),
+            ]).then((res) => res[0] === true || res[1] === true)
           : contract.supportsInterface(standardInterfaceId);
         const fetchName = contract.name();
         return Promise.allSettled([

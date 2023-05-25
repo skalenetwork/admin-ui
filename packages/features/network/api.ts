@@ -90,6 +90,15 @@ export const API = {
       name,
     ],
   ),
+  TOKEN_MANAGER_ERC721_WITH_METADATA: buildApi(
+    TokenManagerERC721,
+    ({ address, abi, signer, name, provider }) => [
+      provider,
+      address,
+      abi,
+      name,
+    ],
+  ),
   TOKEN_MANAGER_ERC1155: buildApi(
     TokenManagerERC1155,
     ({ address, abi, signer, name, provider }) => [
