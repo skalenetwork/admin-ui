@@ -1,6 +1,6 @@
 import { useTokenManager } from '@/features/bridge';
-import { STANDARD_CONTRACT } from '@/features/bridge/lib';
 import { CommonTokenAbi } from '@/features/bridge/types';
+import { STANDARD_CONTRACT } from '@/features/control/lib';
 import { StandardKey, StandardName } from '@/features/network/literals';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -15,8 +15,8 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 
-function getStandardTokenAbi(key: StandardKey) {
-  return STANDARD_CONTRACT[key]['abi'];
+function getStandardTokenAbi(key: Exclude<StandardKey, 'ETH'>) {
+  return STANDARD_CONTRACT[key]?.['abi'];
 }
 
 /**

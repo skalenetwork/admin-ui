@@ -95,40 +95,63 @@ export function useFcd() {
   };
 }
 
-type DeployProps = {
-  name: string;
-  symbol: string;
-  decimals: number;
-};
-
-type DeployStandardProps = DeployProps & {
-  standard: StandardName;
-};
+type DeployStandardProps<S extends Exclude<StandardName, 'eth'>> =
+  S extends 'erc20'
+    ? {
+        name: string;
+        symbol: string;
+        decimals: number;
+      }
+    : S extends 'erc721'
+    ? {
+        name: string;
+        symbol: string;
+      }
+    : S extends 'erc1155'
+    ? {
+        uri: string;
+      }
+    : never;
 
 /**
  * Deploy an ERC** standard contract with minting and burning capability
  * @param props
  * @returns
  */
-function useDeployStandardContract(props: DeployStandardProps) {
-  const { name, symbol, decimals, standard } = props;
+function useDeployStandardContract<
+  TStandard extends Exclude<StandardName, 'eth'>,
+  T extends TStandard,
+>(standard: T, props: DeployStandardProps<T>) {
   const { data: signer } = useSigner();
-  const standardKey = standard && (standard.toUpperCase() as StandardKey);
-  return useMutation({
-    mutationKey: ['custom', 'ima-deployment', props],
-    mutationFn: async () => {
-      const { abi, bytecode } = STANDARD_CONTRACT[standardKey];
-      if (!abi || !bytecode) {
-        return;
-      }
-      const factory = new ContractFactory(abi, bytecode, signer);
-      const contract = await factory.deploy(name, symbol, decimals, {
-        gasPrice: 100000,
-      });
-      await contract.deployed();
-      return contract;
-    },
-  });
+  const standardKey =
+    standard && (standard.toUpperCase() as Exclude<StandardKey, 'ETH'>);
+  const constructorParams =
+    standard === 'erc20'
+      ? [props.name, props.symbol, props.decimals]
+      : standard === 'erc721'
+      ? [props.name, props.symbol]
+      : standard === 'erc1155'
+      ? [props.uri]
+      : undefined;
+
+  return {
+    constructorParams,
+    ...useMutation({
+      mutationKey: ['custom', 'ima-deployment', props],
+      mutationFn: async () => {
+        const { abi, bytecode } = STANDARD_CONTRACT[standardKey];
+        if (!abi || !bytecode || !constructorParams) {
+          return;
+        }
+        const factory = new ContractFactory(abi, bytecode, signer);
+        const contract = await factory.deploy(...constructorParams, {
+          gasPrice: 100000,
+        });
+        await contract.deployed();
+        return contract;
+      },
+    }),
+  };
 }
 
 /**
@@ -136,11 +159,14 @@ function useDeployStandardContract(props: DeployStandardProps) {
  * @todo revise with explicit rules
  * @param param0
  */
-export function useSTokenDeploy(props: DeployStandardProps) {
+export function useSTokenDeploy<
+  TStandard extends Exclude<StandardName, 'eth'>,
+  T extends TStandard,
+>(standard: T, props: DeployStandardProps<T>) {
   const account = useAccount();
-  const deployment = useDeployStandardContract(props);
+  const deployment = useDeployStandardContract(standard, props);
 
-  const hasParams = !!(props.symbol && props.name && props.decimals);
+  const hasParams = !!deployment.constructorParams?.every((p) => !!p);
 
   const isMultisigOwner = useSContractRead('MULTISIG_WALLET', {
     enabled: !!account.address,

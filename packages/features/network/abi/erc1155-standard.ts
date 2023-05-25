@@ -1,6 +1,6 @@
 export default {
-  contractName: 'SkaleMappedERC721Token',
-  sourceName: 'contracts/SkaleMappedERC721Token.sol',
+  contractName: 'SkaleMappedERC1155Token',
+  sourceName: 'contracts/SkaleMappedERC1155Token.sol',
   abi: [
     {
       inputs: [
