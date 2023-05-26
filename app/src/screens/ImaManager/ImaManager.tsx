@@ -38,11 +38,11 @@ import { FormattedPeerChain } from './FormattedPeerChain';
 
 const supported = [
   TOKEN_STANDARD.ERC20,
-  TOKEN_STANDARD.ERC721,
+  TOKEN_STANDARD.ERC721_WITH_METADATA,
   TOKEN_STANDARD.ERC1155,
 ] as const;
 
-type UppercaseStandard = Uppercase<(typeof supported)[number]['name']>;
+type UppercaseStandard = Uppercase<typeof supported[number]['name']>;
 
 const TransactionItem = ({
   id,
@@ -242,19 +242,18 @@ const SelectedPeerChainItem = ({
                 </SButton>
               )
             ) : (
-              <>
-                <span className="font-medium">Mapped Tokens: </span>
+              <div>
+                <p className="font-medium py-2">Mapped Tokens </p>
                 <Dialog
                   title={`${
                     selectedStandard ? selectedStandard.label : ''
                   } Tokens`}
                   description={''}
                   trigger={
-                    <button className="">
+                    <button className="flex gap-6">
                       {supported.map(({ name }) => (
                         <a
                           key={name}
-                          className="px-2"
                           onClick={(e) => {
                             setStandardName(name);
                           }}
@@ -364,7 +363,7 @@ const SelectedPeerChainItem = ({
                     },
                   ]}
                 />
-              </>
+              </div>
             )}
           </div>
         </>
