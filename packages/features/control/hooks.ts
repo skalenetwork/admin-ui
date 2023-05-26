@@ -130,6 +130,8 @@ function useDeployStandardContract<
       ? [props.name, props.symbol, props.decimals]
       : standard === 'erc721'
       ? [props.name, props.symbol]
+      : standard === 'erc721_with_metadata'
+      ? [props.name, props.symbol, props.uri]
       : standard === 'erc1155'
       ? [props.uri]
       : undefined;
@@ -147,8 +149,7 @@ function useDeployStandardContract<
         const contract = await factory.deploy(...constructorParams, {
           gasPrice: 100000,
         });
-        await contract.deployed();
-        return contract;
+        return await contract.deployed();
       },
     }),
   };
@@ -166,7 +167,9 @@ export function useSTokenDeploy<
   const account = useAccount();
   const deployment = useDeployStandardContract(standard, props);
 
-  const hasParams = !!deployment.constructorParams?.every((p) => !!p);
+  const hasParams = !!deployment.constructorParams?.every(
+    (p) => p !== undefined,
+  );
 
   const isMultisigOwner = useSContractRead('MULTISIG_WALLET', {
     enabled: !!account.address,
@@ -223,7 +226,7 @@ export function useSTokenDeploy<
       let response;
       if (!mustWhitelist) {
         response = await deployment.mutateAsync();
-        return;
+        return response;
       }
       await addSelfToWhitelist.writeAsync?.(true);
       response = await deployment.mutateAsync().finally(async () => {

@@ -1,6 +1,7 @@
 import erc1155Standard from '@/features/network/abi/erc1155-standard';
 import erc20Standard from '@/features/network/abi/erc20-standard';
 import erc721Standard from '@/features/network/abi/erc721-standard';
+import erc721WithMetadataStandard from '@/features/network/abi/erc721-with-metadata-standard';
 
 import { StandardKey } from '@/features/network/literals';
 
@@ -16,7 +17,7 @@ export const STANDARD_CONTRACT: {
     bytecode: erc721Standard['bytecode'],
   },
   ERC721_WITH_METADATA: {
-    abi: erc721Standard['abi'],
+    abi: erc721WithMetadataStandard['abi'],
     bytecode: erc721Standard['bytecode'],
   },
   ERC1155: {
