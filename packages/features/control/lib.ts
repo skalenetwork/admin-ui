@@ -18,7 +18,7 @@ export const STANDARD_CONTRACT: {
   },
   ERC721_WITH_METADATA: {
     abi: erc721WithMetadataStandard['abi'],
-    bytecode: erc721Standard['bytecode'],
+    bytecode: erc721WithMetadataStandard['bytecode'],
   },
   ERC1155: {
     abi: erc1155Standard['abi'],
