@@ -1,5 +1,6 @@
 import {
   CloneTokenData,
+  CloneTokenPreData,
   useImaMapTokenContext,
   useWatchValidField,
 } from '@/app/screens/ImaMapToken/context';
@@ -64,6 +65,7 @@ const AlreadyDeployedForm = (props: {
 
   const targetContractInfos = useStandardToken(standard, {
     address: tokenAddress,
+    chainId: targetChain?.id,
   });
   const targetContractInfo = targetContractInfos[standardName];
 
@@ -126,7 +128,7 @@ const AlreadyDeployedForm = (props: {
                 {targetContractInfo.data?.decimals}
               </p>
             </fieldset>
-          ) : (
+          ) : standardName === 'erc1155' ? (
             <fieldset
               className={targetContractInfo.isFetching ? 'animate-pulse' : ''}
             >
@@ -135,6 +137,8 @@ const AlreadyDeployedForm = (props: {
                 {targetContractInfo.data?.uri}
               </p>
             </fieldset>
+          ) : (
+            <></>
           )}
         </div>
         <ErrorMessage errors={errors} />
@@ -175,12 +179,6 @@ const useStandardToken = (
         functionName: 'symbol',
         chainId,
       },
-      {
-        abi: erc721Standard['abi'],
-        address,
-        functionName: 'uri',
-        chainId,
-      },
     ],
   });
 
@@ -195,7 +193,6 @@ const useStandardToken = (
   const erc721Data = {
     name: erc721.data?.[0],
     symbol: erc721.data?.[1],
-    uri: erc721.data?.[2],
   };
 
   const dataset = {
@@ -300,12 +297,13 @@ const StandardDeployForm = (props: {
     form.trigger('uri');
   }, [originContractInfo.isSuccess]);
 
-  const { name, symbol } = form.watch();
+  const { name, symbol, uri } = form.watch();
   const decimals = originContractInfo.data?.decimals;
-  const deployment = useSTokenDeploy('erc20', {
+  const deployment = useSTokenDeploy(standardName, {
     name,
     symbol,
     decimals,
+    uri,
   });
 
   const { isDirty } = form.getFieldState(
@@ -338,13 +336,24 @@ const StandardDeployForm = (props: {
               </fieldset>
             </>
           )}
-          {standardName === 'erc20' && (
+          {standardName === 'erc20' ? (
             <fieldset>
               <label htmlFor="">Contract decimals</label>
               <p className="input-like" aria-readonly={true}>
                 {decimals}
               </p>
             </fieldset>
+          ) : standardName === 'erc1155' ||
+            standardName === 'erc721_with_metadata' ? (
+            <Field<CloneTokenPreData>
+              control={() => <input type="text"></input>}
+              name="uri"
+              label="Base URI"
+              placeholder="ipfs://"
+              required={`Initial URI is required, it can be changed later`}
+            />
+          ) : (
+            <></>
           )}
           <fieldset
             className={deployment.deploy?.isLoading ? 'animate-pulse' : ''}
