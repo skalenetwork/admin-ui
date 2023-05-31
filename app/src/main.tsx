@@ -15,26 +15,28 @@ import '@/app/styles/utils.css';
 
 tailwindSetup({
   preflight: false, // do not include base style reset (default: use tailwind preflight)
-  mode: 'warn', // throw errors for invalid rules (default: warn)
+  mode: 'silent', // throw errors for invalid rules (default: warn)
   hash: false, // hash all generated class names (default: false)
   theme: {}, // define custom theme values (default: tailwind theme)
   darkMode: 'class', // use a different dark mode strategy (default: 'media')
 });
 
 import { ConnectKitProvider, getDefaultClient } from 'connectkit';
-import { createClient, WagmiConfig } from 'wagmi';
+import { createClient, CreateClientConfig, WagmiConfig } from 'wagmi';
 import { createClient as coreCreateClient } from '@wagmi/core';
 import { provider, chains } from './provider';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient();
 
-const clientConfig = {
+const clientConfig: CreateClientConfig = {
   ...getDefaultClient({
     appName: 'SKALE Admin UI',
     provider,
     chains,
+    walletConnectProjectId: '',
   }),
+  logger: { warn: null },
 };
 const wagmiClient = createClient(clientConfig);
 

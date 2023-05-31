@@ -1,6 +1,6 @@
 import { CheckIcon } from '@radix-ui/react-icons';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEffectOnce } from 'react-use';
 import { tw } from 'twind';
 
@@ -136,29 +136,33 @@ export default function Stepper({
       onValueChange={(val) => setActiveId(val)}
     >
       <TabsPrimitive.List className="flex justify-center">
-        {steps.map(({ id, label }, index) =>
-          trigger({
-            id,
-            label,
-            index,
-            activeIndex,
-            totalSteps: steps.length,
-            complete,
-          }),
-        )}
+        {steps.map(({ id, label }, index) => (
+          <React.Fragment key={id}>
+            {trigger({
+              id,
+              label,
+              index,
+              activeIndex,
+              totalSteps: steps.length,
+              complete,
+            })}
+          </React.Fragment>
+        ))}
       </TabsPrimitive.List>
       <div className={bodyClass}>
         {steps.map(({ id, content }) => (
-          <TabsPrimitive.Content value={id} asChild>
-            {content({
-              stepNext,
-              stepPrev,
-              markComplete: () => setComplete(true),
-            })}
+          <TabsPrimitive.Content value={id} key={id} asChild>
+            <>
+              {content({
+                stepNext,
+                stepPrev,
+                markComplete: () => setComplete(true),
+              })}
+            </>
           </TabsPrimitive.Content>
         ))}
         <TabsPrimitive.Content value={'__complete'} asChild>
-          {completeElement}
+          <>{completeElement}</>
         </TabsPrimitive.Content>
       </div>
     </TabsPrimitive.Root>
