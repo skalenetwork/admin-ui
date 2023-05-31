@@ -161,6 +161,7 @@ const useStandardToken = (
 ) => {
   const erc20 = useToken({
     enabled: standard === 'ERC20',
+    address,
     chainId,
   });
 
@@ -235,6 +236,7 @@ const StandardDeployForm = (props: {
     address: tokenAddress as Address,
     chainId: originChain?.id,
   });
+
   const originContractInfo = originContractInfos[standardName];
 
   useEffect(() => {
