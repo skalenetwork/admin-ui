@@ -145,7 +145,7 @@ export function useSTokenMintBurnAccess({
     },
   });
 
-  return {
+  const returnData = {
     minterRole: roleHashesQuery[0],
     burnerRole: roleHashesQuery[1],
     MINTER_ROLE,
@@ -162,4 +162,8 @@ export function useSTokenMintBurnAccess({
       confirmed: grantBurnerRoleConfirmed,
     },
   };
+
+  console.log('useSTokenMintBurnAccess', returnData);
+
+  return returnData;
 }

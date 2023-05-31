@@ -38,6 +38,7 @@ export const StepThree = (props: {
   const grantMinterRoleConfirmed = grantMinterRole.confirmed;
   const grantBurnerRoleConfirmed = grantBurnerRole.confirmed;
 
+  // grantor disabled IF loading OR cannot assign the role when it is unassigned
   const isRoleGrantingDisabled =
     (!minterRole.isLoading &&
       !burnerRole.isLoading &&
