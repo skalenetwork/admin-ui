@@ -277,7 +277,9 @@ const { eoa, mnm, ...rest } = writer;
 2. there are no authorization exceptions
 3. there are no `require` failures in method call
 
-:arrow_upper_right: [Learn more](https://wagmi.sh/react/prepare-hooks) about underlying contract call preparation done by `wagmi`
+> :scroll: SKALE Contract writer hook performs eager validation on destination method call. This validation works as expected in case of EOA-signed transactions. :arrow_upper_right: [Learn more](https://wagmi.sh/react/prepare-hooks#no-upfront-validation) about underlying contract call preparation done by `wagmi`.
+
+> :warning: The eager validation may cause wallet injected scripts to log errors pre-emptively in console. Example: `MetaMask - RPC Error`
 
 Both `writer`s extend the return data of `wagmi`.`useContractWrite`, with more state values.
 
