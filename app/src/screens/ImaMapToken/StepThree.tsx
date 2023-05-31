@@ -9,6 +9,7 @@ import { useSTokenMintBurnAccess } from '@skalenetwork/feat/bridge';
 import { StandardName } from '@skalenetwork/feat/network/literals';
 import Card from '@skalenetwork/ux/components/Card/Card';
 import Field from '@skalenetwork/ux/elements/Field/Field';
+import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 
 export const StepThree = (props: {
@@ -45,6 +46,13 @@ export const StepThree = (props: {
     !grantMinterRoleConfirmed.isIdle ||
     !(!tmHasMinterRole.data && grantMinterRole.writeAsync) ||
     !(!tmHasBurnerRole.data && grantBurnerRole.writeAsync);
+
+  useEffect(() => {
+    if (tmHasMinterRole.refetch && tmHasBurnerRole.refetch) {
+      tmHasMinterRole.refetch();
+      tmHasBurnerRole.refetch();
+    }
+  }, [tmHasMinterRole.refetch, tmHasBurnerRole.refetch]);
 
   return (
     <FormProvider {...form}>
