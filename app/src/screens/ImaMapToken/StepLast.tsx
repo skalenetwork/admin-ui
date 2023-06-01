@@ -4,6 +4,7 @@ import { SubmitButtonPair } from '@/app/screens/ImaMapToken/SubmitButtonPair';
 import { useSTokenRegistration } from '@skalenetwork/feat/bridge';
 import { StandardName } from '@skalenetwork/feat/network/literals';
 import { Address } from 'abitype';
+import { useEffect } from 'react';
 
 export const StepLast = (props: {
   stepNext: () => void;
@@ -26,6 +27,16 @@ export const StepLast = (props: {
     tokenAddress: cloneTokenAddress as Address,
     originTokenAddress: originContractAddress as Address,
   });
+
+  useEffect(() => {
+    registerOnSchain.isErrorOnPrepare &&
+      console.log(
+        'registerOnSchain: Error on Prepare',
+        registerOnSchain.errorOnPrepare,
+        registerOnSchain,
+      );
+  }, [registerOnSchain.isErrorOnPrepare]);
+
   return (
     <form
       onSubmit={async (e) => {

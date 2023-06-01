@@ -131,7 +131,5 @@ export function useSTokenMintBurnAccess({
     },
   };
 
-  console.log('useSTokenMintBurnAccess', returnData);
-
   return returnData;
 }
