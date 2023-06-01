@@ -47,9 +47,13 @@ export function SButton({
       : writer.multisigData?.countRemaining === 0
       ? '▶️'
       : '⏳';
-  const _title =
-    writer.multisigData?.trxId &&
-    `${textmoji} msig tx#${writer.multisigData?.trxId}`;
+  const _title = writer.multisigData?.trxId
+    ? `${textmoji} msig tx#${writer.multisigData?.trxId}`
+    : writer.isErrorOnPrepare
+    ? `⚠️ ${writer.errorOnPrepare?.code || ''}: ${
+        writer.errorOnPrepare?.message || ''
+      }`
+    : undefined;
   return (
     <button
       className={tw(className, midStatus)}

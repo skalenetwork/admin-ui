@@ -69,7 +69,7 @@ const MODULES = [
 ] as const;
 
 type ExplorerProps = {
-  module: (typeof MODULES)[number];
+  module: typeof MODULES[number];
   action: 'listaccounts' | 'getLogs' | string;
   args?: {
     [key: string]: string;
@@ -106,13 +106,13 @@ export function useSContractProvider<T extends ContractId>({ id }: { id: T }) {
  */
 export function useSContract<
   TContractId extends ContractIdWithAbi,
-  TAbi extends (typeof ABI)[TContractId] = (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId] = typeof ABI[TContractId],
 >({
   id,
 }: {
   id: TContractId;
 }): {
-  address?: (typeof CONTRACT)[TContractId]['address'];
+  address?: typeof CONTRACT[TContractId]['address'];
   abi?: TAbi;
   contract?: ReturnType<typeof useContract<TAbi>>;
 } {
@@ -200,7 +200,7 @@ export function useSContractApi<T extends keyof typeof API>({
 
 // these types are created because abitype doesn't support ABIs without stateMutability
 
-export type SContractFunctionName<TAbi extends (typeof ABI)[keyof typeof ABI]> =
+export type SContractFunctionName<TAbi extends typeof ABI[keyof typeof ABI]> =
   Extract<
     TAbi[number],
     | { type: 'function'; stateMutability: 'view' }
@@ -208,7 +208,7 @@ export type SContractFunctionName<TAbi extends (typeof ABI)[keyof typeof ABI]> =
   >['name'];
 
 export type SContractReadParams<
-  TAbi extends (typeof ABI)[keyof typeof ABI],
+  TAbi extends typeof ABI[keyof typeof ABI],
   TFunctionName extends SContractFunctionName<TAbi>,
   TBaseParams = Parameters<typeof useContractRead>[0],
   TArgs = AbiParametersToPrimitiveTypes<
@@ -226,7 +226,7 @@ export type SContractReadParams<
 
 export function useSContractRead<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TBaseParams extends Parameters<typeof useContractRead>[0],
   TFunctionName extends SContractFunctionName<TAbi>,
   TReturnData extends AbiTypeToPrimitiveType<
@@ -264,7 +264,7 @@ export function useSContractRead<
   return {
     ...query,
   } as {
-    [K in keyof typeof query as Exclude<K, 'data'>]: (typeof query)[K];
+    [K in keyof typeof query as Exclude<K, 'data'>]: typeof query[K];
   } & {
     data?: TSelect extends undefined ? TReturnData : ReturnType<TSelect>;
   };
@@ -278,7 +278,7 @@ export function useSContractRead<
  */
 export function useSContractReads<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TBaseParams extends Parameters<typeof useContractReads>[0],
   TFunctionName extends Extract<
     TAbi[number],
@@ -342,7 +342,7 @@ export function useSContractReads<
     ...response,
     data: response.data !== undefined ? response.data : Array(reads.length),
   } as {
-    [K in keyof typeof response as Exclude<K, 'data'>]: (typeof response)[K];
+    [K in keyof typeof response as Exclude<K, 'data'>]: typeof response[K];
   } & {
     data?: TSelect extends undefined
       ? (TReturnData | undefined)[]
@@ -365,7 +365,7 @@ const MULTISIG_ONLY_WALLET_FUNCTIONS = [
   'addOwner',
   'replaceOwner',
   'changeRequirement',
-] satisfies ExtractAbiFunctionNames<(typeof ABI)['MULTISIG_WALLET']>[];
+] satisfies ExtractAbiFunctionNames<typeof ABI['MULTISIG_WALLET']>[];
 const MULTISIG_LOG_EXECUTION_FAILURE =
   '0x526441bb6c1aba3c9a4a6ca1d6545da9c2333c8c48343ef398eb858d72b79236';
 const MNM_GAS_BY_TYPE = {
@@ -436,6 +436,27 @@ const wrapWriteAsync = <
   };
 };
 
+const createErrorOnPrepare = (
+  error,
+  {
+    contractId,
+    functionName,
+  }: { contractId?: ContractId; functionName?: string } = {},
+) => {
+  const _error = error && JSON.parse(JSON.stringify(error));
+  const type = _error && (_error.code < 0 ? 'rpc' : 'ethers');
+  return error
+    ? {
+        type,
+        code: _error.data?.code !== undefined ? _error.data.code : error.code,
+        message: _error.data?.message || _error.reason,
+        contractId,
+        functionName,
+        rawError: _error,
+      }
+    : null;
+};
+
 /**
  * Write to a network contract, including pre-deployed multisig
  * @param id ContractId
@@ -444,7 +465,7 @@ const wrapWriteAsync = <
  */
 export function useSContractWrite<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TFunctionName extends Extract<
     TAbi[number],
     | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
@@ -776,8 +797,13 @@ export function useSContractWrite<
       action: 'eoa',
       isConfirmed: _eoaWait.isSuccess,
       isFailed: _eoaWait.isError,
-      receipt: _eoaWait.data,
       isFinalized: !!_eoaWait.data,
+      receipt: _eoaWait.data,
+      isErrorOnPrepare: eoaPrepare.isError,
+      errorOnPrepare: createErrorOnPrepare(eoaPrepare.error, {
+        contractId: id,
+        functionName: name,
+      }),
       ..._eoa,
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
@@ -793,6 +819,11 @@ export function useSContractWrite<
             isConfirmed: mnmConfirmTxWait.isSuccess,
             isFailed: mnmConfirmTxWait.isError,
             receipt: mnmConfirmTxWait.data,
+            isErrorOnPrepare: mnmConfirmPrepare.isError,
+            errorOnPrepare: createErrorOnPrepare(mnmConfirmPrepare.error, {
+              contractId: id,
+              functionName: name,
+            }),
             ...mnmConfirmTx,
             writeAsync: wrapWriteAsync(id, mnmConfirmTx.writeAsync),
           }
@@ -803,6 +834,11 @@ export function useSContractWrite<
             isConfirmed: _mnmWait.isSuccess,
             isFailed: _mnmWait.isError,
             receipt: _mnmWait.data,
+            isErrorOnPrepare: mnmSubmitPrepare.isError,
+            errorOnPrepare: createErrorOnPrepare(mnmSubmitPrepare.error, {
+              contractId: id,
+              functionName: name,
+            }),
             ..._mnm,
             writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
           }
@@ -823,8 +859,8 @@ export function useSContractWrite<
   };
 
   return finalReturnData as typeof returnData &
-    (typeof returnData)['eoa'] &
-    (typeof returnData)['mnm'] & {
+    typeof returnData['eoa'] &
+    typeof returnData['mnm'] & {
       writeAsync: ReturnType<typeof wrapWriteAsync> | undefined;
     };
 }
@@ -842,9 +878,9 @@ export function useSContracts<T extends ContractIdWithAbi>({
   id: T[];
 }): {
   contractId: T;
-  address?: (typeof CONTRACT)[T]['address'];
-  abi?: (typeof ABI)[T];
-  contract?: ReturnType<typeof useContract<(typeof ABI)[T]>>;
+  address?: typeof CONTRACT[T]['address'];
+  abi?: typeof ABI[T];
+  contract?: ReturnType<typeof useContract<typeof ABI[T]>>;
 }[] {
   const connectedProvider = useProvider();
   const mainnetProvider = getProvider({ chainId: 1 });
@@ -888,7 +924,7 @@ export function useSContracts<T extends ContractIdWithAbi>({
 
 export function useRoleAccess<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
 >(id: TContractId, role: TRoleName) {
   const { data, ...rest } = useRolesAccess(id, [role]);
@@ -900,7 +936,7 @@ export function useRoleAccess<
 
 export function useRolesAccess<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
 >(id: TContractId, roleList?: TRoleName[]) {
   const account = useAccount();
@@ -958,7 +994,7 @@ export function useRolesAccess<
 
 export function useSContractRole<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
 >(id: TContractId, role: TRoleName) {
   const { data, ...rest } = useSContractRoles(id, [role]);
@@ -970,7 +1006,7 @@ export function useSContractRole<
 
 export function useSContractRoles<
   TContractId extends ContractId,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
   TRoleName extends Extract<TAbi[number], RoleFragment>['name'],
 >(id: TContractId, roleList?: TRoleName[]) {
   const { address } = useAccount();
@@ -1092,7 +1128,7 @@ export function useExplorer(
 export function useEvents<
   TAddress extends ContractDetailList['address'],
   TContractId extends ContractIdByAddress<TAddress>,
-  TAbi extends (typeof ABI)[TContractId],
+  TAbi extends typeof ABI[TContractId],
 >({
   address,
   fromBlock,

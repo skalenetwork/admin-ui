@@ -76,15 +76,16 @@ export function FileStorageReserve({
   });
 
   const unit = form.watch('reserveSpaceUnit');
+  const address = form.watch('reserveSpaceAddress');
   const multiplier =
     unit === 'kb' ? 1 : unit === 'mb' ? 2 : unit === 'gb' ? 3 : 0;
   const amount =
     Number(form.watch('reserveSpaceAmount')) * Math.pow(1024, multiplier);
 
   const reserveSpace = useSContractWrite('FILESTORAGE', {
-    enabled: form.formState.isValid,
+    enabled: !!(form.formState.isValid && address),
     name: 'reserveSpace',
-    args: [form.watch('reserveSpaceAddress'), BigNumber.from(amount)],
+    args: [address, BigNumber.from(amount)],
   });
 
   const {

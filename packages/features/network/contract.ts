@@ -29,7 +29,7 @@ namespace ContractManifestBase {
     | 'standard';
   export type Item<TContractType = ContractType> = {
     [key: string]: {
-      network: (typeof NETWORK)[keyof typeof NETWORK];
+      network: typeof NETWORK[keyof typeof NETWORK];
       type: TContractType;
       key: string;
       name: string;
