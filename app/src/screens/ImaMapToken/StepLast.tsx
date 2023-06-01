@@ -37,6 +37,8 @@ export const StepLast = (props: {
       );
   }, [registerOnSchain.isErrorOnPrepare]);
 
+  console.log('registerOnSchain: full object', registerOnSchain);
+
   return (
     <form
       onSubmit={async (e) => {
