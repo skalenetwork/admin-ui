@@ -117,8 +117,12 @@ export const StepThree = (props: {
                       className="btn btn-outline py-3"
                       onClick={async (e) => {
                         e.preventDefault();
-                        await grantMinterRole.writeAsync?.(true);
-                        await grantBurnerRole.writeAsync?.(true);
+                        if (tmHasMinterRole.data === false) {
+                          await grantMinterRole.writeAsync?.();
+                        }
+                        if (tmHasBurnerRole.data === false) {
+                          await grantBurnerRole.writeAsync?.();
+                        }
                       }}
                     >
                       {grantBurnerRoleConfirmed.isIdle &&

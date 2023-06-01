@@ -28,11 +28,11 @@ const useTokenErrors = ({
   mintable: boolean;
   burnable: boolean;
 }) => {
-  return Boolean(contractInfo.isLoading)
+  return contractInfo.isLoading
     ? []
-    : Boolean(contractInfo.isError)
+    : contractInfo.isError
     ? ['Address does not belong to a contract.']
-    : (!mintable || !burnable) && contractInfo.isSuccess
+    : contractInfo.isSuccess && (mintable === false || burnable === false)
     ? [
         <>
           Contract is not using required Open zeppelin access control:{' '}

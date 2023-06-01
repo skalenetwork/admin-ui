@@ -1,12 +1,11 @@
-import { useTokenManager } from '@/features/bridge';
 import { CommonTokenAbi } from '@/features/bridge/types';
 import { STANDARD_CONTRACT } from '@/features/control/lib';
 import { StandardKey, StandardName } from '@/features/network/literals';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { build } from '@/features/network/manifest';
 import { useMemo } from 'react';
 import {
   Address,
-  useContract,
+  useContractRead,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
@@ -44,83 +43,52 @@ export function useSTokenMintBurnAccess({
   const signerOrProvider = activeChain?.id === chainId ? signer : provider;
 
   const tokenAbi = useMemo(() => {
-    return standardName && getStandardTokenAbi(standard);
+    return standardName && (getStandardTokenAbi(standard) as CommonTokenAbi);
   }, [standardName]);
 
-  const targetContract = useContract({
-    abi: tokenAbi as CommonTokenAbi,
+  const { address: targetTokenManagerAddress } = build.addressAbiPair(
+    `TOKEN_MANAGER_${standard}`,
+  );
+
+  const targetContractConfig = {
     address: tokenAddress,
-    signerOrProvider,
+    abi: tokenAbi,
+  };
+
+  const minterRoleHash = useContractRead({
+    ...targetContractConfig,
+    functionName: 'MINTER_ROLE',
+  });
+  const burnerRoleHash = useContractRead({
+    ...targetContractConfig,
+    functionName: 'BURNER_ROLE',
   });
 
-  // `network` allows selecting either token_manager or deposit_box
-  const { contract: originTokenManager } = useTokenManager({
-    standard,
-    network: originChain?.network,
+  const MINTER_ROLE = minterRoleHash.data;
+  const BURNER_ROLE = burnerRoleHash.data;
+
+  const tmHasMinterRole = useContractRead({
+    enabled: !!(tokenAddress && MINTER_ROLE),
+    address: tokenAddress,
+    abi: tokenAbi,
+    functionName: 'hasRole',
+    args: MINTER_ROLE && [MINTER_ROLE, targetTokenManagerAddress],
   });
 
-  const roleHashesQuery = useQueries({
-    queries: [
-      {
-        enabled: !!targetContract?.address,
-        queryKey: ['custom', targetContract?.address, 'role', 'MINTER_ROLE'],
-        queryFn: async () => {
-          if (!targetContract?.MINTER_ROLE) {
-            throw Error('Cloned token role check is misconfigured');
-          }
-          return await targetContract?.MINTER_ROLE();
-        },
-        refetchOnWindowFocus: false,
-      },
-      {
-        enabled: !!targetContract?.address,
-        queryKey: ['custom', targetContract?.address, 'role', 'BURNER_ROLE'],
-        queryFn: async () => {
-          if (!targetContract?.BURNER_ROLE) {
-            throw Error('Cloned token role check is misconfigured');
-          }
-          return await targetContract?.BURNER_ROLE();
-        },
-        refetchOnWindowFocus: false,
-      },
-    ],
-  });
-
-  const MINTER_ROLE = roleHashesQuery[0].data;
-  const BURNER_ROLE = roleHashesQuery[1].data;
-
-  const tmHasMinterRole = useQuery({
-    enabled: !!(MINTER_ROLE && originTokenManager),
-    queryFn: async () => {
-      return targetContract?.hasRole
-        ? targetContract.hasRole(
-            MINTER_ROLE as Address,
-            originTokenManager?.address as Address,
-          )
-        : false;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const tmHasBurnerRole = useQuery({
-    enabled: !!(BURNER_ROLE && originTokenManager),
-    queryFn: async () => {
-      return targetContract?.hasRole
-        ? targetContract.hasRole(
-            BURNER_ROLE as Address,
-            originTokenManager?.address as Address,
-          )
-        : false;
-    },
-    refetchOnWindowFocus: false,
+  const tmHasBurnerRole = useContractRead({
+    enabled: !!(tokenAddress && BURNER_ROLE),
+    address: tokenAddress,
+    abi: tokenAbi,
+    functionName: 'hasRole',
+    args: BURNER_ROLE && [BURNER_ROLE, targetTokenManagerAddress],
   });
 
   const { config: grantMinterRoleConfig } = usePrepareContractWrite({
-    enabled: !!(tokenAddress && MINTER_ROLE && originTokenManager?.address),
+    enabled: !!(tokenAddress && MINTER_ROLE),
     address: tokenAddress,
-    abi: tokenAbi as CommonTokenAbi,
+    abi: tokenAbi,
     functionName: 'grantRole',
-    args: [MINTER_ROLE as Address, originTokenManager?.address as Address],
+    args: MINTER_ROLE && [MINTER_ROLE, targetTokenManagerAddress],
   });
   const grantMinterRole = useContractWrite(grantMinterRoleConfig);
   const grantMinterRoleConfirmed = useWaitForTransaction({
@@ -131,11 +99,11 @@ export function useSTokenMintBurnAccess({
   });
 
   const { config: grantBurnerRoleConfig } = usePrepareContractWrite({
-    enabled: !!(tokenAddress && BURNER_ROLE && originTokenManager?.address),
+    enabled: !!(tokenAddress && BURNER_ROLE),
     address: tokenAddress,
-    abi: tokenAbi as CommonTokenAbi,
+    abi: tokenAbi,
     functionName: 'grantRole',
-    args: [BURNER_ROLE as Address, originTokenManager?.address as Address],
+    args: BURNER_ROLE && [BURNER_ROLE, targetTokenManagerAddress],
   });
   const grantBurnerRole = useContractWrite(grantBurnerRoleConfig);
   const grantBurnerRoleConfirmed = useWaitForTransaction({
@@ -146,11 +114,11 @@ export function useSTokenMintBurnAccess({
   });
 
   const returnData = {
-    minterRole: roleHashesQuery[0],
-    burnerRole: roleHashesQuery[1],
+    minterRole: minterRoleHash,
+    burnerRole: burnerRoleHash,
     MINTER_ROLE,
     BURNER_ROLE,
-    hasAccessControl: MINTER_ROLE && BURNER_ROLE,
+    hasAccessControl: !!(MINTER_ROLE && BURNER_ROLE),
     isMinterOriginTM: tmHasMinterRole,
     isBurnerOriginTM: tmHasBurnerRole,
     grantMinterRoleToOriginTM: {
