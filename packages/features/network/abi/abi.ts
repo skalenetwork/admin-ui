@@ -6,6 +6,7 @@
 import { CONTRACT, ContractId } from '@/features/network/contract';
 import { Abi, AbiError, AbiEvent, AbiFunction } from 'abitype';
 import ConfigControllerABI from './abi-config_controller';
+import ContextABI from './abi-context';
 import FileStorageABI from './abi-filestorage';
 import mainnetImaUnion from './abi-ima-mainnet.union';
 import schainImaUnion from './abi-ima.union';
@@ -14,7 +15,7 @@ import MultisigWalletABI from './abi-multisig_wallet';
 import skaleManagerUnion from './abi-skale_manager.union';
 
 export type ContractName<K extends ContractId> = Lowercase<
-  (typeof CONTRACT)[K]['name']
+  typeof CONTRACT[K]['name']
 >;
 
 type RelaxedAbi = Readonly<
@@ -27,6 +28,7 @@ type RelaxedAbi = Readonly<
  * always 100% export as const to avoid nonsensical exceptions with indexing
  */
 export const ABI = {
+  CONTEXT: ContextABI,
   PROXY_ADMIN: schainImaUnion['proxy_admin_abi'],
   FILESTORAGE: FileStorageABI,
   CONFIG_CONTROLLER: ConfigControllerABI,
@@ -67,6 +69,6 @@ export type ContractIdWithAbi = keyof typeof ABI;
  * @returns
  */
 
-export function getAbi<T extends ContractId>(id: T): (typeof ABI)[T] {
-  return ABI[id] as (typeof ABI)[T];
+export function getAbi<T extends ContractId>(id: T): typeof ABI[T] {
+  return ABI[id] as typeof ABI[T];
 }

@@ -34,6 +34,9 @@ importers:
       '@skaleproject/config-controller':
         specifier: ^0.3.1-1
         version: 0.3.1-1
+      '@skaleproject/context':
+        specifier: ^0.3.1
+        version: 0.3.1
       '@skaleproject/multisig-wallet':
         specifier: ^0.5.1-1
         version: 0.5.1-1
@@ -2665,6 +2668,17 @@ packages:
 
   /@skaleproject/constants@0.3.1:
     resolution: {integrity: sha512-1WdSTUgb3SjORzM948BVvz/lmG3N2ldDqrVnYLLepsQlGtoG1H+GADyID7pdReWi11GaoENlj0sM7E0LiFILbA==}
+    dev: false
+
+  /@skaleproject/context@0.3.1:
+    resolution: {integrity: sha512-INq+uS5Ry5wkg7N7ShCKBPLl8XnqwuWiaI75UTf2F5UcB45RrymzTUBBw+w9109OIbTML0/vGSANXpBBapcXwg==}
+    dependencies:
+      '@skaleproject/constants': 0.3.1
+      '@skaleproject/utils': 0.3.1
+      ethers: 5.7.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
     dev: false
 
   /@skaleproject/multisig-wallet@0.5.1-1:

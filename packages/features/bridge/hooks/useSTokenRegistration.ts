@@ -3,6 +3,7 @@ import {
   NETWORK,
   StandardKey,
   StandardName,
+  TOKEN_STANDARD,
 } from '@/features/network/literals';
 import { Address } from 'abitype';
 import { useNetwork } from 'wagmi';
@@ -44,7 +45,7 @@ export function useSTokenRegistration({
   const registerOnForeignChain = useSContractWrite(`DEPOSIT_BOX_${standard}`, {
     enabled:
       _enabled && !!(targetChain && originTokenAddress && mode === 'f2s'),
-    name: `add${standard}TokenByOwner`,
+    name: TOKEN_STANDARD[standard]?.registerFunction,
     args: [targetChain?.name, originTokenAddress],
   });
 
@@ -53,7 +54,7 @@ export function useSTokenRegistration({
     {
       enabled:
         _enabled && !!(originChain && originTokenAddress && tokenAddress),
-      name: `add${standard}TokenByOwner`,
+      name: TOKEN_STANDARD[standard]?.registerFunction,
       args: [
         originChain?.network === NETWORK.ETHEREUM
           ? 'Mainnet'

@@ -51,6 +51,13 @@ namespace ContractManifestBase {
  */
 
 export const CONTRACT = {
+  CONTEXT: {
+    network: NETWORK.SKALE,
+    type: 'sudo',
+    key: 'schain:context',
+    address: ADDRESS.SCHAIN_CONTEXT_ADDRESS,
+    name: 'Context',
+  },
   PROXY_ADMIN: {
     network: NETWORK.SKALE,
     type: 'sudo',

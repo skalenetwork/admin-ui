@@ -15,6 +15,7 @@ import { TokenManagerERC721 } from '@skalenetwork/ima-js/src/contracts/schain/To
 import { TokenManagerEth } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerEth';
 import { TokenManagerLinker } from '@skalenetwork/ima-js/src/contracts/schain/TokenManagerLinker';
 import { ConfigController } from '@skaleproject/config-controller';
+import { Context } from '@skaleproject/context';
 import { InjectedMultisigWallet } from '@skaleproject/multisig-wallet';
 import { Signer, Wallet } from 'ethers';
 import { Address, Chain } from 'wagmi';
@@ -51,6 +52,14 @@ function buildApi<R, U>(
  * Maps ContractId to their API's argument-less "instantiators", NOT "instances"
  */
 export const API = {
+  CONTEXT: buildApi(Context, ({ address, abi, chain, signer }) => [
+    {
+      address,
+      abi,
+      rpcUrl: chain.rpcUrls?.default?.http[0],
+      signer: signer as Wallet,
+    },
+  ]),
   CONFIG_CONTROLLER: buildApi(
     ConfigController,
     ({ address, abi, chain, signer }) => [

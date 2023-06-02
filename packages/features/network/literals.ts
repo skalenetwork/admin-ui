@@ -33,22 +33,27 @@ export const TOKEN_STANDARD = {
   ETH: {
     name: 'eth',
     label: 'ETH',
+    registerFunction: 'setEthErc20Address',
   },
   ERC20: {
     name: 'erc20',
     label: 'ERC-20',
+    registerFunction: 'addERC20TokenByOwner',
   },
   ERC721: {
     name: 'erc721',
     label: 'ERC-721',
+    registerFunction: 'addERC721TokenByOwner',
   },
   ERC721_WITH_METADATA: {
     name: 'erc721_with_metadata',
     label: 'ERC-721 with Metadata',
+    registerFunction: 'addERC721TokenByOwner',
   },
   ERC1155: {
     name: 'erc1155',
     label: 'ERC-1155',
+    registerFunction: 'addERC1155TokenByOwner'
   },
 } as const;
 
