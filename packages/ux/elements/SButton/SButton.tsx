@@ -1,4 +1,5 @@
 import { PeopleIcon } from '@/components/Icons/Icons';
+import { LockClosedIcon } from '@radix-ui/react-icons';
 import { useSContractWrite } from '@skalenetwork/feat/network/hooks';
 import { ButtonHTMLAttributes, PropsWithChildren } from 'react';
 import { toast as toastify } from 'react-toastify';
@@ -71,6 +72,12 @@ export function SButton({
       title={`${title || ''} ${_title || ''}`}
       {...rest}
     >
+      {writer.isErrorOnPrepare && writer.errorOnPrepare?.kind === 'auth' && (
+        <>
+          <LockClosedIcon />
+          &emsp;
+        </>
+      )}
       {children}{' '}
       {noAction ? (
         <>

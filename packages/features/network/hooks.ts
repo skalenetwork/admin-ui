@@ -445,11 +445,15 @@ const createErrorOnPrepare = (
 ) => {
   const _error = error && JSON.parse(JSON.stringify(error));
   const type = _error && (_error.code < 0 ? 'rpc' : 'ethers');
+  const code =
+    _error && (_error.data?.code !== undefined ? _error.data.code : error.code);
+  const message = _error && (_error.data?.message || _error.reason);
   return error
     ? {
         type,
-        code: _error.data?.code !== undefined ? _error.data.code : error.code,
-        message: _error.data?.message || _error.reason,
+        kind: message?.toLowerCase().includes('accesscontrol') ? 'auth' : '*',
+        code,
+        message,
         contractId,
         functionName,
         rawError: _error,
@@ -499,6 +503,13 @@ export function useSContractWrite<
 
   const contractType = getSContractProp(id, 'type');
   const mnmDefaultGasLimit = MNM_GAS_BY_TYPE[contractType] || MNM_MIN_GAS_LIMIT;
+
+  const { data: isAccountChainOwner } = useSContractRead('CONTEXT', {
+    name: 'getSchainOwnerAddress',
+    select: (address) => {
+      return address?.toLowerCase() === account.address;
+    },
+  });
 
   ////
   // selectively encode data for correct destination contract
@@ -851,7 +862,11 @@ export function useSContractWrite<
           },
   };
 
-  const defaultWrite = returnData.eoa.write ? returnData.eoa : returnData.mnm;
+  const defaultWrite = returnData.eoa.write
+    ? returnData.eoa
+    : isAccountMultisigOwner === true || isAccountChainOwner === true
+    ? returnData.mnm
+    : returnData.eoa;
 
   const finalReturnData = {
     ...returnData,
