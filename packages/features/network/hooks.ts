@@ -592,8 +592,9 @@ export function useSContractWrite<
               trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase())
         );
       });
+
   const existingTrxId: undefined | number =
-    !pendingTrxIds.data || existingTrxIndex === undefined
+    existingTrxIndex === undefined
       ? undefined
       : existingTrxIndex < 0
       ? existingTrxIndex
