@@ -630,18 +630,18 @@ export function useSContractWrite<
   // null = not authorized / not available
 
   let mnmAction = !isAccountMultisigOwner
-    ? null
+    ? 'no-owner'
     : existingTrxId === undefined
-    ? undefined
+    ? 'no-submit-validate'
     : existingTrxId < 0
     ? 'submit'
     : ownerHasConfirmed === undefined || existingTrxIsConfirmed === undefined
-    ? undefined
+    ? 'no-existing-validate'
     : ownerHasConfirmed === false
     ? 'confirm'
     : existingTrxIsConfirmed === true
     ? 'execute'
-    : undefined;
+    : 'no-anything';
 
   ////
   // transaction initiated by EOA on multisig to marionette through to destination contract
@@ -818,48 +818,47 @@ export function useSContractWrite<
       ..._eoa,
       writeAsync: wrapWriteAsync(id, _eoa.writeAsync),
     },
-    mnm:
-      mnmAction === null || mnmAction === undefined
-        ? {
-            action: mnmAction,
-          }
-        : mnmAction === 'confirm' || mnmAction === 'execute'
-        ? {
-            action: mnmAction,
-            multisigData,
-            isConfirmed: mnmConfirmTxWait.isSuccess,
-            isFailed: mnmConfirmTxWait.isError,
-            receipt: mnmConfirmTxWait.data,
-            isErrorOnPrepare: mnmConfirmPrepare.isError,
-            errorOnPrepare: createErrorOnPrepare(mnmConfirmPrepare.error, {
-              contractId: id,
-              functionName: name,
-            }),
-            ...mnmConfirmTx,
-            writeAsync: wrapWriteAsync(id, mnmConfirmTx.writeAsync),
-          }
-        : mnmAction === 'submit'
-        ? {
-            action: mnmAction,
-            multisigData,
-            isConfirmed: _mnmWait.isSuccess,
-            isFailed: _mnmWait.isError,
-            receipt: _mnmWait.data,
-            isErrorOnPrepare: mnmSubmitPrepare.isError,
-            errorOnPrepare: createErrorOnPrepare(mnmSubmitPrepare.error, {
-              contractId: id,
-              functionName: name,
-            }),
-            ..._mnm,
-            writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
-          }
-        : {
-            action:
-              mnmConfirmPrepare.isLoading || mnmSubmitPrepare.isLoading
-                ? 'wait'
-                : 'none',
-            multisigData,
-          },
+    mnm: !['confirm', 'execute', 'submit'].some((v) => v === mnmAction)
+      ? {
+          action: mnmAction,
+        }
+      : mnmAction === 'confirm' || mnmAction === 'execute'
+      ? {
+          action: mnmAction,
+          multisigData,
+          isConfirmed: mnmConfirmTxWait.isSuccess,
+          isFailed: mnmConfirmTxWait.isError,
+          receipt: mnmConfirmTxWait.data,
+          isErrorOnPrepare: mnmConfirmPrepare.isError,
+          errorOnPrepare: createErrorOnPrepare(mnmConfirmPrepare.error, {
+            contractId: id,
+            functionName: name,
+          }),
+          ...mnmConfirmTx,
+          writeAsync: wrapWriteAsync(id, mnmConfirmTx.writeAsync),
+        }
+      : mnmAction === 'submit'
+      ? {
+          action: mnmAction,
+          multisigData,
+          isConfirmed: _mnmWait.isSuccess,
+          isFailed: _mnmWait.isError,
+          receipt: _mnmWait.data,
+          isErrorOnPrepare: mnmSubmitPrepare.isError,
+          errorOnPrepare: createErrorOnPrepare(mnmSubmitPrepare.error, {
+            contractId: id,
+            functionName: name,
+          }),
+          ..._mnm,
+          writeAsync: wrapWriteAsync(id, _mnm.writeAsync),
+        }
+      : {
+          action:
+            mnmConfirmPrepare.isLoading || mnmSubmitPrepare.isLoading
+              ? 'wait'
+              : 'none',
+          multisigData,
+        },
   };
 
   const defaultWrite = returnData.eoa.write
