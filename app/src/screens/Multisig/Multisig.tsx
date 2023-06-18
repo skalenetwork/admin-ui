@@ -76,7 +76,6 @@ export function Multisig() {
 
   const {
     queryKey,
-    api: multisigApi,
     contract,
     balance,
     owners,

@@ -108,8 +108,6 @@ export function RoleAssigner() {
     args: [roleHash, assigneeAddress],
   });
 
-  console.log('RoleAssigner:grantOrRevokeRole', grantOrRevokeRole);
-
   const isOffnet = chain?.network !== NETWORK.SKALE;
 
   const isPreparing =

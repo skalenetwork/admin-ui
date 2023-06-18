@@ -1,4 +1,4 @@
-import { useSContractApi } from '@/features/network/hooks';
+import { useSContractApi } from '@/features/network/api-hooks';
 import { useQuery } from '@tanstack/react-query';
 
 export function useTokenMappings({

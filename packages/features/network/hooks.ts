@@ -6,7 +6,6 @@ import { useMultisig } from '@/features/multisig/hooks';
  */
 
 import { ABI, ContractIdWithAbi, getAbi } from '@/features/network/abi/abi';
-import { API, getApi } from '@/features/network/api';
 import {
   CONTRACT,
   ContractDetailList,
@@ -135,59 +134,6 @@ export function useSContract<
     address,
     abi,
     contract,
-  };
-}
-
-/**
- * Use external library wrapper for predeployed contract
- * @param param0
- * @returns
- */
-export function useSContractApi<T extends keyof typeof API>({
-  id,
-  chainId,
-  enabled = true,
-}: {
-  id: T;
-  chainId?: number;
-  enabled?: boolean;
-}) {
-  const { chain, chains } = useNetwork();
-  const { provider, signer } = useSContractProvider({ id });
-  const connected = chain ? chain.network === NETWORK.SKALE : false;
-
-  const customChain = chains.find((c) => c.id === chainId);
-  const customProvider = getProvider({
-    chainId,
-  });
-  const { data: customSigner } = useSigner({
-    chainId,
-  });
-
-  const params =
-    chainId !== undefined && customProvider && customChain && customSigner
-      ? {
-          chain: customChain,
-          provider: customProvider,
-          signer: customSigner,
-        }
-      : chainId === undefined && chain && signer && provider
-      ? {
-          chain,
-          provider,
-          signer,
-        }
-      : undefined;
-
-  const api = useMemo(() => {
-    return id && enabled && params ? getApi(id, params) : undefined;
-  }, [id, params?.chain, params?.provider, params?.signer, enabled]);
-
-  return {
-    connected,
-    chainId: chainId || chain?.id,
-    signer: params?.signer,
-    api,
   };
 }
 
@@ -504,12 +450,14 @@ export function useSContractWrite<
   const contractType = getSContractProp(id, 'type');
   const mnmDefaultGasLimit = MNM_GAS_BY_TYPE[contractType] || MNM_MIN_GAS_LIMIT;
 
-  const { data: isAccountChainOwner } = useSContractRead('CONTEXT', {
+  const isAccountChainOwnerRead = useSContractRead('CONTEXT', {
     name: 'getSchainOwnerAddress',
     select: (address) => {
       return address?.toLowerCase() === account.address;
     },
   });
+
+  const { data: isAccountChainOwner } = isAccountChainOwnerRead;
 
   ////
   // selectively encode data for correct destination contract
@@ -517,14 +465,20 @@ export function useSContractWrite<
   const { pendingTrxIds, counts, owners } = useMultisig({
     address: multisig.address,
   });
-  const requiredConfirmations = counts.data.countReqdConfirms;
 
   const isAccountMultisigOwner = owners.data?.some(
     (addr) => addr.toLowerCase() === account.address?.toLowerCase(),
   );
 
+  const depsOfAuthorization = [isAccountChainOwnerRead, owners];
+
+  const requiredConfirmations = counts.data.countReqdConfirms;
+
   const isMultisigAndSubmitOnly =
     id === 'MULTISIG_WALLET' && MULTISIG_ONLY_WALLET_FUNCTIONS.includes(name);
+
+  ////
+  // encode transaction data for eoa route
 
   const destMethodEncoded = useMemo(() => {
     if (
@@ -543,6 +497,9 @@ export function useSContractWrite<
     } catch (e) {}
     return destMethodEncoded;
   }, [abi, params.args, name, isMultisigAndSubmitOnly]);
+
+  ////
+  // encode transaction data for mnm route
 
   const marionetteExecEncoded = useMemo(() => {
     if (!(address && destMethodEncoded) || id === 'MULTISIG_WALLET') return;
@@ -625,12 +582,22 @@ export function useSContractWrite<
     requiredConfirmations &&
     existingTrxConfirmCount >= requiredConfirmations;
 
+  const depsOfAction = [pendingTrxs, existingTrxConfirmers];
+
   ///
   // prepare correct action on multisig
   // undefined = loading
   // null = not authorized / not available
 
-  let mnmAction = !isAccountMultisigOwner
+  let mnmAction = depsOfAuthorization.some((d) => d.isLoading)
+    ? 'wait-auth'
+    : depsOfAuthorization.some((d) => d.isError)
+    ? 'valerr-auth'
+    : depsOfAction.some((d) => d.isLoading)
+    ? 'wait-action'
+    : depsOfAction.some((d) => d.isError)
+    ? 'valerr-action'
+    : !isAccountMultisigOwner
     ? 'no-owner'
     : existingTrxId === undefined
     ? 'no-submit-validate'

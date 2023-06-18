@@ -12,17 +12,12 @@ import { NETWORK } from './../network/literals';
 
 import { getAbi } from '@/features/network/abi/abi';
 import { CONTRACT, getSContractProp } from '@/features/network/contract';
-import {
-  useEvents,
-  useSContract,
-  useSContractApi,
-} from '@/features/network/hooks';
+import { useEvents, useSContract } from '@/features/network/hooks';
 import { Address } from 'abitype';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
 import { useLocalStorage } from 'react-use';
 import { useBalance, useNetwork } from 'wagmi';
-import { scope } from './core';
 
 const multisigContract = {
   address: getSContractProp('MULTISIG_WALLET', 'address'),
@@ -185,17 +180,6 @@ export function useMultisig({
     id: 'MULTISIG_WALLET',
   });
 
-  const { api, chainId } = useSContractApi({
-    id: 'MULTISIG_WALLET',
-  });
-
-  const queryKey = useCallback(
-    (key: any[]) => {
-      return [chainId, scope, ...key];
-    },
-    [chainId],
-  );
-
   // queries
 
   const balance = useBalance({ address: address });
@@ -282,9 +266,7 @@ export function useMultisig({
   };
 
   return {
-    queryKey,
     contract,
-    api,
     counts,
     balance,
     owners,

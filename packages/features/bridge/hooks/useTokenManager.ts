@@ -1,5 +1,6 @@
 import { TokenTypeProps } from '@/features/bridge/types';
-import { useSContract, useSContractApi } from '@/features/network/hooks';
+import { useSContractApi } from '@/features/network/api-hooks';
+import { useSContract } from '@/features/network/hooks';
 import { NETWORK, StandardKey } from '@/features/network/literals';
 
 export function useTokenManager<T extends StandardKey>({

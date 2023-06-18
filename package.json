@@ -10,7 +10,8 @@
   "scripts": {
     "build:app": "pnpm --filter @skalenetwork/admin-ui build",
     "dev:app": "pnpm --filter @skalenetwork/admin-ui dev",
-    "compile:chains": "pnpm --filter @skalenetwork/feat compile:chains"
+    "compile:chains": "pnpm --filter @skalenetwork/feat compile:chains",
+    "test": "vitest"
   },
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
@@ -75,6 +76,7 @@
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.2",
+    "jsdom": "^22.1.0",
     "postcss": "^8.4.20",
     "prettier": "^2.8.0",
     "prettier-plugin-organize-imports": "^3.2.2",
