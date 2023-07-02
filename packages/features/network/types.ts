@@ -9,3 +9,13 @@ export type ChainManifestItem = {
 };
 export type NetworkType = 'mainnet' | 'staging';
 export type ConnectionStatus = 'full' | 'origin' | 'target' | 'none';
+
+export type RoleFragment = {
+  type: 'function';
+  name: `${string}_ROLE`;
+} & (
+  | {
+      stateMutability: 'view';
+    }
+  | { constant: true }
+);
