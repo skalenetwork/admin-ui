@@ -30,13 +30,13 @@ async function compileChains(networkType, path) {
   // let metadata: ChainManifestItem[] = await fetch(
   //   build.chainMetadataUrl(networkType),
   // ).then((res) => res.json());
-  let data = await fetch(
+  const data = await fetch(
     `https://${rpcSubdomain}.${HOST}/${JSON_FILE_PATH}`,
   ).then((res) => res.json());
 
-  let chains = {};
+  const chains = {};
 
-  for await (let chain of Object.create(data)) {
+  for await (const chain of Object.create(data)) {
     const name = chain.chain_info.schain_name;
     const rpcUrls = buildRpcUrls([
       {
