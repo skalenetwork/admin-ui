@@ -10,8 +10,9 @@
   "scripts": {
     "typedoc": "typedoc --out docs --entryPointStrategy expand src/features/*** --skipErrorChecking --plugin typedoc-theme-hierarchy --theme hierarchy",
     "compile:chains": "npx tsx ./network/scripts/compile-chains.ts",
-    "lint": "eslint . --ext .ts,.tsx",
-    "prettier": "prettier --check ./*",
+    "lint:check": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "prettier:check": "prettier --check ./*",
     "prettier:fix": "prettier --write ./*"
   },
   "dependencies": {},

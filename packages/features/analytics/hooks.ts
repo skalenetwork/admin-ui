@@ -70,7 +70,7 @@ export function useSkaleManagerStats() {
       chainId: targetChain?.id,
     })),
     select: (data) => {
-      let connectedChains = [] as (typeof originChain & {
+      const connectedChains = [] as (typeof originChain & {
         chainHash: `0x${string}`;
       })[];
       data.forEach((isConnected, index) => {
