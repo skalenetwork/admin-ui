@@ -1,0 +1,16 @@
+name: Run Linting Checks
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  lintcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.12.1'
+      - name: Check @skalenetwork/feat eslint
+        run: pnpm --filter @skalenetwork/feat lint:check
