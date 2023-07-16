@@ -32,7 +32,7 @@ export const staging = {\n`;
   let data = await fetch(`https://${rpcSubdomain}.${HOST}/${JSON_FILE_PATH}`);
   data = await data.json();
 
-  for await (let chain of Object.create(data)) {
+  for await (const chain of Object.create(data)) {
     const name = chain.chain_info.schain_name;
     const rpcUrls = buildRpcUrls([
       {

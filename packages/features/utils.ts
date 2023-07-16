@@ -21,7 +21,7 @@ export function toSentenceCase(anyCamelCase: string) {
 }
 
 export function sanitizeAddress(
-  addressLike: string = '',
+  addressLike = '',
   {
     prefix = true,
     checksum = true,
