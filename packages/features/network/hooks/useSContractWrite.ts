@@ -11,6 +11,7 @@ import {
   useAccount,
   useContractWrite,
   usePrepareContractWrite,
+  UsePrepareContractWriteConfig,
   useWaitForTransaction,
 } from 'wagmi';
 
@@ -139,9 +140,7 @@ export function useSContractWrite<
     | { type: 'function'; stateMutability: 'payable' | 'nonpayable' }
     | { type: 'function'; constant: false }
   >['name'],
-  TBaseParams extends Parameters<
-    typeof usePrepareContractWrite<TAbi, TFunctionName>
-  >[0],
+  TBaseParams extends UsePrepareContractWriteConfig<TAbi, TFunctionName>,
 >(
   id: TContractId,
   {
@@ -239,34 +238,37 @@ export function useSContractWrite<
   const pendingTrxs = useSContractReads('MULTISIG_WALLET', {
     address: multisig.address,
     enabled: pendingTrxIds.isSuccess,
-    reads: (pendingTrxIds.data || []).map((trxId) => ({
+    reads: (pendingTrxIds.data || []).map((trxId: number) => ({
       name: 'transactions',
       args: [ethers.BigNumber.from(trxId)] as const,
     })),
   });
-  const existingTrxIndex: undefined | number = !pendingTrxs.data
-    ? undefined
-    : (
-        pendingTrxs.data as {
-          data: `0x${string}`;
-          destination: `0x${string}`;
-          executed: boolean;
-          value: BigNumber;
-        }[]
-      ).findIndex((trx) => {
-        return (
-          !!trx &&
-          (id === 'MULTISIG_WALLET'
-            ? !!destMethodEncoded &&
-              trx.destination.toLowerCase() ===
-                multisig.address.toLowerCase() &&
-              trx.data.toLowerCase() === destMethodEncoded.toLowerCase()
-            : !!marionetteExecEncoded &&
-              trx.destination.toLowerCase() ===
-                marionette.address.toLowerCase() &&
-              trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase())
-        );
-      });
+  const existingTrxIndex: number | undefined | null =
+    pendingTrxs.data === undefined
+      ? undefined
+      : !pendingTrxs.data?.length
+      ? null
+      : (
+          pendingTrxs.data as {
+            data: `0x${string}`;
+            destination: `0x${string}`;
+            executed: boolean;
+            value: BigNumber;
+          }[]
+        ).findIndex((trx) => {
+          return (
+            !!trx &&
+            (id === 'MULTISIG_WALLET'
+              ? !!destMethodEncoded &&
+                trx.destination.toLowerCase() ===
+                  multisig.address.toLowerCase() &&
+                trx.data.toLowerCase() === destMethodEncoded.toLowerCase()
+              : !!marionetteExecEncoded &&
+                trx.destination.toLowerCase() ===
+                  marionette.address.toLowerCase() &&
+                trx.data.toLowerCase() === marionetteExecEncoded.toLowerCase())
+          );
+        });
 
   const existingTrxId: undefined | number =
     existingTrxIndex === undefined
@@ -319,7 +321,7 @@ export function useSContractWrite<
     ? 'no-owner'
     : existingTrxId === undefined
     ? 'no-submit-validate'
-    : existingTrxId < 0
+    : existingTrxId === null || existingTrxId < 0
     ? 'submit'
     : ownerHasConfirmed === undefined || existingTrxIsConfirmed === undefined
     ? 'no-existing-validate'
