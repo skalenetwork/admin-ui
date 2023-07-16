@@ -273,7 +273,7 @@ export function useSContractWrite<
   const existingTrxId: undefined | number =
     existingTrxIndex === undefined
       ? undefined
-      : existingTrxIndex < 0
+      : existingTrxIndex === null || existingTrxIndex < 0
       ? existingTrxIndex
       : (pendingTrxIds.data[existingTrxIndex as number] as number);
 
