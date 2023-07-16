@@ -3,6 +3,7 @@ import {
   ContractDetailList,
   ContractIdByAddress,
 } from '@/features/network/contract';
+import { useSContract } from '@/features/network/hooks';
 import { build } from '@/features/network/manifest';
 import { useQueries } from '@tanstack/react-query';
 import { Abi, ExtractAbiEventNames } from 'abitype';
