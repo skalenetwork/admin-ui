@@ -12,5 +12,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.12.1'
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8.5.1
+          run_install: false
       - name: Check @skalenetwork/feat eslint
         run: pnpm --filter @skalenetwork/feat lint:check
