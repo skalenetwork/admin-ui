@@ -425,6 +425,9 @@ export function useSContractWrite<
     },
     onError: (err) => {
       params.onError?.(err);
+      console.log(
+        `🏳️ Ignore above extension errors. ${id}.${name} was only dry-run for UX validation.`,
+      );
       // console.log(
       //   'check-write:eoa',
       //   `${id}.${name}`,
